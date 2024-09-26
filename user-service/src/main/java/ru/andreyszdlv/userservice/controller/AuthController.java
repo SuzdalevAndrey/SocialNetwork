@@ -16,7 +16,7 @@ import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.service.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/user/auth")
 @AllArgsConstructor
 public class AuthController {
     private final AuthService authService;
