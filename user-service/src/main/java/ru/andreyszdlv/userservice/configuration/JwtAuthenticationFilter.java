@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.andreyszdlv.postservice.configuration.GatewayRequestFilter;
 import ru.andreyszdlv.userservice.service.jwt.JwtSecurityService;
 import ru.andreyszdlv.userservice.service.jwt.UserService;
 
@@ -27,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtSecurityService jwtSecurityService;
 
-    private static final Logger logger = LoggerFactory.getLogger(GatewayRequestFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final UserService userService;
 
@@ -38,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (StringUtils.isEmpty(header)
-                || !org.apache.commons.lang3.StringUtils.startsWith(header, "Bearer ")) {
+                || !StringUtils.startsWith(header, "Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
