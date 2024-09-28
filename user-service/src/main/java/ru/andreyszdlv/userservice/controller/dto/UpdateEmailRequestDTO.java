@@ -1,6 +1,11 @@
 package ru.andreyszdlv.userservice.controller.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public record UpdateEmailRequestDTO(
-        String email
-) {
+        @NotBlank
+        @Email
+        String email) {
 }

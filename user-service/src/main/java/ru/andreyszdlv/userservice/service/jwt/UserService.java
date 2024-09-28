@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.bouncycastle.openssl.PasswordException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
+
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
@@ -33,21 +36,25 @@ public class UserService {
         return detailsService;
     }
 
-    public void updateEmailUser(String currentEmail, String newEmail) {
+    public void updateEmailUser(String currentEmail, String newEmail)
+            throws NoSuchElementException{
         User user = userRepository.findByEmail(currentEmail)
-                .orElseThrow();
+                .orElseThrow(()->new NoSuchElementException("errors.404.usernotfound"));
         user.setEmail(newEmail);
         userRepository.save(user);
     }
 
-    public void updatePasswordUser(String emailUser, String oldPassword, String newPassword) throws PasswordException {
-        User user = userRepository.findByEmail(emailUser).orElseThrow();
+    public void updatePasswordUser(String emailUser, String oldPassword, String newPassword)
+            throws BadCredentialsException {
+        User user = userRepository.findByEmail(emailUser).
+                orElseThrow(()->new NoSuchElementException("errors.404.usernotfound"));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
-            return;
         }
-        throw new PasswordException("");
+        else{
+            throw new BadCredentialsException("errors.400.invalidpassword");
+        }
     }
 }

@@ -1,4 +1,9 @@
 package ru.andreyszdlv.userservice.controller.dto;
 
-public record RefreshTokenRequestDTO(String refreshToken) {
+import jakarta.validation.constraints.NotBlank;
+
+public record RefreshTokenRequestDTO(
+
+        @NotBlank
+        String refreshToken) {
 }
