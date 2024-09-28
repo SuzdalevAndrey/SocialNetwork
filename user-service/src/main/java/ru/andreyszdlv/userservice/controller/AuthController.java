@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.userservice.model.LoginRequestDTO;
-import ru.andreyszdlv.userservice.model.LoginResponseDTO;
-import ru.andreyszdlv.userservice.model.RefreshTokenRequestDTO;
-import ru.andreyszdlv.userservice.model.RefreshTokenResponseDTO;
-import ru.andreyszdlv.userservice.model.RegisterRequestDTO;
-import ru.andreyszdlv.userservice.model.RegisterResponseDTO;
+import ru.andreyszdlv.userservice.controller.dto.LoginRequestDTO;
+import ru.andreyszdlv.userservice.controller.dto.LoginResponseDTO;
+import ru.andreyszdlv.userservice.controller.dto.RefreshTokenRequestDTO;
+import ru.andreyszdlv.userservice.controller.dto.RefreshTokenResponseDTO;
+import ru.andreyszdlv.userservice.controller.dto.RegisterRequestDTO;
+import ru.andreyszdlv.userservice.controller.dto.RegisterResponseDTO;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.service.AuthService;
 
@@ -24,8 +24,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDTO> register(@RequestBody RegisterRequestDTO request) {
         User user = authService.registerUser(request);
-        RegisterResponseDTO response = new RegisterResponseDTO(user.getName(), user.getEmail());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new RegisterResponseDTO(user.getName(), user.getEmail()));
     }
 
     @PostMapping("/login")

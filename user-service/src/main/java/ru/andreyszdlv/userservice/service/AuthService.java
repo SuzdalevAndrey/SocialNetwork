@@ -7,12 +7,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import ru.andreyszdlv.userservice.model.LoginRequestDTO;
-import ru.andreyszdlv.userservice.model.LoginResponseDTO;
-import ru.andreyszdlv.userservice.model.RefreshTokenRequestDTO;
-import ru.andreyszdlv.userservice.model.RefreshTokenResponseDTO;
-import ru.andreyszdlv.userservice.model.RegisterRequestDTO;
+import ru.andreyszdlv.userservice.controller.dto.LoginRequestDTO;
+import ru.andreyszdlv.userservice.controller.dto.LoginResponseDTO;
+import ru.andreyszdlv.userservice.controller.dto.RefreshTokenRequestDTO;
+import ru.andreyszdlv.userservice.controller.dto.RefreshTokenResponseDTO;
+import ru.andreyszdlv.userservice.controller.dto.RegisterRequestDTO;
+import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
 import ru.andreyszdlv.userservice.service.jwt.JwtSecurityService;
@@ -35,6 +35,7 @@ public class AuthService {
         user.setName(request.name());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
+        user.setRole(ERole.USER);
         return userRepository.save(user);
     }
 

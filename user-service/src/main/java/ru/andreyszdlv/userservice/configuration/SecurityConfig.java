@@ -27,7 +27,6 @@ import ru.andreyszdlv.userservice.service.jwt.UserService;
 public class SecurityConfig {
     private final UserService userService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final GatewayRequestFilter gatewayRequestFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
