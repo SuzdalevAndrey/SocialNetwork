@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record RefreshTokenRequestDTO(
 
-        @NotBlank
+        @NotBlank(message = "{data.token.is_empty}")
         String refreshToken) {
 }

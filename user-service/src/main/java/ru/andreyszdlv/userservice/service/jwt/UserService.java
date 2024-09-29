@@ -28,7 +28,7 @@ public class UserService {
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                 User user = userRepository.findByEmail(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+                        .orElseThrow(() -> new UsernameNotFoundException("errors.404.user_not_found"));
                 return user;
             }
         };
@@ -39,7 +39,7 @@ public class UserService {
     public void updateEmailUser(String currentEmail, String newEmail)
             throws NoSuchElementException{
         User user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(()->new NoSuchElementException("errors.404.usernotfound"));
+                .orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"));
         user.setEmail(newEmail);
         userRepository.save(user);
     }
@@ -47,14 +47,18 @@ public class UserService {
     public void updatePasswordUser(String emailUser, String oldPassword, String newPassword)
             throws BadCredentialsException {
         User user = userRepository.findByEmail(emailUser).
-                orElseThrow(()->new NoSuchElementException("errors.404.usernotfound"));
+                orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
         }
         else{
-            throw new BadCredentialsException("errors.400.invalidpassword");
+            throw new BadCredentialsException("errors.400.invalid_password");
         }
+    }
+
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(()->new NoSuchElementException("errors.404.user_not_found")).getId();
     }
 }

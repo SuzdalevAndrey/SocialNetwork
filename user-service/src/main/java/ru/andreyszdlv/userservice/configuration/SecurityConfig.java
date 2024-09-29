@@ -17,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import ru.andreyszdlv.userservice.configuration.GatewayRequestFilter;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.service.jwt.UserService;
 
@@ -54,6 +53,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(
                                 "/api/auth/**")
+                        .permitAll()
+                        .requestMatchers("/api/getuser/**")
                         .permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority(ERole.ADMIN.name())
                         .requestMatchers("/api/user/**").hasAuthority(ERole.USER.name())

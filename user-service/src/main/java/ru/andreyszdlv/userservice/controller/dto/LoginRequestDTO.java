@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record LoginRequestDTO(
-        @NotBlank
-        @Email
+        @NotBlank(message = "{data.user.email.is_empty}")
+        @Email(message = "{data.user.email.is_not_valid}")
         String email,
 
-        @NotBlank
-        @Size(min = 6)
+        @NotBlank(message = "{data.user.password.is_empty}")
+        @Size(min = 6, message = "{data.user.password.is_not_valid}")
         String password) {
 }

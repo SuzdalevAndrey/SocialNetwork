@@ -1,4 +1,4 @@
-package ru.andreyszdlv.userservice.controller;
+package ru.andreyszdlv.userservice.controller.advice;
 
 import lombok.AllArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -29,7 +28,7 @@ public class IncorrectDataControllerAdvice {
                         ex.getMessage(),
                         locale))
                         .orElse("errors"));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+        return ResponseEntity.of(problemDetail).build();
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -41,7 +40,7 @@ public class IncorrectDataControllerAdvice {
                                 ex.getMessage(),
                                 locale))
                         .orElse("errors"));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
+        return ResponseEntity.of(problemDetail).build();
     }
 
 }

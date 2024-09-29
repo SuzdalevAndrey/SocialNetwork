@@ -1,4 +1,4 @@
-package ru.andreyszdlv.userservice.controller;
+package ru.andreyszdlv.userservice.controller.advice;
 
 
 import lombok.AllArgsConstructor;
@@ -27,16 +27,16 @@ public class BadRequestControllerAdvice {
                 HttpStatus.BAD_REQUEST,
                 Optional.ofNullable(
                         messageSource.getMessage(
-                            "errors.400.request",
+                            "errors.400.request.title",
                             null,
-                            "errors.400.request",
+                            "errors.400.request.title",
                             locale))
                         .orElse("errors"));
         problemDetail.setProperty(
                 "errors",
-                ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()
+            ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
+        return ResponseEntity.of(problemDetail).build();
     }
 
 }
