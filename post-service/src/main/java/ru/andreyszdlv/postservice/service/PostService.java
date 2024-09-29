@@ -25,35 +25,23 @@ public class PostService {
 
     private final UserServiceFeignClient userServiceFeignClient;
 
-//    private final Logger logger = LoggerFactory.getLogger(PostService.class);
-
     public List<Post> getPostsByUserEmail(String userEmail) {
-        ResponseEntity<?> response = userServiceFeignClient.getUserIdByUserEmail(userEmail);
+        Long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
 
-        if(response.getStatusCode().is2xxSuccessful()){
-            Long userId = (Long) response.getBody();
-
-            return postRepository.findAllByUserId(userId);
-        } else {
-            throw new NoSuchElementException("errors.404.user_not_found");
-        }
+        return postRepository.findAllByUserId(userId);
     }
 
     public Post createPost(String userEmail, String content) {
 
-        ResponseEntity<?> response = userServiceFeignClient.getUserIdByUserEmail(userEmail);
+        Long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
 
-        if(response.getStatusCode().is2xxSuccessful()){
-            Long userId = (Long) response.getBody();
-            Post post = new Post();
-            post.setContent(content);
-            post.setDateCreate(LocalDateTime.now());
-            post.setNumberViews(0L);
-            post.setUserId(userId);
-            return postRepository.save(post);
-        } else {
-            throw new NoSuchElementException("errors.404.user_not_found");
-        }
+        Post post = new Post();
+        post.setContent(content);
+        post.setDateCreate(LocalDateTime.now());
+        post.setNumberViews(0L);
+        post.setUserId(userId);
+
+        return postRepository.save(post);
     }
 
     @Transactional
