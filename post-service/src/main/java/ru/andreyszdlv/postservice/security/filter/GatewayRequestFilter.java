@@ -1,4 +1,4 @@
-package ru.andreyszdlv.postservice.security;
+package ru.andreyszdlv.postservice.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -24,8 +24,6 @@ public class IncorrectDataControllerAdvice {
 
     private final MessageSource messageSource;
 
-    private final Logger logger = LoggerFactory.getLogger(IncorrectDataControllerAdvice.class);
-
     @ExceptionHandler(FeignException.FeignClientException.class)
     public ResponseEntity<ProblemDetail> handleFeignException(FeignException ex, Locale locale){
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -37,22 +35,6 @@ public class IncorrectDataControllerAdvice {
                         ex.getMessage(),
                         locale
                 )).orElse("errors")
-        );
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ProblemDetail> handleNoSuchElementException(NoSuchElementException ex, Locale locale){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.NOT_FOUND,
-                Optional.ofNullable(
-                    messageSource.getMessage(
-                            ex.getMessage(),
-                            null,
-                            ex.getMessage(),
-                            locale
-                    )
-                ).orElse("")
         );
         return ResponseEntity.of(problemDetail).build();
     }

@@ -9,7 +9,7 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ru.andreyszdlv.userservice.enums.ERole;
+import ru.andreyszdlv.userservice.security.enums.ERole;
 
 import java.util.Collection;
 import java.util.List;

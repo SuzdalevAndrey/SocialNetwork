@@ -2,7 +2,6 @@ package ru.andreyszdlv.userservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.bouncycastle.openssl.PasswordException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindException;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.userservice.controller.dto.UpdateEmailRequestDTO;
 import ru.andreyszdlv.userservice.controller.dto.UpdatePasswordRequestDTO;
-import ru.andreyszdlv.userservice.service.jwt.UserService;
+import ru.andreyszdlv.userservice.service.UserService;
 
 import java.util.NoSuchElementException;
 
@@ -26,9 +25,8 @@ import java.util.NoSuchElementException;
 public class UserController {
     private final UserService userService;
 
-    @PatchMapping("/editemail/{email}")
-    public ResponseEntity<String> updateEmailUser(@PathVariable String email,
-                                                  @Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,
+    @PatchMapping("/editemail")
+    public ResponseEntity<String> updateEmailUser(@Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,
                                                   BindingResult bindingResult) throws NoSuchElementException, BindException {
         if(bindingResult.hasErrors()) {
             if(bindingResult instanceof BindException exception)
@@ -36,14 +34,13 @@ public class UserController {
             throw new BindException(bindingResult);
         }
         else{
-            userService.updateEmailUser(email, updateEmailRequestDTO.email());
+            userService.updateEmailUser(updateEmailRequestDTO.email());
             return ResponseEntity.ok("Email успешно изменён");
         }
     }
 
-    @PatchMapping("/editpassword/{email}")
-    public ResponseEntity<String> updatePasswordUser(@PathVariable String email,
-                                                     @Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO,
+    @PatchMapping("/editpassword")
+    public ResponseEntity<String> updatePasswordUser(@Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO,
                                                      BindingResult bindingResult)
             throws NoSuchElementException,
             BindException,
@@ -54,9 +51,13 @@ public class UserController {
             throw new BindException(bindingResult);
         }
         else {
-            userService.updatePasswordUser(email, updatePasswordRequestDTO.oldPassword(), updatePasswordRequestDTO.newPassword());
+            userService.updatePasswordUser(updatePasswordRequestDTO.oldPassword(), updatePasswordRequestDTO.newPassword());
             return ResponseEntity.ok("Пароль успешно изменён");
         }
     }
 
+    @GetMapping("/{email}")
+    public ResponseEntity<Long> getUserIdByUserEmail(@PathVariable String email){
+        return ResponseEntity.ok(userService.getUserIdByEmail(email));
+    }
 }

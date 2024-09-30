@@ -1,4 +1,4 @@
-//package ru.andreyszdlv.userservice.configuration;
+//package ru.andreyszdlv.userservice.security.filter;
 //
 //import jakarta.servlet.FilterChain;
 //import jakarta.servlet.ServletException;

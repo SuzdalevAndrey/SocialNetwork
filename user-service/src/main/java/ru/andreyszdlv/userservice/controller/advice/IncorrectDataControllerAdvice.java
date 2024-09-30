@@ -20,7 +20,7 @@ public class IncorrectDataControllerAdvice {
     private final MessageSource messageSource;
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ProblemDetail> handleNotFoundUser(final NoSuchElementException ex, Locale locale) {
+    public ResponseEntity<ProblemDetail> handleNotFoundUserException(final NoSuchElementException ex, Locale locale) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.NOT_FOUND,
                 Optional.ofNullable(messageSource.getMessage(ex.getMessage(),
@@ -32,7 +32,7 @@ public class IncorrectDataControllerAdvice {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ProblemDetail> handleNotFoundUser(final BadCredentialsException ex, Locale locale) {
+    public ResponseEntity<ProblemDetail> handleDifferentPasswordsException(final BadCredentialsException ex, Locale locale) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 Optional.ofNullable(messageSource.getMessage(ex.getMessage(),
