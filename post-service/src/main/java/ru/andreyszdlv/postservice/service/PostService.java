@@ -1,10 +1,6 @@
 package ru.andreyszdlv.postservice.service;
 
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
@@ -14,8 +10,6 @@ import ru.andreyszdlv.postservice.repository.PostRepo;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
@@ -25,15 +19,15 @@ public class PostService {
 
     private final UserServiceFeignClient userServiceFeignClient;
 
-    public List<Post> getPostsByUserEmail(String userEmail) {
-        Long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
+    public List<Post> getPostsByUserEmail() {
+        Long userId = userServiceFeignClient.getUserIdByUserEmail().getBody();
 
         return postRepository.findAllByUserId(userId);
     }
 
-    public Post createPost(String userEmail, String content) {
+    public Post createPost(String content) {
 
-        Long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
+        Long userId = userServiceFeignClient.getUserIdByUserEmail().getBody();
 
         Post post = new Post();
         post.setContent(content);

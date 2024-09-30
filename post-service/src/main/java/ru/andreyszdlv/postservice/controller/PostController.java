@@ -33,24 +33,23 @@ public class PostController {
 
     private final Logger logger = LoggerFactory.getLogger(PostController.class);
 
-    @GetMapping("/{useremail}")
-    public ResponseEntity<List<Post>> getPostsByUserEmail(@PathVariable("useremail") String userEmail){
-        logger.info("GetPostsByUserEmail: UserEmail = " + userEmail);
-        return ResponseEntity.ok(postService.getPostsByUserEmail(userEmail));
+    @GetMapping("")
+    public ResponseEntity<List<Post>> getPostsByUserEmail(){
+//        logger.info("GetPostsByUserEmail: UserEmail = " + userEmail);
+        return ResponseEntity.ok(postService.getPostsByUserEmail());
     }
 
-    @PostMapping("/create/{useremail}")
-    public ResponseEntity<Void> createPost(@PathVariable("useremail") String userEmail,
-                                           @Valid @RequestBody CreatePostRequestDTO request,
+    @PostMapping("/create")
+    public ResponseEntity<Void> createPost(@Valid @RequestBody CreatePostRequestDTO request,
                                            BindingResult bindingResult)
             throws BindException {
-        logger.info("CreatePost: UserEmail = " + userEmail);
+//        logger.info("CreatePost: UserEmail = " + userEmail);
         if(bindingResult.hasErrors()){
             if(bindingResult instanceof BindException ex)
                 throw ex;
             throw new BindException(bindingResult);
         }
-        postService.createPost(userEmail, request.content());
+        postService.createPost(request.content());
         return ResponseEntity.ok().build();
     }
 

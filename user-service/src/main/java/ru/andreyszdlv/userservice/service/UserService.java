@@ -3,10 +3,8 @@ package ru.andreyszdlv.userservice.service;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -55,7 +52,7 @@ public class UserService {
         }
     }
 
-    public Long getUserIdByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(()->new NoSuchElementException("errors.404.user_not_found")).getId();
+    public Long getUserIdByEmail() {
+        return userRepository.findByEmail(getEmailAuthenticationUser()).orElseThrow(()->new NoSuchElementException("errors.404.user_not_found")).getId();
     }
 }
