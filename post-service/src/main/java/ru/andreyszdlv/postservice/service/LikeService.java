@@ -2,6 +2,7 @@ package ru.andreyszdlv.postservice.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
@@ -34,14 +35,17 @@ public class LikeService {
         likeRepository.save(like);
     }
 
+    @Transactional
     public void deleteLike(long postId) {
         if(!postRepository.existsById(postId)) {
             throw new NoSuchPostException("errors.404.post_not_found");
         }
         long userId = userServiceFeignClient.getUserIdByUserEmail().getBody();
-        if(!likeRepository.existsByPostIdAndUserId(postId, userId)){
+
+        int deletedCount = likeRepository.deleteByPostIdAndUserId(postId, userId);
+
+        if (deletedCount == 0) {
             throw new NoLikedPostThisUserException("errors.404.no_liked_post");
         }
-        likeRepository.deleteByPostIdAndUserId(postId, userServiceFeignClient.getUserIdByUserEmail().getBody());
     }
 }

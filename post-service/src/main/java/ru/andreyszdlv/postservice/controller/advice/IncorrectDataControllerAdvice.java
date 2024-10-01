@@ -10,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
+import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
+import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 
 import java.util.Locale;
@@ -70,6 +72,36 @@ public class IncorrectDataControllerAdvice {
 
     @ExceptionHandler(NoLikedPostThisUserException.class)
     public ResponseEntity<ProblemDetail> handleNoLikedPostThisUserException(NoLikedPostThisUserException ex, Locale locale){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                Optional.ofNullable(
+                        messageSource.getMessage(
+                                ex.getMessage(),
+                                null,
+                                ex.getMessage(),
+                                locale
+                        )).orElse("errors")
+        );
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(AnotherUsersCommentException.class)
+    public ResponseEntity<ProblemDetail> handleAnotherUsersCommentException(AnotherUsersCommentException ex, Locale locale){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                Optional.ofNullable(
+                        messageSource.getMessage(
+                                ex.getMessage(),
+                                null,
+                                ex.getMessage(),
+                                locale
+                        )).orElse("errors")
+        );
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(NoSuchCommentException.class)
+    public ResponseEntity<ProblemDetail> handleNoSuchCommentException(NoSuchCommentException ex, Locale locale){
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.NOT_FOUND,
                 Optional.ofNullable(
