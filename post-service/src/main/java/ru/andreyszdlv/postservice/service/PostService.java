@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
-import ru.andreyszdlv.postservice.execption.NoSuchPostException;
+import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.PostRepo;
 
@@ -48,5 +48,9 @@ public class PostService {
 
     public void deletePost(long id) {
         postRepository.deleteById(id);
+    }
+
+    public Post getPostByPostId(Long postId) {
+        return postRepository.findById(postId).orElseThrow(()->new NoSuchPostException("errors.404.post_not_found"));
     }
 }

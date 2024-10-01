@@ -1,4 +1,4 @@
-package ru.andreyszdlv.postservice.execption;
+package ru.andreyszdlv.postservice.exception;
 
 public class NoSuchPostException extends RuntimeException{
 

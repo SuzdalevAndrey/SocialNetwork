@@ -1,10 +1,9 @@
-package ru.andreyszdlv.postservice.controller;
+package ru.andreyszdlv.postservice.controller.post;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -14,11 +13,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.postservice.controller.dto.CreatePostRequestDTO;
-import ru.andreyszdlv.postservice.controller.dto.UpdatePostRequestDTO;
+import ru.andreyszdlv.postservice.controller.post.dto.CreatePostRequestDTO;
+import ru.andreyszdlv.postservice.controller.post.dto.PostResponseDTO;
+import ru.andreyszdlv.postservice.controller.post.dto.UpdatePostRequestDTO;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.service.PostService;
 
@@ -37,6 +36,11 @@ public class PostController {
     public ResponseEntity<List<Post>> getPostsByUserEmail(){
 //        logger.info("GetPostsByUserEmail: UserEmail = " + userEmail);
         return ResponseEntity.ok(postService.getPostsByUserEmail());
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<Post> getPostById(@PathVariable Long postId){
+        return ResponseEntity.ok(postService.getPostByPostId(postId));
     }
 
     @PostMapping("/create")

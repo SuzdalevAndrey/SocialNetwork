@@ -1,4 +1,4 @@
-package ru.andreyszdlv.postservice.controller.dto;
+package ru.andreyszdlv.postservice.controller.post.dto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;

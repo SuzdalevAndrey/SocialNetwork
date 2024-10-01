@@ -1,17 +1,21 @@
 package ru.andreyszdlv.postservice.model;
 
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Table(schema = "posts", name="t_posts")
@@ -31,7 +35,9 @@ public class Post {
     @Column(name = "c_date_create", nullable = false)
     private LocalDateTime dateCreate;
 
-//    @NotBlank(message = "{error.post.user_id.is_empty}")
     @Column(name = "c_user_id", nullable = false)
     private Long userId;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    List<Like> likes;
 }

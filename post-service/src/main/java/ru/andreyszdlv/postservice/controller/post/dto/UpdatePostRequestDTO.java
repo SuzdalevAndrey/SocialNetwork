@@ -1,4 +1,4 @@
-package ru.andreyszdlv.postservice.controller.dto;
+package ru.andreyszdlv.postservice.controller.post.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
