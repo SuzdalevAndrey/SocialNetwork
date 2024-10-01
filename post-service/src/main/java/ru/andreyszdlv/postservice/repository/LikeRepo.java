@@ -6,7 +6,7 @@ import ru.andreyszdlv.postservice.model.Like;
 
 @Repository
 public interface LikeRepo extends JpaRepository<Like, Long> {
-    boolean deleteByPostIdAndUserId(Long postId, Long userId);
+    void deleteByPostIdAndUserId(Long postId, Long userId);
 
     boolean existsByPostIdAndUserId(Long postId, Long userId);
 }

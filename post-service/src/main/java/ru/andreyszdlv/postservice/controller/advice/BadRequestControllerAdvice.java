@@ -28,7 +28,7 @@ public class BadRequestControllerAdvice {
                 Optional.ofNullable(messageSource.getMessage(
                         "error.400.request.title",
                         null,
-                        "{error.request.400.title}",
+                        "error.request.400.title",
                         locale
                 )).orElse("errors")
         );
