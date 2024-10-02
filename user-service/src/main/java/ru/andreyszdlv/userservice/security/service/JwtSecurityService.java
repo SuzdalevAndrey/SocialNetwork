@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Function;
 
 @Service
@@ -37,22 +36,18 @@ public class JwtSecurityService {
                 .getPayload();
     }
 
-    // Получение почты юзера
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Когда срок действия заканчивается
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // Метод проверки срока действия токена
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    // Метод для валидации токена
     public boolean validateToken(String token) {
         return !isTokenExpired(token);
     }

@@ -2,6 +2,8 @@ package ru.andreyszdlv.userservice.controller.advice;
 
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -21,8 +23,13 @@ public class BadRequestControllerAdvice {
 
     private final MessageSource messageSource;
 
+    private final static Logger log = LoggerFactory.getLogger(BadRequestControllerAdvice.class);
+
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(final BindException ex, Locale locale) {
+
+        log.info("The method handleBindException in the BadRequestControllerAdvice");
+
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 Optional.ofNullable(
@@ -36,6 +43,9 @@ public class BadRequestControllerAdvice {
                 "errors",
             ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()
         );
+
+        log.error("Bad request: ", ex);
+
         return ResponseEntity.of(problemDetail).build();
     }
 

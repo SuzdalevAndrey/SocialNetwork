@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,16 +26,20 @@ import java.util.stream.Stream;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private final static Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     private final JwtSecurityService jwtSecurityService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        log.info("Executing JWT authentication");
+
         String header = request.getHeader("Authorization");
 
-        if (StringUtils.isEmpty(header)
-                || !StringUtils.startsWith(header, "Bearer ")) {
+        if (StringUtils.isEmpty(header) || !StringUtils.startsWith(header, "Bearer ")) {
+            log.error("Authorization header is missing or presented in the wrong format");
             filterChain.doFilter(request, response);
             return;
         }
@@ -42,13 +48,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String email = jwtSecurityService.extractUsername(jwt);
         String role = jwtSecurityService.extractRole(jwt);
 
-        if (StringUtils.isNotEmpty(email)
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (StringUtils.isNotEmpty(email) && SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.info("Extracted email: {}, role: {}", email, role);
 
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     email, "", Stream.of(role).map(SimpleGrantedAuthority::new).toList());
 
             if (jwtSecurityService.validateToken(jwt)) {
+                log.info("JWT is valid");
+
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
                 UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
@@ -57,6 +65,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 securityContext.setAuthentication(token);
                 SecurityContextHolder.setContext(securityContext);
+            } else {
+                log.error("Invalid JWT token for email: {}", email);
             }
         }
 
