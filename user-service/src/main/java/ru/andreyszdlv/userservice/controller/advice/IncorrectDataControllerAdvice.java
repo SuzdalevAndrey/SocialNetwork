@@ -24,17 +24,16 @@ public class IncorrectDataControllerAdvice {
     private final static Logger log = LoggerFactory.getLogger(IncorrectDataControllerAdvice.class);
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ProblemDetail> handleNotFoundUserException(final NoSuchElementException ex, Locale locale) {
+    public ResponseEntity<ProblemDetail> handleNotFoundUserException(
+            final NoSuchElementException ex,
+            Locale locale) {
 
-        log.info("The method handleNotFoundUserException in the IncorrectDataControllerAdvice");
+        log.error("The method handleNotFoundUserException in the IncorrectDataControllerAdvice");
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        ProblemDetail problemDetail = createProbemDetail(
                 HttpStatus.NOT_FOUND,
-                Optional.ofNullable(messageSource.getMessage(ex.getMessage(),
-                        null,
-                        ex.getMessage(),
-                        locale))
-                        .orElse("errors"));
+                ex.getMessage(),
+                locale);
 
         log.error("NoSuchElementException: ", ex);
 
@@ -42,21 +41,33 @@ public class IncorrectDataControllerAdvice {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ProblemDetail> handleDifferentPasswordsException(final BadCredentialsException ex, Locale locale) {
+    public ResponseEntity<ProblemDetail> handleDifferentPasswordsException(
+            final BadCredentialsException ex,
+            Locale locale) {
 
-        log.info("The method handleDifferentPasswordsException in the IncorrectDataControllerAdvice");
+        log.error("The method handleDifferentPasswordsException in the IncorrectDataControllerAdvice");
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        ProblemDetail problemDetail = createProbemDetail(
                 HttpStatus.BAD_REQUEST,
-                Optional.ofNullable(messageSource.getMessage(ex.getMessage(),
-                                null,
-                                ex.getMessage(),
-                                locale))
-                        .orElse("errors"));
+                ex.getMessage(),
+                locale);
 
         log.error("Password different: " + ex);
 
         return ResponseEntity.of(problemDetail).build();
+    }
+
+    private ProblemDetail createProbemDetail(HttpStatus status, String message, Locale locale){
+        return ProblemDetail.forStatusAndDetail(
+                status,
+                Optional.ofNullable(
+                        messageSource.getMessage(
+                                message,
+                                null,
+                                message,
+                                locale
+                        )).orElse("errors")
+        );
     }
 
 }

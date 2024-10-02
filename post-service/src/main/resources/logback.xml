@@ -9,7 +9,7 @@
 
     <!-- Файловый аппендер -->
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/user-service.log</file>
+        <file>logs/post-service.log</file>
         <append>true</append>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>

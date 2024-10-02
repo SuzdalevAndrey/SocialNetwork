@@ -38,7 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        if (StringUtils.isEmpty(header) || !StringUtils.startsWith(header, "Bearer ")) {
+        if (StringUtils.isEmpty(header)
+                || !StringUtils.startsWith(header, "Bearer ")) {
             log.error("Authorization header is missing or presented in the wrong format");
             filterChain.doFilter(request, response);
             return;

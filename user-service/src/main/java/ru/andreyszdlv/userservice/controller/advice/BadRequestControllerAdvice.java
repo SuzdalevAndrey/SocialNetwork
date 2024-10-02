@@ -28,7 +28,7 @@ public class BadRequestControllerAdvice {
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(final BindException ex, Locale locale) {
 
-        log.info("The method handleBindException in the BadRequestControllerAdvice");
+        log.error("The method handleBindException in the BadRequestControllerAdvice");
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
@@ -39,12 +39,13 @@ public class BadRequestControllerAdvice {
                             "errors.400.request.title",
                             locale))
                         .orElse("errors"));
+
         problemDetail.setProperty(
                 "errors",
             ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()
         );
 
-        log.error("Bad request: ", ex);
+        log.error("Bad request: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }

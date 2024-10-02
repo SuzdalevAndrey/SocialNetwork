@@ -30,30 +30,47 @@ public class PostController {
 
     private final PostService postService;
 
-    private final Logger logger = LoggerFactory.getLogger(PostController.class);
+    private static final Logger log = LoggerFactory.getLogger(PostController.class);
 
     @GetMapping("")
     public ResponseEntity<List<Post>> getPostsByUserEmail(){
-//        logger.info("GetPostsByUserEmail: UserEmail = " + userEmail);
-        return ResponseEntity.ok(postService.getPostsByUserEmail());
+        log.info("Executing getPostsByUserEmail method");
+
+        List<Post> responePosts = postService.getPostsByUserEmail();
+        log.info("Successful getPostsByUserEmail method");
+
+        return ResponseEntity.ok(responePosts);
     }
 
     @GetMapping("/{postId}")
     public ResponseEntity<Post> getPostById(@PathVariable Long postId){
-        return ResponseEntity.ok(postService.getPostByPostId(postId));
+        log.info("Executing getPostById method for postId: {}", postId);
+
+        Post responsePost = postService.getPostByPostId(postId);
+        log.info("Successful get post for postId: {}", postId);
+
+        return ResponseEntity.ok(responsePost);
     }
 
     @PostMapping("/create")
     public ResponseEntity<Void> createPost(@Valid @RequestBody CreatePostRequestDTO request,
                                            BindingResult bindingResult)
             throws BindException {
-//        logger.info("CreatePost: UserEmail = " + userEmail);
+        log.info("Executing createPost method for content: {}", request.content());
+
         if(bindingResult.hasErrors()){
+            log.error("Validation errors occurred during create post: {}",
+                    bindingResult.getAllErrors());
+
             if(bindingResult instanceof BindException ex)
                 throw ex;
             throw new BindException(bindingResult);
         }
+
+        log.info("Validation successful, creating post with content: {}", request.content());
         postService.createPost(request.content());
+
+        log.info("Post create completed successfully with content: {}", request.content());
         return ResponseEntity.ok().build();
     }
 
@@ -62,18 +79,38 @@ public class PostController {
                                            @Valid @RequestBody UpdatePostRequestDTO request,
                                            BindingResult bindingResult)
             throws BindException {
+        log.info("Executing updatePost method for postId: {} with newContent: {}",
+                id,
+                request.content());
+
         if(bindingResult.hasErrors()){
+            log.error("Validation errors occurred during update post: {}",
+                    bindingResult.getAllErrors());
+
             if(bindingResult instanceof BindException ex)
                 throw ex;
             throw new BindException(bindingResult);
         }
+
+        log.info("Validation successful, updating post with postId: {}, newContent: {}",
+                id,
+                request.content());
         postService.updatePost(id, request.content());
+
+        log.info("Post update completed successfully with postId: {}, newContent: {}",
+                id,
+                request.content());
+
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable long id){
+
+        log.info("Executing deletePost method for postId: {}", id);
         postService.deletePost(id);
+
+        log.info("Post delete completed successfully with postId: {}", id);
         return ResponseEntity.ok().build();
     }
 }

@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     private final JwtSecurityService jwtSecurityService;
 
     private final RequestContext requestContext;
@@ -35,10 +37,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        log.info("Executing JWT authentication");
+
         String header = request.getHeader("Authorization");
 
         if (StringUtils.isEmpty(header)
                 || !StringUtils.startsWith(header, "Bearer ")) {
+            log.error("Authorization header is missing or presented in the wrong format");
             filterChain.doFilter(request, response);
             return;
         }
@@ -46,15 +51,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = header.substring(7);
         requestContext.setToken(jwt);
         String email = jwtSecurityService.extractUsername(jwt);
-        String roles = jwtSecurityService.extractRoles(jwt);
+        String role = jwtSecurityService.extractRoles(jwt);
 
         if (StringUtils.isNotEmpty(email)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.info("Extracted email: {}, role: {}", email, role);
 
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                    email, "", Stream.of(roles).map(SimpleGrantedAuthority::new).toList());
+                    email, "", Stream.of(role).map(SimpleGrantedAuthority::new).toList());
 
             if (jwtSecurityService.validateToken(jwt)) {
+                log.info("JWT is valid");
+
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
                 UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
@@ -63,6 +71,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 securityContext.setAuthentication(token);
                 SecurityContextHolder.setContext(securityContext);
+            }
+            else {
+                log.error("Invalid JWT token for email: {}", email);
             }
         }
 

@@ -1,6 +1,8 @@
 package ru.andreyszdlv.postservice.service;
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
@@ -15,6 +17,8 @@ import ru.andreyszdlv.postservice.repository.PostRepo;
 @AllArgsConstructor
 public class LikeService {
 
+    private static final Logger log = LoggerFactory.getLogger(LikeService.class);
+
     private final LikeRepo likeRepository;
 
     private final PostRepo postRepository;
@@ -22,30 +26,53 @@ public class LikeService {
     private final UserServiceFeignClient userServiceFeignClient;
 
     public void createLike(long postId){
+        log.info("Executing createLike method for postId: {}", postId);
+
         if(!postRepository.existsById(postId)) {
+            log.error("Post no exists with postId: {}", postId);
             throw new NoSuchPostException("errors.404.post_not_found");
         }
+
+        log.info("Getting a userId by email");
         long userId = userServiceFeignClient.getUserIdByUserEmail().getBody();
+        log.info("Successful get userId by email");
+
         if(likeRepository.existsByPostIdAndUserId(postId, userId)){
+            log.error("A user with userId: {} already liked post with postId: {}", userId, postId);
             throw new AlreadyLikedException("errors.409.already_liked_post");
         }
+
         Like like = new Like();
+
         like.setUserId(userId);
         like.setPostId(postId);
+
+        log.info("Saving a like post with postId: {} and userId: {}", postId, userId);
         likeRepository.save(like);
+
+        log.info("Successful save a like post with postId: {} and userId: {}", postId, userId);
     }
 
     @Transactional
     public void deleteLike(long postId) {
+        log.info("Executing deleteLike method for postId: {}", postId);
+
         if(!postRepository.existsById(postId)) {
+            log.error("Post no exists with postId: {}", postId);
             throw new NoSuchPostException("errors.404.post_not_found");
         }
+
+        log.info("Getting a userId by email");
         long userId = userServiceFeignClient.getUserIdByUserEmail().getBody();
+        log.info("Successful get userId by email");
 
-        int deletedCount = likeRepository.deleteByPostIdAndUserId(postId, userId);
+        log.info("Deleting a like post with postId: {} and userId: {}", postId, userId);
+        if (likeRepository.deleteByPostIdAndUserId(postId, userId) == 0) {
 
-        if (deletedCount == 0) {
+            log.error("The user with userId: {} not like post with postId: {}", userId, postId);
             throw new NoLikedPostThisUserException("errors.404.no_liked_post");
         }
+
+        log.info("Successful delete a like post with postId: {} and userId: {}", postId, userId);
     }
 }
