@@ -2,6 +2,8 @@ package ru.andreyszdlv.authservice.controller.advice;
 
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -18,10 +20,14 @@ import java.util.Optional;
 @AllArgsConstructor
 public class BadRequestControllerAdvice {
 
+    private static final Logger log = LoggerFactory.getLogger(BadRequestControllerAdvice.class);
+
     private final MessageSource messageSource;
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(final BindException ex, Locale locale) {
+        log.error("Executing handleBindException method in the BadRequestControllerAdvice");
+
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 Optional.ofNullable(
@@ -35,6 +41,9 @@ public class BadRequestControllerAdvice {
                 "errors",
             ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()
         );
+
+        log.error("Bad request: {}", problemDetail);
+
         return ResponseEntity.of(problemDetail).build();
     }
 

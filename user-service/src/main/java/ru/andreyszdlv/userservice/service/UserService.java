@@ -53,6 +53,7 @@ public class UserService {
         log.info("Verification of the user existence");
         User user = userRepository.findByEmail(getEmailAuthenticationUser())
                 .orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"));
+
         user.setEmail(newEmail);
 
         log.info("Updating an old email: {} to a new: {} ", user.getEmail(), newEmail);
