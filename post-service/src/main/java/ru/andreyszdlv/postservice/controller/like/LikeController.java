@@ -3,6 +3,7 @@ package ru.andreyszdlv.postservice.controller.like;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ru.andreyszdlv.postservice.service.LikeService;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/posts/like")
 @AllArgsConstructor
 public class LikeController {
-    private static final Logger log = LoggerFactory.getLogger(LikeController.class);
 
     private final LikeService likeService;
 

@@ -2,6 +2,7 @@ package ru.andreyszdlv.userservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +20,13 @@ import ru.andreyszdlv.userservice.service.UserService;
 
 import java.util.NoSuchElementException;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 @AllArgsConstructor
 public class UserController {
 
     private final UserService userService;
-
-    private final static Logger log = LoggerFactory.getLogger(UserController.class);
 
     @PatchMapping("/editemail")
     public ResponseEntity<String> updateEmailUser(@Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,

@@ -2,6 +2,7 @@ package ru.andreyszdlv.postservice.controller.post;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +24,13 @@ import ru.andreyszdlv.postservice.service.PostService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/posts")
 @AllArgsConstructor
 public class PostController {
 
     private final PostService postService;
-
-    private static final Logger log = LoggerFactory.getLogger(PostController.class);
 
     @GetMapping("")
     public ResponseEntity<List<Post>> getPostsByUserEmail(){

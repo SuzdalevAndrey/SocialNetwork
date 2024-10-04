@@ -1,8 +1,10 @@
 package ru.andreyszdlv.authservice.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,17 +18,18 @@ import ru.andreyszdlv.authservice.exception.ValidateTokenException;
 import ru.andreyszdlv.authservice.model.User;
 import ru.andreyszdlv.authservice.repository.UserRepo;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class AuthService {
-
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepo userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
     private final JwtSecurityService jwtSecurityService;
+
+    private final KafkaTemplate<String, UserModel> kafkaTemplate;
 
     public User registerUser(RegisterRequestDTO request) {
         log.info("Executing registerUser method in AuthService for email: {} and name: {}",
@@ -42,6 +45,13 @@ public class AuthService {
         log.info("RegisterUser completed successfully with  email: {} and name: {}",
                 request.email(),
                 request.name());
+        kafkaTemplate.send(
+                "auth-service",
+                new UserModel(
+                        "REGISTER",
+                        user.getName(),
+                        user.getEmail()
+                ));
         return userRepository.save(user);
     }
 
@@ -59,6 +69,14 @@ public class AuthService {
         String refreshToken = jwtSecurityService.generateRefreshToken(user);
 
         log.info("LoginUser completed successfully with email: {}", request.email());
+
+        kafkaTemplate.send(
+                "auth-service",
+                new UserModel(
+                        "LOGIN",
+                        user.getName(),
+                        user.getEmail()
+                ));
 
         return new LoginResponseDTO(user.getEmail(), token, refreshToken);
     }

@@ -2,6 +2,7 @@ package ru.andreyszdlv.postservice.controller.advice;
 
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -17,11 +18,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.Locale;
 import java.util.Optional;
 
+@Slf4j
 @ControllerAdvice
 @AllArgsConstructor
 public class BadRequestControllerAdvice {
-
-    private static final Logger log = LoggerFactory.getLogger(BadRequestControllerAdvice.class);
 
     private final MessageSource messageSource;
 

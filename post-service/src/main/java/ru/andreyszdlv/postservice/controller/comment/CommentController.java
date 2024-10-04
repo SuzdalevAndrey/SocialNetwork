@@ -2,6 +2,7 @@ package ru.andreyszdlv.postservice.controller.comment;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +18,11 @@ import ru.andreyszdlv.postservice.controller.comment.dto.UpdateCommentRequestDTO
 import ru.andreyszdlv.postservice.model.Comment;
 import ru.andreyszdlv.postservice.service.CommentService;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/posts/comment")
 @AllArgsConstructor
 public class CommentController {
-
-    private static final Logger log = LoggerFactory.getLogger(CommentController.class);
 
     private final CommentService commentService;
 

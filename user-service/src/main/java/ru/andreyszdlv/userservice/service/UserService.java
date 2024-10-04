@@ -1,6 +1,7 @@
 package ru.andreyszdlv.userservice.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,13 +17,12 @@ import ru.andreyszdlv.userservice.repository.UserRepo;
 
 import java.util.NoSuchElementException;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserService {
 
     private final UserRepo userRepository;
-
-    private final static Logger log = LoggerFactory.getLogger(UserService.class);
 
     private String getEmailAuthenticationUser() throws UsernameNotFoundException {
 

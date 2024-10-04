@@ -1,6 +1,7 @@
 package ru.andreyszdlv.userservice.controller.advice;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -15,13 +16,12 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@Slf4j
 @ControllerAdvice
 @AllArgsConstructor
 public class IncorrectDataControllerAdvice {
 
     private final MessageSource messageSource;
-
-    private final static Logger log = LoggerFactory.getLogger(IncorrectDataControllerAdvice.class);
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ProblemDetail> handleNotFoundUserException(
