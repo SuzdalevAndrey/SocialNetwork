@@ -1,14 +1,22 @@
 package ru.andreyszdlv.authservice.configuration;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.JacksonUtils;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.andreyszdlv.authservice.service.UserModel;
 
@@ -19,8 +27,9 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
+    @Value("${spring.kafka.producer.bootstrap-servers}")
     private String kafkaBootstrapServers;
+
 
     @Bean
     public ProducerFactory<String, UserModel> kafkaProducer() {
@@ -35,8 +44,18 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, UserModel> kafkaTemplate(){
-        return new KafkaTemplate<>(kafkaProducer());
+    public KafkaTemplate<String, UserModel> kafkaTemplate(
+            ProducerFactory<String, UserModel> producerFactory
+    ){
+        return new KafkaTemplate<>(producerFactory);
     }
 
+    @Bean
+    public NewTopic newTopicLogin() {
+        return TopicBuilder
+                .name("auth-event")
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
 }

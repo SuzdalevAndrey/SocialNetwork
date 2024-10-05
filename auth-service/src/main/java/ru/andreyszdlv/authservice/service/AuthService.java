@@ -46,9 +46,8 @@ public class AuthService {
                 request.email(),
                 request.name());
         kafkaTemplate.send(
-                "auth-service",
+                "auth-event",
                 new UserModel(
-                        "REGISTER",
                         user.getName(),
                         user.getEmail()
                 ));
@@ -71,9 +70,8 @@ public class AuthService {
         log.info("LoginUser completed successfully with email: {}", request.email());
 
         kafkaTemplate.send(
-                "auth-service",
+                "auth-event",
                 new UserModel(
-                        "LOGIN",
                         user.getName(),
                         user.getEmail()
                 ));
