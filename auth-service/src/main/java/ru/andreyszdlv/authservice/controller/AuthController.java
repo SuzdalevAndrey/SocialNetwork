@@ -6,16 +6,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.andreyszdlv.authservice.controller.dto.ConfirmEmailRequestDTO;
 import ru.andreyszdlv.authservice.controller.dto.LoginRequestDTO;
 import ru.andreyszdlv.authservice.controller.dto.LoginResponseDTO;
 import ru.andreyszdlv.authservice.controller.dto.RefreshTokenRequestDTO;
 import ru.andreyszdlv.authservice.controller.dto.RefreshTokenResponseDTO;
 import ru.andreyszdlv.authservice.controller.dto.RegisterRequestDTO;
 import ru.andreyszdlv.authservice.controller.dto.RegisterResponseDTO;
+import ru.andreyszdlv.authservice.model.PendingUser;
 import ru.andreyszdlv.authservice.model.User;
 import ru.andreyszdlv.authservice.service.AuthService;
 
@@ -28,7 +33,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request,
+    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequestDTO request,
                                                         BindingResult bindingResult)
             throws BindException {
 
@@ -49,12 +54,12 @@ public class AuthController {
                     request.email(),
                     request.name());
 
-            User user = authService.registerUser(request);
+            authService.registerUser(request);
 
             log.info("User register completed successfully with  email: {} and name: {}",
                     request.email(),
                     request.name());
-            return ResponseEntity.ok(new RegisterResponseDTO(user.getName(), user.getEmail()));
+            return ResponseEntity.ok().build();
         }
     }
 
@@ -106,5 +111,37 @@ public class AuthController {
 
             return ResponseEntity.ok(response);
         }
+    }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<String> confirmEmail(
+            @Valid @RequestBody ConfirmEmailRequestDTO request,
+            BindingResult bindingResult) throws BindException {
+
+        log.info("Executing confirmEmail method in AuthController");
+        if(bindingResult.hasErrors()){
+            log.error("Validation errors occurred during confirm email: {}",
+                    bindingResult.getAllErrors());
+
+            if(bindingResult instanceof BindException exception)
+                throw exception;
+            throw new BindException(bindingResult);
+        }
+        else{
+            log.info("Validation successful, confirm email");
+
+            authService.confirmEmail(request);
+
+            log.info("Confirm email completed successfully");
+
+            return ResponseEntity.ok("Вы успешно подтвердили email," +
+                    " теперь можете входить в систему!");
+        }
+    }
+
+    @PatchMapping("/verification-codes/{userEmail}")
+    public ResponseEntity<String> UpdatingVerificationCode(@PathVariable String userEmail){
+        authService.updateVerificationCode(userEmail);
+        return ResponseEntity.ok("Код успешно обновлён, проверяйте почту!");
     }
 }
