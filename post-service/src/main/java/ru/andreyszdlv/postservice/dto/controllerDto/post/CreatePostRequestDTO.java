@@ -1,13 +1,7 @@
-package ru.andreyszdlv.postservice.controller.post.dto;
+package ru.andreyszdlv.postservice.dto.controllerDto.post;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
-import java.time.LocalDateTime;
 
 public record CreatePostRequestDTO(
        @NotBlank(message = "{error.post.content.is_empty}")

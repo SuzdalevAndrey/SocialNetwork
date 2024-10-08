@@ -1,10 +1,8 @@
-package ru.andreyszdlv.postservice.controller.comment;
+package ru.andreyszdlv.postservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.postservice.controller.comment.dto.CreateCommentRequestDTO;
-import ru.andreyszdlv.postservice.controller.comment.dto.UpdateCommentRequestDTO;
+import ru.andreyszdlv.postservice.dto.controllerDto.comment.CreateCommentRequestDTO;
+import ru.andreyszdlv.postservice.dto.controllerDto.comment.UpdateCommentRequestDTO;
 import ru.andreyszdlv.postservice.model.Comment;
 import ru.andreyszdlv.postservice.service.CommentService;
 

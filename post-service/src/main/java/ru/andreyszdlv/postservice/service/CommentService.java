@@ -27,6 +27,8 @@ public class CommentService {
 
     private final UserServiceFeignClient userServiceFeignClient;
 
+    private final KafkaProducerService kafkaProducerService;
+
     public Comment createComment(long postId, String content){
         log.info("Executing createComment method for postId: {}, content: {}", postId, content);
 
@@ -49,6 +51,22 @@ public class CommentService {
         Comment commentResponse = commentRepository.save(comment);
 
         log.info("Successful save a comment with postId: {}, content: {}", postId, content);
+
+        Long userIdAuthorPost = postRepository
+                .findById(postId)
+                .orElseThrow(
+                        ()->new NoSuchPostException("errors.404.post_not_found")
+                ).getUserId();
+
+        String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
+        String nameAuthorComment = userServiceFeignClient.getNameByUserEmail().getBody();
+
+        kafkaProducerService.sendCreateCommentEvent(
+                email,
+                nameAuthorComment,
+                content
+        );
+
         return commentResponse;
     }
 

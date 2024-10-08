@@ -1,4 +1,4 @@
-package ru.andreyszdlv.postservice.controller.post.dto;
+package ru.andreyszdlv.postservice.dto.controllerDto.post;
 
 import ru.andreyszdlv.postservice.model.Like;
 import ru.andreyszdlv.postservice.model.Post;

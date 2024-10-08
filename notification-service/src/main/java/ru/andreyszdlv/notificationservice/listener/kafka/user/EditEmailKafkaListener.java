@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import ru.andreyszdlv.notificationservice.dto.user.EditEmailKafkaDTO;
+import ru.andreyszdlv.notificationservice.dto.user.EditEmailDTO;
 
 @Component
 @Slf4j
@@ -24,13 +23,14 @@ public class EditEmailKafkaListener {
     public void listen(String editEmailMessage)
             throws JsonProcessingException {
 
-        EditEmailKafkaDTO editEmailKafka = mapper.readValue(editEmailMessage,
-                EditEmailKafkaDTO.class);
+        EditEmailDTO editEmailDTO = mapper.readValue(
+                editEmailMessage,
+                EditEmailDTO.class);
 
-        publisher.publishEvent(editEmailKafka);
+        publisher.publishEvent(editEmailDTO);
 
         log.info("Edit oldEmail: {} on newEmail: {}",
-                editEmailKafka.oldEmail(),
-                editEmailKafka.newEmail());
+                editEmailDTO.oldEmail(),
+                editEmailDTO.newEmail());
     }
 }

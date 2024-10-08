@@ -25,6 +25,8 @@ public class LikeService {
 
     private final UserServiceFeignClient userServiceFeignClient;
 
+    private final KafkaProducerService kafkaProducerService;
+
     public void createLike(long postId){
         log.info("Executing createLike method for postId: {}", postId);
 
@@ -51,6 +53,20 @@ public class LikeService {
         likeRepository.save(like);
 
         log.info("Successful save a like post with postId: {} and userId: {}", postId, userId);
+
+        Long userIdAuthorPost = postRepository
+                .findById(postId)
+                .orElseThrow(
+                        ()->new NoSuchPostException("errors.404.post_not_found")
+                ).getUserId();
+
+        String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
+        String nameAuthorLike = userServiceFeignClient.getNameByUserEmail().getBody();
+
+        kafkaProducerService.sendCreateLikeEvent(
+                email,
+                nameAuthorLike
+        );
     }
 
     @Transactional

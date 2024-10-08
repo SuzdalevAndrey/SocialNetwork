@@ -108,4 +108,34 @@ public class UserService {
 
         return userId;
     }
+
+    public String getUserEmailByUserId(long userId) {
+
+        log.info("Executing getUserEmailByUserId in UserService");
+
+        log.info("Getting a email by userId: {}", userId);
+        String email = userRepository
+                .findById(userId)
+                .orElseThrow(
+                        ()->new NoSuchElementException("errors.404.user_not_found")
+                )
+                .getEmail();
+
+        log.info("Successful get a email: {} by userId: {}", email, userId);
+
+        return email;
+    }
+
+    public String getNameByUserEmail() {
+        log.info("Executing getNameByUserEmail in UserService");
+
+        log.info("Getting a name by email");
+        String name = userRepository.findByEmail(getEmailAuthenticationUser())
+                .orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"))
+                .getName();
+
+        log.info("Successful get a name: {} by email", name);
+
+        return name;
+    }
 }

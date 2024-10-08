@@ -1,30 +1,31 @@
-package ru.andreyszdlv.notificationservice.listener.notification.user;
+package ru.andreyszdlv.notificationservice.listener.notification.post;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import ru.andreyszdlv.notificationservice.dto.user.EditEmailDTO;
+import ru.andreyszdlv.notificationservice.dto.post.CreateLikeDTO;
 import ru.andreyszdlv.notificationservice.service.MailSenderService;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
-public class MailEditEmailNotificationListener {
-
+public class MailCreateLikeNotificationListener {
     private final MailSenderService mailSender;
 
-    @Value("${message.editemail.header}")
+    @Value("${message.createlike.header}")
     private String header;
 
-    @Value("${message.editemail.body}")
+    @Value("${message.createlike.body}")
     private String body;
 
     @EventListener
-    public void handle(EditEmailDTO editEmailDTO){
+    public void handle(CreateLikeDTO createLikeDTO){
         mailSender.send(
-                editEmailDTO.newEmail(),
+                createLikeDTO.email(),
                 header,
-                String.format(body, editEmailDTO.oldEmail())
+                String.format(body, createLikeDTO.nameLikeAuthor())
         );
     }
 }

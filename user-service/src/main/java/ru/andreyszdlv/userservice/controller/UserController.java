@@ -9,6 +9,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,5 +87,25 @@ public class UserController {
 
         log.info("Successfully retrieved userId: {} by email", userId);
         return ResponseEntity.ok(userId);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<String> getUserEmailByUserId(@PathVariable long userId){
+        log.info("Executing getUserEmailByUserId method for getting a userEmail by userId");
+
+        String email = userService.getUserEmailByUserId(userId);
+
+        log.info("Successfully retrieved email: {} by userId: {}", email, userId);
+        return ResponseEntity.ok(email);
+    }
+
+    @GetMapping("/name")
+    public ResponseEntity<String> getNameByUserEmail(){
+        log.info("Executing getNameByUserEmail method for getting a name by userEmail");
+
+        String name = userService.getNameByUserEmail();
+
+        log.info("Successfully retrieved name: {} by userEmail", name);
+        return ResponseEntity.ok(name);
     }
 }

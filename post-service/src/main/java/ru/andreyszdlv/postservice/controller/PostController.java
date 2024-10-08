@@ -1,10 +1,8 @@
-package ru.andreyszdlv.postservice.controller.post;
+package ru.andreyszdlv.postservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -16,9 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.postservice.controller.post.dto.CreatePostRequestDTO;
-import ru.andreyszdlv.postservice.controller.post.dto.PostResponseDTO;
-import ru.andreyszdlv.postservice.controller.post.dto.UpdatePostRequestDTO;
+import ru.andreyszdlv.postservice.dto.controllerDto.post.CreatePostRequestDTO;
+import ru.andreyszdlv.postservice.dto.controllerDto.post.UpdatePostRequestDTO;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.service.PostService;
 

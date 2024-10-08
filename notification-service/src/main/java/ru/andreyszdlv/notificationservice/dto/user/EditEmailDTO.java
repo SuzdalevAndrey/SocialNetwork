@@ -1,6 +1,6 @@
 package ru.andreyszdlv.notificationservice.dto.user;
 
-public record EditEmailKafkaDTO(
+public record EditEmailDTO(
         String oldEmail,
         String newEmail
 ) {
