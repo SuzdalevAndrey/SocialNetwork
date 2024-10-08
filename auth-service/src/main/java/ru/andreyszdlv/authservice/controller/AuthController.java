@@ -9,19 +9,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.authservice.controller.dto.ConfirmEmailRequestDTO;
-import ru.andreyszdlv.authservice.controller.dto.LoginRequestDTO;
-import ru.andreyszdlv.authservice.controller.dto.LoginResponseDTO;
-import ru.andreyszdlv.authservice.controller.dto.RefreshTokenRequestDTO;
-import ru.andreyszdlv.authservice.controller.dto.RefreshTokenResponseDTO;
-import ru.andreyszdlv.authservice.controller.dto.RegisterRequestDTO;
-import ru.andreyszdlv.authservice.controller.dto.RegisterResponseDTO;
-import ru.andreyszdlv.authservice.model.PendingUser;
-import ru.andreyszdlv.authservice.model.User;
+import ru.andreyszdlv.authservice.dto.controllerDto.ConfirmEmailRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.LoginRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.LoginResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.RegisterRequestDTO;
 import ru.andreyszdlv.authservice.service.AuthService;
 
 @Slf4j

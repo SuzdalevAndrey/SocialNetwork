@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
 
@@ -23,6 +24,8 @@ import java.util.NoSuchElementException;
 public class UserService {
 
     private final UserRepo userRepository;
+
+    private final KafkaProducerService kafkaProducerService;
 
     private String getEmailAuthenticationUser() throws UsernameNotFoundException {
 
@@ -45,30 +48,35 @@ public class UserService {
     }
 
 
+    @Transactional
     public void updateEmailUser(String newEmail)
             throws NoSuchElementException{
 
         log.info("Executing updateEmailUser in UserService");
 
+        String oldEmail = getEmailAuthenticationUser();
+
         log.info("Verification of the user existence");
-        User user = userRepository.findByEmail(getEmailAuthenticationUser())
+        User user = userRepository.findByEmail(oldEmail)
                 .orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"));
 
         user.setEmail(newEmail);
 
-        log.info("Updating an old email: {} to a new: {} ", user.getEmail(), newEmail);
-        userRepository.save(user);
+        kafkaProducerService.sendEditEmailEvent(oldEmail, newEmail);
 
         log.info("The old email: {} has been updated to a new: {}", user.getEmail(), newEmail);
     }
 
+    @Transactional
     public void updatePasswordUser(String oldPassword, String newPassword)
             throws BadCredentialsException {
 
         log.info("Executing updatePasswordUser in UserService");
 
+        String email = getEmailAuthenticationUser();
+
         log.info("Verification of the user existence");
-        User user = userRepository.findByEmail(getEmailAuthenticationUser()).
+        User user = userRepository.findByEmail(email).
                 orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -76,8 +84,7 @@ public class UserService {
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
             user.setPassword(passwordEncoder.encode(newPassword));
 
-            log.info("Updating the user's password");
-            userRepository.save(user);
+            kafkaProducerService.sendEditPasswordEvent(email);
 
             log.info("Successful update password");
         }

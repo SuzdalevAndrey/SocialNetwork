@@ -2,27 +2,25 @@ package ru.andreyszdlv.authservice.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.authservice.controller.dto.ConfirmEmailRequestDTO;
-import ru.andreyszdlv.authservice.controller.dto.LoginRequestDTO;
-import ru.andreyszdlv.authservice.controller.dto.LoginResponseDTO;
-import ru.andreyszdlv.authservice.controller.dto.RefreshTokenRequestDTO;
-import ru.andreyszdlv.authservice.controller.dto.RefreshTokenResponseDTO;
-import ru.andreyszdlv.authservice.controller.dto.RegisterRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.ConfirmEmailRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.LoginRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.LoginResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerDto.RegisterRequestDTO;
 import ru.andreyszdlv.authservice.enums.ERole;
 import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
 import ru.andreyszdlv.authservice.exception.VerificationTokenNotSuitableException;
-import ru.andreyszdlv.authservice.model.EmailVerificationToken;
-import ru.andreyszdlv.authservice.model.LoginUser;
 import ru.andreyszdlv.authservice.model.PendingUser;
-import ru.andreyszdlv.authservice.model.RegisterUser;
 import ru.andreyszdlv.authservice.model.User;
-import ru.andreyszdlv.authservice.repository.EmailVerificationTokenRepo;
 import ru.andreyszdlv.authservice.repository.PendingUserRepo;
 import ru.andreyszdlv.authservice.repository.UserRepo;
 
@@ -33,7 +31,7 @@ import java.util.NoSuchElementException;
 @Service
 @AllArgsConstructor
 public class AuthService {
-    private final EmailVerificationTokenRepo emailVerificationTokenRepo;
+    private final EmailVerificationService emailVerificationService;
 
     private final UserRepo userRepository;
 
@@ -43,9 +41,9 @@ public class AuthService {
 
     private final JwtSecurityService jwtSecurityService;
 
-    private final KafkaTemplate<String, LoginUser> kafkaTemplateLogin;
+    private final KafkaProducerService kafkaProducerService;
 
-    private final KafkaTemplate<String, RegisterUser> kafkaTemplateRegister;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public void registerUser(RegisterRequestDTO request) {
@@ -68,30 +66,23 @@ public class AuthService {
         user.setCreatedAt(LocalDateTime.now());
 
         log.info("Verification code generation");
-        String codeUser = GenerateCodeService.generateCode();
-
-        EmailVerificationToken emailVerificationToken = new EmailVerificationToken();
-
-        emailVerificationToken.setEmail(user.getEmail());
-        emailVerificationToken.setVerificationCode(codeUser);
-        emailVerificationToken.setExpirationTime(LocalDateTime.now());
-
-        log.info("Saving the user with email: {} and his code", user.getEmail());
-        emailVerificationTokenRepo.save(emailVerificationToken);
+        String verificationCode = emailVerificationService
+                .generateAndSaveVerificationCode(request.email());
 
         log.info("Sending a message to kafka that contains userEmail: {}", user.getEmail());
-        kafkaTemplateRegister.send(
-                "auth-event-register",
-                new RegisterUser(
-                        user.getEmail(),
-                        codeUser
-                ));
+        kafkaProducerService.sendRegisterEvent(user.getEmail(), verificationCode);
 
         log.info("Saving a user to a temporary database");
         pendingUserRepo.save(user);
     }
 
     public LoginResponseDTO loginUser(LoginRequestDTO request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.email(),
+                        request.password()
+                ));
+
         log.info("Executing loginUser method in AuthService for email: {}", request.email());
 
         log.info("Verification of the user existence with email: {}", request.email());
@@ -106,12 +97,7 @@ public class AuthService {
 
         log.info("LoginUser completed successfully with email: {}", request.email());
 
-        kafkaTemplateLogin.send(
-                "auth-event-login",
-                new LoginUser(
-                        user.getName(),
-                        user.getEmail()
-                ));
+        kafkaProducerService.sendLoginEvent(user.getName(), user.getEmail());
 
         return new LoginResponseDTO(user.getEmail(), token, refreshToken);
     }
@@ -145,11 +131,7 @@ public class AuthService {
         log.info("Executing confirmEmail method in AuthService for email: {}", request.email());
 
         log.info("Getting the access code for email: {}", request.email());
-        String code = emailVerificationTokenRepo.findByEmail(request.email())
-                .orElseThrow(
-                        ()->new NoSuchElementException("errors.404.email_not_found")
-                )
-                .getVerificationCode();
+
 
         log.info("Getting a user from a table pendings user by email: {}", request.email());
         PendingUser pendingUser = pendingUserRepo
@@ -158,9 +140,9 @@ public class AuthService {
                         ()->new NoSuchElementException("errors.404.email_not_found")
                 );
 
-        log.info("Comparison of the verification code with the code sent by the user");
-        if(code.equals(request.code())){
-            log.info("The code from the user and the correct code match");
+        log.info("Comparison verification code with code sent by user");
+        if(emailVerificationService.isValidCode(request.email(), request.code())){
+            log.info("The code from user and correct code match");
             User user = new User();
 
             user.setName(pendingUser.getName());
@@ -188,25 +170,10 @@ public class AuthService {
         }
 
         log.info("Verification code generation");
-        String verificationCode = GenerateCodeService.generateCode();
-
-        log.info("Search for an entry with an access code and email: {}", userEmail);
-        EmailVerificationToken emailVerificationToken = emailVerificationTokenRepo
-                .findByEmail(userEmail)
-                .orElseThrow(
-                        ()->new NoSuchElementException("errors.404.email_not_found")
-                );
-
-        log.info("Changing the access code for email: {}", userEmail);
-        emailVerificationToken.setVerificationCode(verificationCode);
-        emailVerificationToken.setExpirationTime(LocalDateTime.now());
+        String verificationCode = emailVerificationService
+                .generateAndSaveVerificationCode(userEmail);
 
         log.info("Sending a message to kafka that contains userEmail: {}", userEmail);
-        kafkaTemplateRegister.send(
-                "auth-event-register",
-                new RegisterUser(
-                        userEmail,
-                        verificationCode
-                ));
+        kafkaProducerService.sendRegisterEvent(userEmail, verificationCode);
     }
 }

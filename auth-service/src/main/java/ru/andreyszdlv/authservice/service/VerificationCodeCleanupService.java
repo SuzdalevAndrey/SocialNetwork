@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.authservice.repository.EmailVerificationTokenRepo;
+import ru.andreyszdlv.authservice.repository.EmailVerificationCodeRepo;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -13,7 +13,7 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 public class VerificationCodeCleanupService {
 
-    private final EmailVerificationTokenRepo emailVerificationTokenRepository;
+    private final EmailVerificationCodeRepo emailVerificationCodeRepository;
 
     @Transactional
     @Scheduled(fixedRate = 300000)
@@ -22,6 +22,6 @@ public class VerificationCodeCleanupService {
                 .now()
                 .minus(15, ChronoUnit.MINUTES);
 
-        emailVerificationTokenRepository.deleteByexpirationTimeBefore(cutOffTime);
+        emailVerificationCodeRepository.deleteByexpirationTimeBefore(cutOffTime);
     }
 }
