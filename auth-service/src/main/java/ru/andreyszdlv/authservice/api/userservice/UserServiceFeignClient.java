@@ -1,5 +1,6 @@
 package ru.andreyszdlv.authservice.api.userservice;
 
+import org.apache.catalina.authenticator.SavedRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,4 +23,7 @@ public interface UserServiceFeignClient {
 
     @GetMapping("/user-details/{email}")
     ResponseEntity<UserDetailsResponseDTO> getUserDetailsByUserEmail(@PathVariable String email);
+
+    @GetMapping("/role/{email}")
+    ResponseEntity<String> getUserRoleByEmail(@PathVariable String email);
 }

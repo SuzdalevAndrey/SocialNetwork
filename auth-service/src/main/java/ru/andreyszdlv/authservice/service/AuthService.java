@@ -1,6 +1,7 @@
 package ru.andreyszdlv.authservice.service;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
 import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
+import ru.andreyszdlv.authservice.model.AccessAndRefreshJwt;
 import ru.andreyszdlv.authservice.model.PendingUser;
 import ru.andreyszdlv.authservice.repository.PendingUserRepo;
 
@@ -33,7 +35,7 @@ import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthService {
     private final EmailVerificationService emailVerificationService;
 
@@ -48,6 +50,8 @@ public class AuthService {
     private final KafkaProducerService kafkaProducerService;
 
     private final AuthenticationManager authenticationManager;
+
+    private HashMap<String, AccessAndRefreshJwt> cache = new HashMap<>();
 
     @Transactional
     public void registerUser(RegisterRequestDTO request) {
@@ -105,6 +109,14 @@ public class AuthService {
         log.info("RefreshToken generation for userEmail: {}", user.email());
         String refreshToken = jwtSecurityService.generateRefreshToken(user.email());
 
+        cache.put(user.email(),
+                AccessAndRefreshJwt
+                        .builder()
+                        .accessToken(token)
+                        .refreshToken(refreshToken)
+                        .build()
+        );
+
         log.info("LoginUser completed successfully with email: {}", request.email());
 
         kafkaProducerService.sendLoginEvent(user.name(), user.email());
@@ -115,18 +127,27 @@ public class AuthService {
     public RefreshTokenResponseDTO refresh(RefreshTokenRequestDTO request) {
         log.info("Executing refresh method in AuthService");
 
-        String refreshToken = request.refreshToken();
+        String token = request.refreshToken();
 
-        String email = jwtSecurityService.extractEmail(refreshToken);
+        String email = jwtSecurityService.extractEmail(token);
 
-        UserResponseDTO user = userServiceFeignClient.getUserByEmail(email).getBody();
+        String role = userServiceFeignClient.getUserRoleByEmail(email).getBody();
 
-        if(jwtSecurityService.validateToken(refreshToken, user.email())) {
+        if(jwtSecurityService.validateToken(token)
+                && cache.containsKey(email)
+                && cache.get(email).getRefreshToken().equals(token)
+        ){
+
+            String accessToken = jwtSecurityService.generateToken(email, role);
+            String refreshToken = jwtSecurityService.generateRefreshToken(email);
+
+            cache.get(email).setAccessToken(accessToken);
+            cache.get(email).setRefreshToken(refreshToken);
+
             log.info("Refresh token completed successfully");
-
             return new RefreshTokenResponseDTO(
-                    jwtSecurityService.generateToken(email, user.role().name()),
-                    jwtSecurityService.generateRefreshToken(email)
+                    accessToken,
+                    refreshToken
             );
         }
 
@@ -185,20 +206,27 @@ public class AuthService {
         kafkaProducerService.sendRegisterEvent(userEmail, verificationCode);
     }
 
-    public Map<String, String> validateToken(String token) {
-
-        //todo валидация токена с помощью кэша
-
-        HashMap<String, String> dataUser = new HashMap<>(2);
+    public Map<String, String> generateDataUserUsingToken(String token) {
 
         String userEmail = jwtSecurityService.extractEmail(token);
 
-        String role = jwtSecurityService.extractRole(token);
+        if(jwtSecurityService.validateToken(token)
+                && cache.containsKey(userEmail)
+                && cache.get(userEmail).getAccessToken().equals(token)
+        ){
+            HashMap<String, String> dataUser = new HashMap<>(2);
 
-        dataUser.put("email", userEmail);
+            dataUser.put("email", userEmail);
 
-        dataUser.put("role", role);
+            String role = jwtSecurityService.extractRole(token);
+            dataUser.put("role", role);
 
-        return dataUser;
+            return dataUser;
+        }
+        throw new RuntimeException();
+    }
+
+    public void logout(String email) {
+        cache.remove(email);
     }
 }

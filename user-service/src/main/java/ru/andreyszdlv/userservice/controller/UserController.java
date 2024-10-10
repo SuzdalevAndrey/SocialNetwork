@@ -33,7 +33,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PatchMapping("/editemail")
+    @PatchMapping("/edit-email")
     public ResponseEntity<String> updateEmailUser(@Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,
                                                   BindingResult bindingResult,
                                                   @RequestHeader("X-User-Email") String oldEmail)
@@ -60,7 +60,7 @@ public class UserController {
     }
 
 
-    @PatchMapping("/editpassword")
+    @PatchMapping("/change-password")
     public ResponseEntity<String> updatePasswordUser(@Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO,
                                                      BindingResult bindingResult,
                                                      @RequestHeader("X-User-Email") String userEmail)

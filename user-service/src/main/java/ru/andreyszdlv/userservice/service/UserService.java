@@ -150,4 +150,10 @@ public class UserService {
                 .role(user.getRole())
                 .build();
     }
+
+    public String getUserRoleByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                ()->new NoSuchElementException("errors.404.user_not_found")
+        ).getRole().name();
+    }
 }

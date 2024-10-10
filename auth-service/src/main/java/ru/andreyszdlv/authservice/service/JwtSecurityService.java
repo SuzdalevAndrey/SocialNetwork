@@ -69,13 +69,7 @@ public class JwtSecurityService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    public boolean validateToken(String token, String email) {
-        String userEmail = extractEmail(token);
-        return (userEmail.equals(email)
-                && !isTokenExpired(token));
+    public boolean validateToken(String token) {
+        return !extractExpiration(token).before(new Date());
     }
 }

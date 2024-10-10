@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -140,21 +141,46 @@ public class AuthController {
         }
     }
 
-    @PatchMapping("/update-verification-codes")
+    @PatchMapping("/update-verification-code")
     public ResponseEntity<String> updatingVerificationCode(
-            @RequestBody UpdateVerifiCodeRequestDTO request){
+            @Valid @RequestBody UpdateVerifiCodeRequestDTO request,
+            BindingResult bindingResult)
+            throws BindException {
 
-        authService.updateVerificationCode(request.email());
+        log.info("Executing updatingVerificationCode method in AuthController");
 
-        return ResponseEntity.ok("Код успешно обновлён, проверяйте почту!");
+        if(bindingResult.hasErrors()){
+            log.error("Validation errors occurred during update verification code: {}",
+                    bindingResult.getAllErrors());
+
+            if(bindingResult instanceof BindException exception)
+                throw exception;
+            throw new BindException(bindingResult);
+        }
+        else {
+            log.info("Validation successful, update verification code");
+
+            authService.updateVerificationCode(request.email());
+
+            log.info("Confirm update verification code completed successfully");
+
+            return ResponseEntity.ok("Код успешно обновлён, проверяйте почту!");
+        }
     }
 
     @PostMapping("/generate-data-user")
-    public ResponseEntity<Map<String, String>> validateToken(
+    public ResponseEntity<Map<String, String>> generateDataUserUsingToken(
             @RequestHeader("Authorization") String token){
-        log.info("validateToken with AuthController");
-        Map<String, String> dataUser = authService.validateToken(token);
+        log.info("Executing generateDataUserUsingToken with AuthController");
+        Map<String, String> dataUser = authService.generateDataUserUsingToken(token);
 
+        log.info("Confirm generate data user using token completed successfully");
         return ResponseEntity.ok(dataUser);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("X-User-Email") String email){
+        authService.logout(email);
+        return ResponseEntity.ok("Вы успешно вышли из системы");
     }
 }
