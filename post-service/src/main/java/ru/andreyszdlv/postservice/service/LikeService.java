@@ -2,8 +2,6 @@ package ru.andreyszdlv.postservice.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
@@ -27,7 +25,7 @@ public class LikeService {
 
     private final KafkaProducerService kafkaProducerService;
 
-    public void createLike(long postId){
+    public void createLike(long postId, String userEmail){
         log.info("Executing createLike method for postId: {}", postId);
 
         if(!postRepository.existsById(postId)) {
@@ -36,7 +34,7 @@ public class LikeService {
         }
 
         log.info("Getting a userId by email");
-        long userId = userServiceFeignClient.getUserIdByUserEmail().getBody();
+        long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
         log.info("Successful get userId by email");
 
         if(likeRepository.existsByPostIdAndUserId(postId, userId)){
@@ -61,7 +59,7 @@ public class LikeService {
                 ).getUserId();
 
         String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
-        String nameAuthorLike = userServiceFeignClient.getNameByUserEmail().getBody();
+        String nameAuthorLike = userServiceFeignClient.getNameByUserEmail(userEmail).getBody();
 
         kafkaProducerService.sendCreateLikeEvent(
                 email,
@@ -70,7 +68,7 @@ public class LikeService {
     }
 
     @Transactional
-    public void deleteLike(long postId) {
+    public void deleteLike(long postId, String userEmail) {
         log.info("Executing deleteLike method for postId: {}", postId);
 
         if(!postRepository.existsById(postId)) {
@@ -79,7 +77,7 @@ public class LikeService {
         }
 
         log.info("Getting a userId by email");
-        long userId = userServiceFeignClient.getUserIdByUserEmail().getBody();
+        long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
         log.info("Successful get userId by email");
 
         log.info("Deleting a like post with postId: {} and userId: {}", postId, userId);

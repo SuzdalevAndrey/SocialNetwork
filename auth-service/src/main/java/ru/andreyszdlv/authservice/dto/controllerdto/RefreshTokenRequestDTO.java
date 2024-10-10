@@ -1,4 +1,4 @@
-package ru.andreyszdlv.authservice.dto.controllerDto;
+package ru.andreyszdlv.authservice.dto.controllerdto;
 
 import jakarta.validation.constraints.NotBlank;
 

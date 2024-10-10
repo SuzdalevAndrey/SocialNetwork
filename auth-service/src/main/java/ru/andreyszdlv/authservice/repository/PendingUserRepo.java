@@ -12,4 +12,6 @@ public interface PendingUserRepo extends JpaRepository<PendingUser, Long> {
     boolean existsByEmail(String email);
 
     void deleteBycreatedAtBefore(LocalDateTime cutOffTime);
+
+    void deleteAllByEmail(String email);
 }

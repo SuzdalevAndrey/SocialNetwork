@@ -12,8 +12,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.andreyszdlv.authservice.model.RegisterUser;
-import ru.andreyszdlv.authservice.model.LoginUser;
+import ru.andreyszdlv.authservice.dto.kafkadto.RegisterUserKafkaDTO;
+import ru.andreyszdlv.authservice.dto.kafkadto.LoginUserKafkaDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class KafkaProducerConfig {
 
 
     @Bean
-    public ProducerFactory<String, LoginUser> LoginUserProducerFactory() {
+    public ProducerFactory<String, LoginUserKafkaDTO> LoginUserProducerFactory() {
 
         Map<String, Object> props = new HashMap<>();
 
@@ -39,14 +39,14 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, LoginUser> kafkaTemplateLoginUser(
-            ProducerFactory<String, LoginUser> producerFactory
+    public KafkaTemplate<String, LoginUserKafkaDTO> kafkaTemplateLoginUser(
+            ProducerFactory<String, LoginUserKafkaDTO> producerFactory
     ){
         return new KafkaTemplate<>(producerFactory);
     }
 
     @Bean
-    public ProducerFactory<String, RegisterUser> RegisterUserProducerFactory() {
+    public ProducerFactory<String, RegisterUserKafkaDTO> RegisterUserProducerFactory() {
 
         Map<String, Object> props = new HashMap<>();
 
@@ -58,8 +58,8 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, RegisterUser> kafkaTemplateRegisterUser(
-            ProducerFactory<String, RegisterUser> producerFactory
+    public KafkaTemplate<String, RegisterUserKafkaDTO> kafkaTemplateRegisterUser(
+            ProducerFactory<String, RegisterUserKafkaDTO> producerFactory
     ){
         return new KafkaTemplate<>(producerFactory);
     }

@@ -10,11 +10,17 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.andreyszdlv.userservice.dto.controllerDto.SaveUserRequestDTO;
 import ru.andreyszdlv.userservice.dto.controllerDto.UpdateEmailRequestDTO;
 import ru.andreyszdlv.userservice.dto.controllerDto.UpdatePasswordRequestDTO;
+import ru.andreyszdlv.userservice.dto.controllerDto.UserDetailsResponseDTO;
+import ru.andreyszdlv.userservice.dto.controllerDto.UserResponseDTO;
+import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.service.UserService;
 
 import java.util.NoSuchElementException;
@@ -29,7 +35,8 @@ public class UserController {
 
     @PatchMapping("/editemail")
     public ResponseEntity<String> updateEmailUser(@Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,
-                                                  BindingResult bindingResult)
+                                                  BindingResult bindingResult,
+                                                  @RequestHeader("X-User-Email") String oldEmail)
             throws NoSuchElementException, BindException {
 
         log.info("Executing updateEmailUser method for email update request");
@@ -46,7 +53,7 @@ public class UserController {
         }
 
         log.info("Validation successful, updating email for user");
-        userService.updateEmailUser(updateEmailRequestDTO.email());
+        userService.updateEmailUser(oldEmail, updateEmailRequestDTO.email());
 
         log.info("Email update completed successfully");
         return ResponseEntity.ok("Email успешно изменён");
@@ -55,7 +62,8 @@ public class UserController {
 
     @PatchMapping("/editpassword")
     public ResponseEntity<String> updatePasswordUser(@Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO,
-                                                     BindingResult bindingResult)
+                                                     BindingResult bindingResult,
+                                                     @RequestHeader("X-User-Email") String userEmail)
             throws NoSuchElementException,
             BindException,
             BadCredentialsException {
@@ -73,39 +81,9 @@ public class UserController {
         }
 
         log.info("Validation successful, updating password for user");
-        userService.updatePasswordUser(updatePasswordRequestDTO.oldPassword(), updatePasswordRequestDTO.newPassword());
+        userService.updatePasswordUser(userEmail, updatePasswordRequestDTO.oldPassword(), updatePasswordRequestDTO.newPassword());
 
         log.info("Password update completed successfully");
         return ResponseEntity.ok("Пароль успешно изменён");
-    }
-
-    @GetMapping
-    public ResponseEntity<Long> getUserIdByUserEmail(){
-        log.info("Executing getUserIdByUserEmail method for getting a userId by email");
-
-        Long userId = userService.getUserIdByEmail();
-
-        log.info("Successfully retrieved userId: {} by email", userId);
-        return ResponseEntity.ok(userId);
-    }
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<String> getUserEmailByUserId(@PathVariable long userId){
-        log.info("Executing getUserEmailByUserId method for getting a userEmail by userId");
-
-        String email = userService.getUserEmailByUserId(userId);
-
-        log.info("Successfully retrieved email: {} by userId: {}", email, userId);
-        return ResponseEntity.ok(email);
-    }
-
-    @GetMapping("/name")
-    public ResponseEntity<String> getNameByUserEmail(){
-        log.info("Executing getNameByUserEmail method for getting a name by userEmail");
-
-        String name = userService.getNameByUserEmail();
-
-        log.info("Successfully retrieved name: {} by userEmail", name);
-        return ResponseEntity.ok(name);
     }
 }

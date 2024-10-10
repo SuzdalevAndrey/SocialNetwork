@@ -2,21 +2,20 @@ package ru.andreyszdlv.authservice.controller.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.andreyszdlv.authservice.exception.UserNeedConfirmException;
+import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
+import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
+import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
 
 import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Slf4j
 @ControllerAdvice
@@ -27,7 +26,7 @@ public class IncorrectDataControllerAdvice {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleNotFoundUserException(
-            final UsernameNotFoundException ex,
+            UsernameNotFoundException ex,
             Locale locale) {
 
         log.error("Executing handleNotFoundUserException method in the IncorrectDataControllerAdvice");
@@ -43,7 +42,7 @@ public class IncorrectDataControllerAdvice {
 
     @ExceptionHandler(ValidateTokenException.class)
     public ResponseEntity<ProblemDetail> handleValidateTokenException(
-            final ValidateTokenException ex,
+            ValidateTokenException ex,
             Locale locale
     ) {
         log.error("Executing handleValidateTokenException method in the IncorrectDataControllerAdvice");
@@ -53,6 +52,68 @@ public class IncorrectDataControllerAdvice {
                 locale);
 
         log.error("Token is not valid: {}", problemDetail);
+
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(RegisterUserNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleRegisterUserNotFoundException(
+            RegisterUserNotFoundException ex,
+            Locale locale){
+        log.error("Executing handleRegisterUserNotFoundException method in the IncorrectDataControllerAdvice");
+
+        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                locale);
+
+        log.error("RegisterUserNotFound: {}", problemDetail);
+
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(UserAlreadyRegisteredException.class)
+    public ResponseEntity<ProblemDetail> handleUserAlreadyRegisteredException(
+            UserAlreadyRegisteredException ex,
+            Locale locale){
+        log.error("Executing handleUserAlreadyRegisteredException method in the IncorrectDataControllerAdvice");
+
+        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
+                ex.getMessage(),
+                locale);
+
+        log.error("UserAlreadyRegisteredException: {}", problemDetail);
+
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(UserNeedConfirmException.class)
+    public ResponseEntity<ProblemDetail> handleUserNeedConfirmException(
+            UserNeedConfirmException ex,
+            Locale locale
+    ){
+        log.error("Executing handleUserNeedConfirmException method in the IncorrectDataControllerAdvice");
+
+        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
+                ex.getMessage(),
+                locale);
+
+        log.error("UserNeedConfirmException: {}", problemDetail);
+
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(VerificationCodeNotSuitableException.class)
+    public ResponseEntity<ProblemDetail> handleVerificationCodeNotSuitableException(
+            VerificationCodeNotSuitableException ex,
+            Locale locale)
+    {
+        log.error("Executing handleVerificationCodeNotSuitableException method in the IncorrectDataControllerAdvice");
+
+        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
+                ex.getMessage(),
+                locale);
+
+        log.error("VerificationCodeNotSuitableException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }

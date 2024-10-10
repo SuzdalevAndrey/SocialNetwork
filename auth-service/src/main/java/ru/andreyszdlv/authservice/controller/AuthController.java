@@ -10,15 +10,19 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.authservice.dto.controllerDto.ConfirmEmailRequestDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.LoginRequestDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.LoginResponseDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenRequestDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenResponseDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.RegisterRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.ConfirmEmailRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.LoginRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.LoginResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.RefreshTokenRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.RefreshTokenResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.RegisterRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.UpdateVerifiCodeRequestDTO;
 import ru.andreyszdlv.authservice.service.AuthService;
+
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -29,7 +33,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequestDTO request,
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request,
                                                         BindingResult bindingResult)
             throws BindException {
 
@@ -55,7 +59,8 @@ public class AuthController {
             log.info("User register completed successfully with  email: {} and name: {}",
                     request.email(),
                     request.name());
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok("Вам на почту было отправлено" +
+                    " письмо с кодом для подтверждения email");
         }
     }
 
@@ -135,9 +140,21 @@ public class AuthController {
         }
     }
 
-    @PatchMapping("/verification-codes/{userEmail}")
-    public ResponseEntity<String> UpdatingVerificationCode(@PathVariable String userEmail){
-        authService.updateVerificationCode(userEmail);
+    @PatchMapping("/update-verification-codes")
+    public ResponseEntity<String> updatingVerificationCode(
+            @RequestBody UpdateVerifiCodeRequestDTO request){
+
+        authService.updateVerificationCode(request.email());
+
         return ResponseEntity.ok("Код успешно обновлён, проверяйте почту!");
+    }
+
+    @PostMapping("/generate-data-user")
+    public ResponseEntity<Map<String, String>> validateToken(
+            @RequestHeader("Authorization") String token){
+        log.info("validateToken with AuthController");
+        Map<String, String> dataUser = authService.validateToken(token);
+
+        return ResponseEntity.ok(dataUser);
     }
 }

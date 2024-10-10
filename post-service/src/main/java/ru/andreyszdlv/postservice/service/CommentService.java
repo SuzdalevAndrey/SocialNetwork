@@ -2,8 +2,6 @@ package ru.andreyszdlv.postservice.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
@@ -29,7 +27,7 @@ public class CommentService {
 
     private final KafkaProducerService kafkaProducerService;
 
-    public Comment createComment(long postId, String content){
+    public Comment createComment(long postId, String content, String userEmail){
         log.info("Executing createComment method for postId: {}, content: {}", postId, content);
 
         if(!postRepository.existsById(postId)){
@@ -40,7 +38,7 @@ public class CommentService {
         Comment comment = new Comment();
 
         log.info("Getting a userId by email");
-        comment.setUserId(userServiceFeignClient.getUserIdByUserEmail().getBody());
+        comment.setUserId(userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody());
         log.info("Successful get userId by email");
 
         comment.setPostId(postId);
@@ -59,7 +57,7 @@ public class CommentService {
                 ).getUserId();
 
         String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
-        String nameAuthorComment = userServiceFeignClient.getNameByUserEmail().getBody();
+        String nameAuthorComment = userServiceFeignClient.getNameByUserEmail(userEmail).getBody();
 
         kafkaProducerService.sendCreateCommentEvent(
                 email,
@@ -70,7 +68,7 @@ public class CommentService {
         return commentResponse;
     }
 
-    public void deleteComment(long commentId) {
+    public void deleteComment(long commentId, String userEmail) {
         log.info("Executing deleteComment method for commentId: {}", commentId);
 
         if(!commentRepository.existsById(commentId)){
@@ -78,7 +76,15 @@ public class CommentService {
             throw new NoSuchCommentException("errors.404.comment_not_found");
         }
 
-        if(!commentRepository.findById(commentId).get().getUserId().equals(userServiceFeignClient.getUserIdByUserEmail().getBody())){
+        if(!commentRepository
+                .findById(commentId)
+                .get()
+                .getUserId()
+                .equals(userServiceFeignClient
+                        .getUserIdByUserEmail(userEmail)
+                        .getBody()
+                )
+        ){
             log.error("The comment does not belong to the user");
             throw new AnotherUsersCommentException("errors.409.another_user_comment");
         }
@@ -91,7 +97,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(long commentId, String content) {
+    public void updateComment(long commentId, String content, String userEmail) {
         log.info("Executing updateComment method for commentId: {} and newContent: {}", commentId, content);
 
         Comment comment;
@@ -102,7 +108,11 @@ public class CommentService {
         }
 
 
-        if(!comment.getUserId().equals(userServiceFeignClient.getUserIdByUserEmail().getBody())){
+        if(!comment.getUserId().equals(
+                userServiceFeignClient
+                .getUserIdByUserEmail(userEmail)
+                .getBody())
+        ){
             log.error("The comment does not belong to the user");
             throw new AnotherUsersCommentException("errors.409.another_user_comment");
         }

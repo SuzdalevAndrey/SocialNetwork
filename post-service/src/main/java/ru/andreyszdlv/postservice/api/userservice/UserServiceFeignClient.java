@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "user-service")
+@FeignClient(name = "user-service", path = "/internal/user")
 public interface UserServiceFeignClient {
-    @GetMapping("/api/user")
-    ResponseEntity<Long> getUserIdByUserEmail();
+    @GetMapping("/id/{email}")
+    ResponseEntity<Long> getUserIdByUserEmail(@PathVariable String email);
 
-    @GetMapping("/api/user/{userId}")
+    @GetMapping("/email/{userId}")
     ResponseEntity<String> getUserEmailByUserId(@PathVariable("userId") long userId);
 
-    @GetMapping("/api/user/name")
-    ResponseEntity<String> getNameByUserEmail();
+    @GetMapping("/name/{email}")
+    ResponseEntity<String> getNameByUserEmail(@PathVariable String email);
 }

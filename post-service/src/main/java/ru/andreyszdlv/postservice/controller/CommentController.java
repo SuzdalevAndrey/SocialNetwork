@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.postservice.dto.controllerDto.comment.CreateCommentRequestDTO;
@@ -24,31 +25,43 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/{postId}")
-    public ResponseEntity<Comment> createComment(@PathVariable long postId, @Valid @RequestBody CreateCommentRequestDTO request) {
-        log.info("Executing createComment method for postId: {} and content request: {}", postId, request.content());
+    @PostMapping
+    public ResponseEntity<Comment> createComment(@Valid @RequestBody CreateCommentRequestDTO request,
+                                                 @RequestHeader("X-User-Email") String userEmail) {
+        log.info("Executing createComment method for postId: {} and content request: {}",
+                request.postId(),
+                request.content());
 
-        Comment newComment = commentService.createComment(postId, request.content());
+        Comment newComment = commentService.createComment(
+                request.postId(),
+                request.content(),
+                userEmail
+        );
+
         log.info("Successful comment creation with content: {}", request.content());
 
         return ResponseEntity.ok().body(newComment);
     }
 
-    @PatchMapping("/{commentId}")
-    public ResponseEntity<String> updateComment(@PathVariable long commentId, @Valid @RequestBody UpdateCommentRequestDTO request){
-        log.info("Executing updateComment method for commentId: {} and content request: {}", commentId, request.content());
+    @PatchMapping
+    public ResponseEntity<String> updateComment(@Valid @RequestBody UpdateCommentRequestDTO request,
+                                                @RequestHeader("X-User-Email") String userEmail){
+        log.info("Executing updateComment method for commentId: {} and content request: {}",
+                request.commentId(),
+                request.content());
 
-        commentService.updateComment(commentId, request.content());
+        commentService.updateComment(request.commentId(), request.content(), userEmail);
         log.info("Successful update comment with new content: {}", request.content());
 
         return ResponseEntity.ok().body("Комментарий обновлён");
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<String> deleteComment(@PathVariable long commentId) {
+    public ResponseEntity<String> deleteComment(@PathVariable long commentId,
+                                                @RequestHeader("X-User-Email") String userEmail) {
         log.info("Executing deleteComment method for commentId: {}", commentId);
 
-        commentService.deleteComment(commentId);
+        commentService.deleteComment(commentId, userEmail);
         log.info("Successful delete comment with commentId: {}", commentId);
 
         return ResponseEntity.ok().body("Комментарий удалён");

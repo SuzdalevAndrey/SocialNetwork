@@ -5,22 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.andreyszdlv.authservice.enums.ERole;
-import ru.andreyszdlv.authservice.model.PendingUser;
+import ru.andreyszdlv.authservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserDetailsResponseDTO;
 import ru.andreyszdlv.authservice.model.User;
-import ru.andreyszdlv.authservice.repository.PendingUserRepo;
-import ru.andreyszdlv.authservice.repository.UserRepo;
-
-import java.time.LocalDateTime;
 
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserService {
 
-    private final UserRepo userRepository;
+    private final UserServiceFeignClient userServiceFeignClient;
 
     public UserDetailsService getDetailsService() {
 
@@ -28,9 +24,19 @@ public class UserService {
             @Override
             public UserDetails loadUserByUsername(String username)
                     throws UsernameNotFoundException {
-                User user = userRepository.findByEmail(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("errors.404.user_not_found"));
-                return user;
+                log.info("getDetailsService in getDetailsService");
+                UserDetailsResponseDTO user = userServiceFeignClient
+                        .getUserDetailsByUserEmail(username)
+                        .getBody();
+
+                return User
+                        .builder()
+                        .id(user.id())
+                        .email(user.email())
+                        .password(user.password())
+                        .name(user.name())
+                        .role(user.role())
+                        .build();
             }
         };
 

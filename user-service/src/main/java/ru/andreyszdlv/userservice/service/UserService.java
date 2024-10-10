@@ -2,19 +2,16 @@ package ru.andreyszdlv.userservice.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.andreyszdlv.userservice.dto.controllerDto.UserDetailsResponseDTO;
+import ru.andreyszdlv.userservice.dto.controllerDto.UserResponseDTO;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
+import ru.andreyszdlv.userservice.security.enums.ERole;
 
 import java.util.NoSuchElementException;
 
@@ -27,34 +24,12 @@ public class UserService {
 
     private final KafkaProducerService kafkaProducerService;
 
-    private String getEmailAuthenticationUser() throws UsernameNotFoundException {
-
-        log.info("Executing getEmailAuthenticationUser in UserService");
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            if (authentication.getPrincipal() instanceof UserDetails) {
-
-                String email = ((UserDetails) authentication.getPrincipal()).getUsername();
-                log.info("User is authenticated, email: {}", email);
-
-                return email;
-            }
-        }
-
-        log.error("User not authenticated or authentication is null");
-        throw new NoSuchElementException("errors.404.user_not_found");
-    }
-
 
     @Transactional
-    public void updateEmailUser(String newEmail)
+    public void updateEmailUser(String oldEmail, String newEmail)
             throws NoSuchElementException{
 
         log.info("Executing updateEmailUser in UserService");
-
-        String oldEmail = getEmailAuthenticationUser();
 
         log.info("Verification of the user existence");
         User user = userRepository.findByEmail(oldEmail)
@@ -68,15 +43,13 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePasswordUser(String oldPassword, String newPassword)
+    public void updatePasswordUser(String userEmail, String oldPassword, String newPassword)
             throws BadCredentialsException {
 
         log.info("Executing updatePasswordUser in UserService");
 
-        String email = getEmailAuthenticationUser();
-
         log.info("Verification of the user existence");
-        User user = userRepository.findByEmail(email).
+        User user = userRepository.findByEmail(userEmail).
                 orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -84,7 +57,7 @@ public class UserService {
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
             user.setPassword(passwordEncoder.encode(newPassword));
 
-            kafkaProducerService.sendEditPasswordEvent(email);
+            kafkaProducerService.sendEditPasswordEvent(userEmail);
 
             log.info("Successful update password");
         }
@@ -96,11 +69,11 @@ public class UserService {
         }
     }
 
-    public Long getUserIdByEmail() {
+    public Long getUserIdByEmail(String email) {
         log.info("Executing getUserIdByEmail in UserService");
 
         log.info("Getting a userId by email");
-        Long userId = userRepository.findByEmail(getEmailAuthenticationUser())
+        Long userId = userRepository.findByEmail(email)
                 .orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"))
                 .getId();
 
@@ -126,16 +99,55 @@ public class UserService {
         return email;
     }
 
-    public String getNameByUserEmail() {
+    public String getNameByUserEmail(String email) {
         log.info("Executing getNameByUserEmail in UserService");
 
         log.info("Getting a name by email");
-        String name = userRepository.findByEmail(getEmailAuthenticationUser())
+        String name = userRepository.findByEmail(email)
                 .orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"))
                 .getName();
 
         log.info("Successful get a name: {} by email", name);
 
         return name;
+    }
+
+    public UserDetailsResponseDTO getUserDetailsByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                ()->new NoSuchElementException("errors.404.user_not_found")
+        );
+
+        return UserDetailsResponseDTO
+                .builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .role(user.getRole())
+                .build();
+    }
+
+    public void saveUser(String name, String email, String password, ERole role) {
+        User user = new User();
+        user.setEmail(email);
+        user.setName(name);
+        user.setPassword(password);
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+    public Boolean existsUserByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public UserResponseDTO getUserByUserEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                ()->new NoSuchElementException("errors.404.user_not_found")
+        );
+        return UserResponseDTO
+                .builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
     }
 }

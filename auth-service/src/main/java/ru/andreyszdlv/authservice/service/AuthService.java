@@ -5,26 +5,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.authservice.dto.controllerDto.ConfirmEmailRequestDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.LoginRequestDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.LoginResponseDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenRequestDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.RefreshTokenResponseDTO;
-import ru.andreyszdlv.authservice.dto.controllerDto.RegisterRequestDTO;
+import ru.andreyszdlv.authservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.authservice.dto.controllerdto.ConfirmEmailRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.LoginRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.LoginResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.RefreshTokenRequestDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.RefreshTokenResponseDTO;
+import ru.andreyszdlv.authservice.dto.controllerdto.RegisterRequestDTO;
+import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserDetailsRequestDTO;
+import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserResponseDTO;
 import ru.andreyszdlv.authservice.enums.ERole;
+import ru.andreyszdlv.authservice.exception.UserNeedConfirmException;
 import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
+import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
-import ru.andreyszdlv.authservice.exception.VerificationTokenNotSuitableException;
+import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
 import ru.andreyszdlv.authservice.model.PendingUser;
-import ru.andreyszdlv.authservice.model.User;
 import ru.andreyszdlv.authservice.repository.PendingUserRepo;
-import ru.andreyszdlv.authservice.repository.UserRepo;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -33,7 +37,7 @@ import java.util.NoSuchElementException;
 public class AuthService {
     private final EmailVerificationService emailVerificationService;
 
-    private final UserRepo userRepository;
+    private final UserServiceFeignClient userServiceFeignClient;
 
     private final PendingUserRepo pendingUserRepo;
 
@@ -52,10 +56,14 @@ public class AuthService {
                 request.name());
 
         log.info("Checking whether the user is registered with email: {}", request.email());
-        if(pendingUserRepo.existsByEmail(request.email())
-                || userRepository.existsByEmail(request.email())) {
+        if(userServiceFeignClient.existsUserByEmail(request.email()).getBody()) {
             log.error("The user is already registered with email: {}", request.email());
-            throw new RegisterUserNotFoundException("errors.409.user_already_register");
+            throw new UserAlreadyRegisteredException("errors.409.user_already_register");
+        }
+
+        if(pendingUserRepo.existsByEmail(request.email())){
+            log.error("The user need confirm email: {}", request.email());
+            throw new UserNeedConfirmException("errors.409.need_confirm_email");
         }
 
         PendingUser user = new PendingUser();
@@ -86,20 +94,22 @@ public class AuthService {
         log.info("Executing loginUser method in AuthService for email: {}", request.email());
 
         log.info("Verification of the user existence with email: {}", request.email());
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(()->new UsernameNotFoundException("errors.404.user_not_found"));
+        UserResponseDTO user = userServiceFeignClient
+                .getUserByEmail(
+                    request.email())
+                .getBody();
 
-        log.info("Token generation for userEmail: {}", user.getEmail());
-        String token = jwtSecurityService.generateToken(user, user.getRole().name());
+        log.info("Token generation for user: {}", user.email());
+        String token = jwtSecurityService.generateToken(user.email(), user.role().name());
 
-        log.info("RefreshToken generation for userEmail: {}", user.getEmail());
-        String refreshToken = jwtSecurityService.generateRefreshToken(user);
+        log.info("RefreshToken generation for userEmail: {}", user.email());
+        String refreshToken = jwtSecurityService.generateRefreshToken(user.email());
 
         log.info("LoginUser completed successfully with email: {}", request.email());
 
-        kafkaProducerService.sendLoginEvent(user.getName(), user.getEmail());
+        kafkaProducerService.sendLoginEvent(user.name(), user.email());
 
-        return new LoginResponseDTO(user.getEmail(), token, refreshToken);
+        return new LoginResponseDTO(token, refreshToken);
     }
 
     public RefreshTokenResponseDTO refresh(RefreshTokenRequestDTO request) {
@@ -107,17 +117,16 @@ public class AuthService {
 
         String refreshToken = request.refreshToken();
 
-        String email = jwtSecurityService.extractUsername(refreshToken);
+        String email = jwtSecurityService.extractEmail(refreshToken);
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(()->new UsernameNotFoundException("errors.404.user_not_found"));
+        UserResponseDTO user = userServiceFeignClient.getUserByEmail(email).getBody();
 
-        if(jwtSecurityService.validateToken(refreshToken, user)) {
+        if(jwtSecurityService.validateToken(refreshToken, user.email())) {
             log.info("Refresh token completed successfully");
 
             return new RefreshTokenResponseDTO(
-                    jwtSecurityService.generateToken(user, user.getRole().name()),
-                    jwtSecurityService.generateRefreshToken(user)
+                    jwtSecurityService.generateToken(email, user.role().name()),
+                    jwtSecurityService.generateRefreshToken(email)
             );
         }
 
@@ -130,9 +139,6 @@ public class AuthService {
     public void confirmEmail(ConfirmEmailRequestDTO request){
         log.info("Executing confirmEmail method in AuthService for email: {}", request.email());
 
-        log.info("Getting the access code for email: {}", request.email());
-
-
         log.info("Getting a user from a table pendings user by email: {}", request.email());
         PendingUser pendingUser = pendingUserRepo
                 .findByEmail(request.email())
@@ -143,30 +149,32 @@ public class AuthService {
         log.info("Comparison verification code with code sent by user");
         if(emailVerificationService.isValidCode(request.email(), request.code())){
             log.info("The code from user and correct code match");
-            User user = new User();
-
-            user.setName(pendingUser.getName());
-            user.setEmail(pendingUser.getEmail());
-            user.setPassword(pendingUser.getPassword());
-            user.setRole(pendingUser.getRole());
 
             log.info("Saving the user to a permanent database");
-            userRepository.save(user);
+            userServiceFeignClient.saveUser(
+                    UserDetailsRequestDTO
+                    .builder()
+                    .name(pendingUser.getName())
+                    .email(pendingUser.getEmail())
+                    .password(pendingUser.getPassword())
+                    .role(pendingUser.getRole())
+                    .build()
+            );
 
+            pendingUserRepo.deleteAllByEmail(request.email());
             return;
         }
         log.error("The verification code and the code sent by the user do not match");
-        throw new VerificationTokenNotSuitableException("errors.409.verification_token_is_not_valid");
+        throw new VerificationCodeNotSuitableException("errors.409.verification_token_is_not_valid");
     }
 
     @Transactional
     public void updateVerificationCode(String userEmail) {
         log.info("Executing updateVerificationCode method in AuthService for email: {}", userEmail);
 
-        if(!pendingUserRepo.existsByEmail(userEmail)
-                || userRepository.existsByEmail(userEmail)) {
+        if(!pendingUserRepo.existsByEmail(userEmail)) {
             log.error("The user is already registered with email: {}", userEmail);
-            throw new RegisterUserNotFoundException("errors.409.user_already_register");
+            throw new RegisterUserNotFoundException("errors.404.email_not_found");
         }
 
         log.info("Verification code generation");
@@ -175,5 +183,22 @@ public class AuthService {
 
         log.info("Sending a message to kafka that contains userEmail: {}", userEmail);
         kafkaProducerService.sendRegisterEvent(userEmail, verificationCode);
+    }
+
+    public Map<String, String> validateToken(String token) {
+
+        //todo валидация токена с помощью кэша
+
+        HashMap<String, String> dataUser = new HashMap<>(2);
+
+        String userEmail = jwtSecurityService.extractEmail(token);
+
+        String role = jwtSecurityService.extractRole(token);
+
+        dataUser.put("email", userEmail);
+
+        dataUser.put("role", role);
+
+        return dataUser;
     }
 }

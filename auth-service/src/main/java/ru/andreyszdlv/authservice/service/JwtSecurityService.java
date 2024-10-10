@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -26,19 +25,19 @@ public class JwtSecurityService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(UserDetails userDetails, String claims){
+    public String generateToken(String email, String role){
         return Jwts.builder()
-                .claims(Map.of("roles", claims))
-                .subject(userDetails.getUsername())
+                .claims(Map.of("role", role))
+                .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000*60*24))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken(String email) {
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * 60))
                 .signWith(getSigningKey())
@@ -58,25 +57,25 @@ public class JwtSecurityService {
                 .getPayload();
     }
 
-    // Получение почты юзера
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Когда срок действия заканчивается
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role").toString();
+    }
+
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // Метод проверки срока действия токена
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    // Метод для валидации токена
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())
+    public boolean validateToken(String token, String email) {
+        String userEmail = extractEmail(token);
+        return (userEmail.equals(email)
                 && !isTokenExpired(token));
     }
 }
