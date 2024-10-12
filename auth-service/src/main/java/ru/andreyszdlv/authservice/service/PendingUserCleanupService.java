@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
-public class PendingUserService {
+public class PendingUserCleanupService {
 
     private final PendingUserRepo pendingUserRepository;
 

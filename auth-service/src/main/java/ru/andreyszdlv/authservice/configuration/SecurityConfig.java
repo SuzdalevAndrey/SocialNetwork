@@ -16,6 +16,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import ru.andreyszdlv.authservice.filter.RoleUserFilter;
 import ru.andreyszdlv.authservice.service.UserService;
 
 @Configuration
@@ -23,6 +25,8 @@ import ru.andreyszdlv.authservice.service.UserService;
 @EnableWebSecurity
 public class SecurityConfig {
     private final UserService userService;
+
+    private final RoleUserFilter roleUserFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -47,7 +51,12 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers("/api/auth/logout").hasAuthority("USER")
+                        .anyRequest().permitAll()
+                )
                 .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(roleUserFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->

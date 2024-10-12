@@ -30,7 +30,7 @@ public class JwtSecurityService {
                 .claims(Map.of("role", role))
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000*60*24))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
                 .signWith(getSigningKey())
                 .compact();
     }
