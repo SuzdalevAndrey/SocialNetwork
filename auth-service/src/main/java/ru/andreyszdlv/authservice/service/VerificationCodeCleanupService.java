@@ -19,8 +19,7 @@ public class VerificationCodeCleanupService {
     @Scheduled(fixedRate = 300000)
     public void removeExpiredVerificationCodes(){
         LocalDateTime cutOffTime = LocalDateTime
-                .now()
-                .minus(15, ChronoUnit.MINUTES);
+                .now();
 
         emailVerificationCodeRepository.deleteByexpirationTimeBefore(cutOffTime);
     }

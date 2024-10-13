@@ -35,8 +35,9 @@ public class JwtSecurityService {
                 .compact();
     }
 
-    public String generateRefreshToken(String email) {
+    public String generateRefreshToken(String email, String role) {
         return Jwts.builder()
+                .claims(Map.of("role", role))
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * 60))

@@ -9,12 +9,14 @@ import ru.andreyszdlv.authservice.model.EmailVerificationCode;
 import ru.andreyszdlv.authservice.repository.EmailVerificationCodeRepo;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailVerificationService {
+
     private final EmailVerificationCodeRepo emailVerificationCodeRepository;
 
     @Transactional
@@ -27,13 +29,18 @@ public class EmailVerificationService {
 
         emailVerificationCode.setEmail(email);
         emailVerificationCode.setVerificationCode(verificationCode);
-        emailVerificationCode.setExpirationTime(LocalDateTime.now());
+        emailVerificationCode.setExpirationTime(
+                LocalDateTime
+                .now()
+                .plusMinutes(15)
+        );
 
         emailVerificationCodeRepository.save(emailVerificationCode);
 
         return verificationCode;
     }
 
+    @Transactional(readOnly = true)
     public boolean isValidCode(String email, String code){
         return emailVerificationCodeRepository.findByEmail(email)
                 .orElseThrow(

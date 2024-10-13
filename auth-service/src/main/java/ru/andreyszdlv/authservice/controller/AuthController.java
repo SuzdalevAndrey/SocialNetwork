@@ -38,12 +38,12 @@ public class AuthController {
                                                         BindingResult bindingResult)
             throws BindException {
 
-        log.info("Executing register method in AuthController for email: {} and name: {}",
+        log.info("Register user for email: {} and name: {}",
                 request.email(),
                 request.name());
 
         if(bindingResult.hasErrors()) {
-            log.error("Validation errors occurred during register user: {}",
+            log.error("Validation errors during register user: {}",
                     bindingResult.getAllErrors());
 
             if(bindingResult instanceof BindException exception)
@@ -69,10 +69,10 @@ public class AuthController {
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request,
                                                   BindingResult bindingResult)
             throws BindException {
-        log.info("Executing login method in AuthController for email: {} ", request.email());
+        log.info("Login user for email: {} ", request.email());
 
         if(bindingResult.hasErrors()) {
-            log.error("Validation errors occurred during login user: {}",
+            log.error("Validation errors during login user: {}",
                     bindingResult.getAllErrors());
 
             if(bindingResult instanceof BindException exception)
@@ -97,7 +97,7 @@ public class AuthController {
         log.info("Executing refresh method in AuthController");
 
         if(bindingResult.hasErrors()) {
-            log.error("Validation errors occurred during refresh token: {}",
+            log.error("Validation errors during refresh token: {}",
                     bindingResult.getAllErrors());
 
             if(bindingResult instanceof BindException exception)
@@ -121,8 +121,9 @@ public class AuthController {
             BindingResult bindingResult) throws BindException {
 
         log.info("Executing confirmEmail method in AuthController");
+
         if(bindingResult.hasErrors()){
-            log.error("Validation errors occurred during confirm email: {}",
+            log.error("Validation errors during confirm email: {}",
                     bindingResult.getAllErrors());
 
             if(bindingResult instanceof BindException exception)
@@ -150,7 +151,7 @@ public class AuthController {
         log.info("Executing updatingVerificationCode method in AuthController");
 
         if(bindingResult.hasErrors()){
-            log.error("Validation errors occurred during update verification code: {}",
+            log.error("Validation errors during update verification code: {}",
                     bindingResult.getAllErrors());
 
             if(bindingResult instanceof BindException exception)
@@ -162,7 +163,7 @@ public class AuthController {
 
             authService.updateVerificationCode(request.email());
 
-            log.info("Confirm update verification code completed successfully");
+            log.info("Confirm update verification code successfully");
 
             return ResponseEntity.ok("Код успешно обновлён, проверяйте почту!");
         }
@@ -174,7 +175,7 @@ public class AuthController {
         log.info("Executing generateDataUserUsingToken with AuthController");
         Map<String, String> dataUser = authService.generateDataUserUsingToken(token);
 
-        log.info("Confirm generate data user using token completed successfully");
+        log.info("Confirm generate data user using token successfully");
         return ResponseEntity.ok(dataUser);
     }
 

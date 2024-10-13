@@ -23,7 +23,4 @@ public interface UserServiceFeignClient {
 
     @GetMapping("/user-details/{email}")
     ResponseEntity<UserDetailsResponseDTO> getUserDetailsByUserEmail(@PathVariable String email);
-
-    @GetMapping("/role/{email}")
-    ResponseEntity<String> getUserRoleByEmail(@PathVariable String email);
 }
