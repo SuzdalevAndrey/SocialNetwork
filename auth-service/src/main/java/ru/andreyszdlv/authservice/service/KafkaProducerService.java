@@ -14,10 +14,10 @@ public class KafkaProducerService {
     private final KafkaTemplate<String, RegisterUserKafkaDTO> kafkaTemplateRegister;
 
     public void sendRegisterEvent(String email, String code){
-        kafkaTemplateRegister.send("auth-event-register",new RegisterUserKafkaDTO(email, code));
+        kafkaTemplateRegister.send("auth-event-register", new RegisterUserKafkaDTO(email, code));
     }
 
     public void sendLoginEvent(String name, String email){
-        kafkaTemplateLogin.send("auth-event-login",new LoginUserKafkaDTO(name, email));
+        kafkaTemplateLogin.send("auth-event-login", new LoginUserKafkaDTO(name, email));
     }
 }

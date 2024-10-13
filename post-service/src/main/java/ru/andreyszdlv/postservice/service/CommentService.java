@@ -27,6 +27,7 @@ public class CommentService {
 
     private final KafkaProducerService kafkaProducerService;
 
+    @Transactional
     public Comment createComment(long postId, String content, String userEmail){
         log.info("Executing createComment method for postId: {}, content: {}", postId, content);
 
@@ -68,6 +69,7 @@ public class CommentService {
         return commentResponse;
     }
 
+    @Transactional
     public void deleteComment(long commentId, String userEmail) {
         log.info("Executing deleteComment method for commentId: {}", commentId);
 

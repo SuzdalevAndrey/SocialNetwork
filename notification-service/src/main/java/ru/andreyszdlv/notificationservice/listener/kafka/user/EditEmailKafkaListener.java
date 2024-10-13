@@ -18,7 +18,7 @@ public class EditEmailKafkaListener {
 
     private final ApplicationEventPublisher publisher;
 
-    @KafkaListener(topics = "${spring.kafka.topic.nameTopicEditEmail}",
+    @KafkaListener(topics = "${spring.kafka.topic.name.TopicEditEmail}",
             groupId = "${spring.kafka.consumer.group-id}")
     public void listen(String editEmailMessage)
             throws JsonProcessingException {

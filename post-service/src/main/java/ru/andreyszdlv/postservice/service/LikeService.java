@@ -25,6 +25,7 @@ public class LikeService {
 
     private final KafkaProducerService kafkaProducerService;
 
+    @Transactional
     public void createLike(long postId, String userEmail){
         log.info("Executing createLike method for postId: {}", postId);
 

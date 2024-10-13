@@ -41,8 +41,6 @@ public class AuthService {
 
     private final PendingUserService pendingUserService;
 
-    private final PasswordEncoder passwordEncoder;
-
     private final JwtSecurityService jwtSecurityService;
 
     private final KafkaProducerService kafkaProducerService;
@@ -72,11 +70,11 @@ public class AuthService {
         String verificationCode = emailVerificationService
                 .generateAndSaveVerificationCode(request.email());
 
-        log.info("Sending a message to kafka that contains userEmail: {}", request.email());
-        kafkaProducerService.sendRegisterEvent(request.email(), verificationCode);
-
         log.info("Saving a user to a temporary database");
         pendingUserService.savePendingUser(request.name(), request.email(), request.password());
+
+        log.info("Sending a message to kafka that contains userEmail: {}", request.email());
+        kafkaProducerService.sendRegisterEvent(request.email(), verificationCode);
     }
 
     @Transactional

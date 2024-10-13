@@ -1,13 +1,7 @@
 package ru.andreyszdlv.authservice.dto.kafkadto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public record RegisterUserKafkaDTO (
+        String email,
 
-@Data
-@AllArgsConstructor
-public class RegisterUserKafkaDTO {
-
-    private String email;
-
-    private String code;
-}
+        String code
+){ }

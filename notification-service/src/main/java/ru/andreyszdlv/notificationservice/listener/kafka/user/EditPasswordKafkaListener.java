@@ -18,7 +18,7 @@ public class EditPasswordKafkaListener {
 
     private final ApplicationEventPublisher publisher;
 
-    @KafkaListener(topics = "${spring.kafka.topic.nameTopicEditPassword}",
+    @KafkaListener(topics = "${spring.kafka.topic.name.TopicEditPassword}",
             groupId = "${spring.kafka.consumer.group-id}")
     public void listener(String editPasswordMessage)
             throws JsonProcessingException {

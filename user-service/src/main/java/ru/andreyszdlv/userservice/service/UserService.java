@@ -24,6 +24,7 @@ public class UserService {
 
     private final KafkaProducerService kafkaProducerService;
 
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void updateEmailUser(String oldEmail, String newEmail)
@@ -52,8 +53,6 @@ public class UserService {
         User user = userRepository.findByEmail(userEmail).
                 orElseThrow(()->new NoSuchElementException("errors.404.user_not_found"));
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
             user.setPassword(passwordEncoder.encode(newPassword));
 
@@ -69,6 +68,7 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Long getUserIdByEmail(String email) {
         log.info("Executing getUserIdByEmail in UserService");
 
@@ -82,6 +82,7 @@ public class UserService {
         return userId;
     }
 
+    @Transactional(readOnly = true)
     public String getUserEmailByUserId(long userId) {
 
         log.info("Executing getUserEmailByUserId in UserService");
@@ -99,6 +100,7 @@ public class UserService {
         return email;
     }
 
+    @Transactional(readOnly = true)
     public String getNameByUserEmail(String email) {
         log.info("Executing getNameByUserEmail in UserService");
 
@@ -112,6 +114,7 @@ public class UserService {
         return name;
     }
 
+    @Transactional(readOnly = true)
     public UserDetailsResponseDTO getUserDetailsByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 ()->new NoSuchElementException("errors.404.user_not_found")
@@ -126,6 +129,7 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public void saveUser(String name, String email, String password, ERole role) {
         User user = new User();
         user.setEmail(email);
@@ -135,10 +139,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
     public Boolean existsUserByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDTO getUserByUserEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 ()->new NoSuchElementException("errors.404.user_not_found")
@@ -149,11 +155,5 @@ public class UserService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();
-    }
-
-    public String getUserRoleByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(
-                ()->new NoSuchElementException("errors.404.user_not_found")
-        ).getRole().name();
     }
 }

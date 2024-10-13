@@ -21,6 +21,7 @@ public class PostService {
 
     private final UserServiceFeignClient userServiceFeignClient;
 
+    @Transactional(readOnly = true)
     public List<Post> getPostsByUserEmail(String userEmail) {
         log.info("Executing getPostsByUserEmail method");
 
@@ -36,6 +37,7 @@ public class PostService {
         return responseList;
     }
 
+    @Transactional
     public Post createPost(String content, String userEmail) {
 
         log.info("Executing createPost method for content: {}", content);
@@ -80,6 +82,7 @@ public class PostService {
         throw new RuntimeException();
     }
 
+    @Transactional
     public void deletePost(long id, String userEmail) {
         log.info("Executing deletePost method for postId: {}", id);
 
@@ -104,7 +107,7 @@ public class PostService {
         throw new RuntimeException();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Post getPostByPostId(long postId) {
         log.info("Executing getPostByPostId method for postId: {}", postId);
 
