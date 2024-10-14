@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.authservice.api.userservice.UserServiceFeignClient;
@@ -15,21 +14,15 @@ import ru.andreyszdlv.authservice.dto.controllerdto.LoginResponseDTO;
 import ru.andreyszdlv.authservice.dto.controllerdto.RefreshTokenRequestDTO;
 import ru.andreyszdlv.authservice.dto.controllerdto.RefreshTokenResponseDTO;
 import ru.andreyszdlv.authservice.dto.controllerdto.RegisterRequestDTO;
-import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserDetailsRequestDTO;
 import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserResponseDTO;
-import ru.andreyszdlv.authservice.enums.ERole;
 import ru.andreyszdlv.authservice.exception.UserNeedConfirmException;
 import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
 import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
-import ru.andreyszdlv.authservice.model.PendingUser;
-import ru.andreyszdlv.authservice.repository.PendingUserRepo;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service

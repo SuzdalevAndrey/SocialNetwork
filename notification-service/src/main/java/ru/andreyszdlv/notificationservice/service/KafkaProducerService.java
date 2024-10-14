@@ -1,19 +1,23 @@
 package ru.andreyszdlv.notificationservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ru.andreyszdlv.notificationservice.dto.auth.RegisterCompensationDTO;
+import ru.andreyszdlv.notificationservice.dto.auth.FailureSendRegisterMailDTO;
 
 @Service
 @RequiredArgsConstructor
 public class KafkaProducerService {
-    private final KafkaTemplate<String, RegisterCompensationDTO> kafkaTemplateMailFailure;
+    @Value("${spring.kafka.topic.name.failure-send-register-mail}")
+    private String nameTopicFailureSendRegisterMail;
 
-    public void sendRegisterCompensation(String email){
+    private final KafkaTemplate<String, FailureSendRegisterMailDTO> kafkaTemplateMailFailure;
+
+    public void sendFailureRegisterMailEvent(String email){
         kafkaTemplateMailFailure.send(
-                "${spring.kafka.topic.name.TopicRegisterCompensation}",
-                new RegisterCompensationDTO(email)
+                nameTopicFailureSendRegisterMail,
+                new FailureSendRegisterMailDTO(email)
         );
     }
 }

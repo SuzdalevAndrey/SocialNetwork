@@ -1,5 +1,5 @@
 package ru.andreyszdlv.authservice.dto.kafkadto;
 
-public record RegisterCompensationKafkaDTO(
+public record FailureSendRegisterMailKafkaDTO(
         String email
 ){ }

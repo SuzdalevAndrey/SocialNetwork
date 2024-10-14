@@ -6,9 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.authservice.api.userservice.UserServiceFeignClient;
-import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserDetailsRequestDTO;
+import ru.andreyszdlv.authservice.dto.kafkadto.UserDetailsKafkaDTO;
 import ru.andreyszdlv.authservice.enums.ERole;
-import ru.andreyszdlv.authservice.exception.UserNeedConfirmException;
 import ru.andreyszdlv.authservice.model.PendingUser;
 import ru.andreyszdlv.authservice.repository.PendingUserRepo;
 
@@ -25,6 +24,8 @@ public class PendingUserService {
     private final PendingUserRepo pendingUserRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final KafkaProducerService kafkaProducerService;
 
     @Transactional(readOnly = true)
     public boolean existsUserByEmail(String email) {
@@ -56,8 +57,10 @@ public class PendingUserService {
                         ()->new NoSuchElementException("errors.404.email_not_found")
                 );
 
-        userServiceFeignClient.saveUser(
-                UserDetailsRequestDTO
+        pendingUserRepository.deleteByEmail(email);
+
+        kafkaProducerService.sendSaveUserEvent(
+                UserDetailsKafkaDTO
                         .builder()
                         .name(pendingUser.getName())
                         .email(pendingUser.getEmail())
@@ -66,6 +69,5 @@ public class PendingUserService {
                         .build()
         );
 
-        pendingUserRepository.deleteByEmail(email);
     }
 }

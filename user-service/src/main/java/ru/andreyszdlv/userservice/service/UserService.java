@@ -136,7 +136,17 @@ public class UserService {
         user.setName(name);
         user.setPassword(password);
         user.setRole(role);
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+        }
+        catch (Exception ex){
+            kafkaProducerService.sendFailureSaveUserEvent(
+                    name,
+                    email,
+                    password,
+                    role
+            );
+        }
     }
 
     @Transactional(readOnly = true)

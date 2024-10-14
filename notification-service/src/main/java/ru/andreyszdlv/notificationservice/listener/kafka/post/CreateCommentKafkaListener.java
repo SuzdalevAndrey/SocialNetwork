@@ -19,7 +19,7 @@ public class CreateCommentKafkaListener {
     private final ApplicationEventPublisher publisher;
 
     @KafkaListener(
-            topics = "${spring.kafka.topic.name.TopicCreateComment}",
+            topics = "${spring.kafka.topic.name.create-comment}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String createCommentMessage)

@@ -11,18 +11,21 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.andreyszdlv.notificationservice.dto.auth.RegisterCompensationDTO;
+import ru.andreyszdlv.notificationservice.dto.auth.FailureSendRegisterMailDTO;
 
 import java.util.HashMap;
 
 @Configuration
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.producer.bootstrap-servers}")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaBootstrapServers;
 
+    @Value("${spring.kafka.topic.name.failure-send-register-mail}")
+    private String nameTopicFailureSendRegisterMail;
+
     @Bean
-    public ProducerFactory<String, RegisterCompensationDTO> producerFactory(){
+    public ProducerFactory<String, FailureSendRegisterMailDTO> producerFactory(){
         HashMap<String, Object> props = new HashMap<>(3);
 
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
@@ -33,8 +36,8 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, RegisterCompensationDTO> kafkaTemplateRegisterCompensation(
-            ProducerFactory<String, RegisterCompensationDTO> producerFactory
+    public KafkaTemplate<String, FailureSendRegisterMailDTO> kafkaTemplateRegisterCompensation(
+            ProducerFactory<String, FailureSendRegisterMailDTO> producerFactory
     ){
         return new KafkaTemplate<>(producerFactory);
     }
@@ -42,7 +45,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicRegisterCompensation(){
         return TopicBuilder
-                .name("${spring.kafka.topic.name.TopicRegisterCompensation}")
+                .name(nameTopicFailureSendRegisterMail)
                 .partitions(1)
                 .replicas(1)
                 .build();

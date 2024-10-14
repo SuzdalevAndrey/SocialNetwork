@@ -14,6 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import ru.andreyszdlv.userservice.dto.kafkaDto.EditEmailKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafkaDto.EditPasswordKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafkaDto.UserDetailsKafkaDTO;
 
 import java.util.HashMap;
 
@@ -21,14 +22,17 @@ import java.util.HashMap;
 @EnableKafka
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.producer.bootstrap-servers}")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaBootstrapServers;
 
-    @Value("${spring.kafka.topic.nameTopicEditEmail}")
+    @Value("${spring.kafka.topic.name.edit-email}")
     private String nameTopicEditEmail;
 
-    @Value("${spring.kafka.topic.nameTopicEditPassword}")
+    @Value("${spring.kafka.topic.name.edit-password}")
     private String nameTopicEditPassword;
+
+    @Value("${spring.kafka.topic.name.failure-save-user}")
+    private String nameTopicFailureSaveUser;
 
     @Bean
     public ProducerFactory<String, EditEmailKafkaDTO> editEmailProducerFactory() {
@@ -64,6 +68,33 @@ public class KafkaProducerConfig {
             ProducerFactory<String, EditPasswordKafkaDTO> producerFactory
     ) {
         return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public ProducerFactory<String, UserDetailsKafkaDTO> failureSaveUserProducerFactory() {
+        HashMap<String, Object> props = new HashMap<>();
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    @Bean
+    public KafkaTemplate<String, UserDetailsKafkaDTO> failureSaveUserKafkaTemplate(
+            ProducerFactory<String, UserDetailsKafkaDTO> producerFactory
+    ) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public NewTopic newTopicFailureSaveUser(){
+        return TopicBuilder
+                .name(nameTopicFailureSaveUser)
+                .partitions(1)
+                .replicas(1)
+                .build();
     }
 
     @Bean

@@ -1,6 +1,6 @@
 package ru.andreyszdlv.notificationservice.dto.auth;
 
-public record RegisterCompensationDTO(
+public record FailureSendRegisterMailDTO(
         String email
 ){
 }

@@ -5,11 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.userservice.dto.controllerDto.SaveUserRequestDTO;
 import ru.andreyszdlv.userservice.dto.controllerDto.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.dto.controllerDto.UserResponseDTO;
 import ru.andreyszdlv.userservice.service.UserService;
@@ -58,16 +55,6 @@ public class InternalUserController {
         return ResponseEntity.ok(userService.getUserDetailsByEmail(email));
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<String> saveUser(@RequestBody SaveUserRequestDTO user){
-        userService.saveUser(
-                user.name(),
-                user.email(),
-                user.password(),
-                user.role()
-        );
-        return ResponseEntity.ok("Пользователь успешно сохранён");
-    }
 
     @GetMapping("/exists/{email}")
     public ResponseEntity<Boolean> existsUserByEmail(@PathVariable String email){
@@ -77,10 +64,5 @@ public class InternalUserController {
     @GetMapping("/{email}")
     public ResponseEntity<UserResponseDTO> getUserByEmail(@PathVariable String email){
         return ResponseEntity.ok(userService.getUserByUserEmail(email));
-    }
-
-    @GetMapping("/role/{email}")
-    ResponseEntity<String> getUserRoleByEmail(@PathVariable String email){
-        return ResponseEntity.ok(userService.getUserRoleByEmail(email));
     }
 }

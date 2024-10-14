@@ -5,25 +5,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import ru.andreyszdlv.authservice.dto.kafkadto.RegisterCompensationKafkaDTO;
+import ru.andreyszdlv.authservice.dto.kafkadto.FailureSendRegisterMailKafkaDTO;
 import ru.andreyszdlv.authservice.service.RegisterCompensationService;
 
 @Component
 @RequiredArgsConstructor
-public class RegisterCompensationEventListener {
+public class FailureSendRegisterMailEventListener {
 
     private final ObjectMapper mapper;
 
     private final RegisterCompensationService registerCompensationService;
 
     @KafkaListener(
-            topics = "${spring.kafka.topic.name.TopicRegisterCompensation}",
+            topics = "${spring.kafka.topic.name.failure-send-register-mail}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String message) throws JsonProcessingException {
-        RegisterCompensationKafkaDTO registerCompensation = mapper
-                .readValue(message, RegisterCompensationKafkaDTO.class);
+        FailureSendRegisterMailKafkaDTO dto = mapper
+                .readValue(message, FailureSendRegisterMailKafkaDTO.class);
 
-        registerCompensationService.handle(registerCompensation.email());
+        registerCompensationService.handle(dto.email());
     }
 }

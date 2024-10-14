@@ -43,7 +43,7 @@ public class MailGenerateCodeNotificationListener {
             );
         }
         catch (MailException ex){
-            kafkaProducerService.sendRegisterCompensation(user.email());
+            kafkaProducerService.sendFailureRegisterMailEvent(user.email());
         }
     }
 }
