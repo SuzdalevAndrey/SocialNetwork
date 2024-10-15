@@ -1,4 +1,4 @@
-package ru.andreyszdlv.authservice.service;
+package ru.andreyszdlv.authservice.service.compensation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

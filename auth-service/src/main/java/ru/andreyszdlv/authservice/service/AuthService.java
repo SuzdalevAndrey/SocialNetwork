@@ -44,18 +44,19 @@ public class AuthService {
 
     @Transactional
     public void registerUser(RegisterRequestDTO request) {
-        log.info("Executing registerUser method in AuthService for email: {} and name: {}",
+        log.info("Executing registerUser in AuthService for email: {} and name: {}",
                 request.email(),
                 request.name());
 
-        log.info("Checking whether the user is registered with email: {}", request.email());
+        log.info("Checking registered user with email: {}", request.email());
         if(userServiceFeignClient.existsUserByEmail(request.email()).getBody()) {
-            log.error("The user is already registered with email: {}", request.email());
+            log.error("User already registered with email: {}", request.email());
             throw new UserAlreadyRegisteredException("errors.409.user_already_register");
         }
 
+        log.info("Checking user need confirm email: {}", request.email());
         if(pendingUserService.existsUserByEmail(request.email())){
-            log.error("The user need confirm email: {}", request.email());
+            log.error("User need confirm email: {}", request.email());
             throw new UserNeedConfirmException("errors.409.need_confirm_email");
         }
 
@@ -63,41 +64,39 @@ public class AuthService {
         String verificationCode = emailVerificationService
                 .generateAndSaveVerificationCode(request.email());
 
-        log.info("Saving a user to a temporary database");
+        log.info("Save user to temporary database");
         pendingUserService.savePendingUser(request.name(), request.email(), request.password());
 
-        log.info("Sending a message to kafka that contains userEmail: {}", request.email());
+        log.info("Send message to kafka contains userEmail: {} and code", request.email());
         kafkaProducerService.sendRegisterEvent(request.email(), verificationCode);
     }
 
     @Transactional
     public LoginResponseDTO loginUser(LoginRequestDTO request) {
-        log.info("Executing loginUser method in AuthService for email: {}", request.email());
+        log.info("Executing loginUser in AuthService for email: {}", request.email());
 
+        log.info("Checking login user with email: {}", request.email());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
                         request.password()
                 ));
 
-        log.info("Verification of the user existence with email: {}", request.email());
+        log.info("Verification user existence with email: {}", request.email());
         UserResponseDTO user = userServiceFeignClient
-                .getUserByEmail(
-                    request.email()
-                )
+                .getUserByEmail(request.email())
                 .getBody();
 
         log.info("Token generation for user: {}", user.email());
         String token = jwtSecurityService.generateToken(user.email(), user.role().name());
 
-        log.info("RefreshToken generation for userEmail: {}", user.email());
+        log.info("RefreshToken generation for user: {}", user.email());
         String refreshToken = jwtSecurityService.generateRefreshToken(user.email(), user.role().name());
 
         accessAndRefreshJwtService.saveAccessTokenByUserEmail(user.email(), token);
         accessAndRefreshJwtService.saveRefreshTokenByUserEmail(user.email(), refreshToken);
 
-        log.info("LoginUser completed successfully with email: {}", request.email());
-
+        log.info("Login completed successfully with email: {}", request.email());
         kafkaProducerService.sendLoginEvent(user.name(), user.email());
 
         return new LoginResponseDTO(token, refreshToken);
@@ -105,22 +104,28 @@ public class AuthService {
 
     @Transactional
     public RefreshTokenResponseDTO refresh(RefreshTokenRequestDTO request) {
-        log.info("Executing refresh method in AuthService");
+        log.info("Executing refresh in AuthService");
 
         String token = request.refreshToken();
 
         String email = jwtSecurityService.extractEmail(token);
+        log.info("Extract email: {}", email);
 
         String role = jwtSecurityService.extractRole(token);
+        log.info("Extract role: {}", role);
 
+        log.info("Validate token");
         if(jwtSecurityService.validateToken(token)
                 && accessAndRefreshJwtService.getRefreshTokenByUserEmail(email) != null
                 && accessAndRefreshJwtService.getRefreshTokenByUserEmail(email).equals(token)
         ){
+            log.info("Successfully validated token");
 
+            log.info("Generate refresh and access token");
             String accessToken = jwtSecurityService.generateToken(email, role);
             String refreshToken = jwtSecurityService.generateRefreshToken(email, role);
 
+            log.info("Save tokens to cache");
             accessAndRefreshJwtService.saveAccessTokenByUserEmail(email, accessToken);
             accessAndRefreshJwtService.saveRefreshTokenByUserEmail(email, refreshToken);
 
@@ -138,59 +143,70 @@ public class AuthService {
 
     @Transactional
     public void confirmEmail(ConfirmEmailRequestDTO request){
-        log.info("Executing confirmEmail method in AuthService for email: {}", request.email());
+        log.info("Executing confirmEmail in AuthService for email: {}", request.email());
 
         log.info("Comparison verification code with code sent by user");
         if(emailVerificationService.isValidCode(request.email(), request.code())){
-            log.info("The code from user and correct code match");
+            log.info("The code from user is valid");
 
             log.info("Saving the user to a permanent database");
             pendingUserService.savePendingUserInPermanentBD(request.email());
 
             return;
         }
-        log.error("Verifi code and code sent user not match");
+        log.error("Code sent user with email: {} not valid", request.email());
         throw new VerificationCodeNotSuitableException("errors.409.verification_token_is_not_valid");
     }
 
     @Transactional
     public void updateVerificationCode(String userEmail) {
-        log.info("Executing updateVerificationCode method in AuthService for email: {}", userEmail);
+        log.info("Executing updateVerificationCode in AuthService for email: {}", userEmail);
 
+        log.info("Checking register user with email: {}", userEmail);
         if(!pendingUserService.existsUserByEmail(userEmail)) {
             log.error("The user is already registered with email: {}", userEmail);
             throw new RegisterUserNotFoundException("errors.404.email_not_found");
         }
 
-        log.info("Verification code generation");
+        log.info("Verification code generation for email: {}", userEmail);
         String verificationCode = emailVerificationService
                 .generateAndSaveVerificationCode(userEmail);
 
-        log.info("Sending a message to kafka that contains userEmail: {}", userEmail);
+        log.info("Sending message to kafka contains userEmail: {}", userEmail);
         kafkaProducerService.sendRegisterEvent(userEmail, verificationCode);
     }
 
     public Map<String, String> generateDataUserUsingToken(String token) {
+        log.info("Executing generateDataUserUsingToken in AuthService");
 
         String email = jwtSecurityService.extractEmail(token);
+        log.info("Extract email: {}", email);
 
+        log.info("Validate token");
         if(jwtSecurityService.validateToken(token)
                 && accessAndRefreshJwtService.getAccessTokenByUserEmail(email) != null
                 && accessAndRefreshJwtService.getAccessTokenByUserEmail(email).equals(token)
         ){
+            log.info("Token is valid");
+
+            log.info("Generate data user using token");
+
             HashMap<String, String> dataUser = new HashMap<>(2);
 
             dataUser.put("email", email);
 
             String role = jwtSecurityService.extractRole(token);
+            log.info("Extract role: {}", role);
             dataUser.put("role", role);
 
             return dataUser;
         }
-        throw new RuntimeException();
+        throw new ValidateTokenException("errors.409.is_not_valid_token");
     }
 
     public void logout(String email) {
+        log.info("Executing logout in AuthService");
+
         accessAndRefreshJwtService.deleteByUserEmail(email);
     }
 }

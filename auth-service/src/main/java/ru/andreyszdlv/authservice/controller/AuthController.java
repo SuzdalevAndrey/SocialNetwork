@@ -3,6 +3,9 @@ package ru.andreyszdlv.authservice.controller;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -23,6 +26,7 @@ import ru.andreyszdlv.authservice.dto.controllerdto.RegisterRequestDTO;
 import ru.andreyszdlv.authservice.dto.controllerdto.UpdateVerifiCodeRequestDTO;
 import ru.andreyszdlv.authservice.service.AuthService;
 
+import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
@@ -33,9 +37,12 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final MessageSource messageSource;
+
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request,
-                                                        BindingResult bindingResult)
+                                           BindingResult bindingResult,
+                                           Locale locale)
             throws BindException {
 
         log.info("Register user for email: {} and name: {}",
@@ -60,8 +67,14 @@ public class AuthController {
             log.info("User register completed successfully with  email: {} and name: {}",
                     request.email(),
                     request.name());
-            return ResponseEntity.ok("Вам на почту было отправлено" +
-                    " письмо с кодом для подтверждения email");
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(messageSource.getMessage(
+                            "message.ok.register",
+                            null,
+                            "message.ok.register",
+                            locale
+                    ));
         }
     }
 
@@ -118,7 +131,8 @@ public class AuthController {
     @PostMapping("/confirm")
     public ResponseEntity<String> confirmEmail(
             @Valid @RequestBody ConfirmEmailRequestDTO request,
-            BindingResult bindingResult) throws BindException {
+            BindingResult bindingResult,
+            Locale locale) throws BindException {
 
         log.info("Executing confirmEmail method in AuthController");
 
@@ -137,15 +151,23 @@ public class AuthController {
 
             log.info("Confirm email completed successfully");
 
-            return ResponseEntity.ok("Вы успешно подтвердили email," +
-                    " теперь можете входить в систему!");
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(messageSource.getMessage(
+                            "message.ok.confirm_email",
+                            null,
+                            "message.ok.confirm_email",
+                            locale
+                    ));
         }
+
     }
 
     @PatchMapping("/update-verification-code")
     public ResponseEntity<String> updatingVerificationCode(
             @Valid @RequestBody UpdateVerifiCodeRequestDTO request,
-            BindingResult bindingResult)
+            BindingResult bindingResult,
+            Locale locale)
             throws BindException {
 
         log.info("Executing updatingVerificationCode method in AuthController");
@@ -165,7 +187,14 @@ public class AuthController {
 
             log.info("Confirm update verification code successfully");
 
-            return ResponseEntity.ok("Код успешно обновлён, проверяйте почту!");
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(messageSource.getMessage(
+                            "message.ok.update_code",
+                            null,
+                            "message.ok.update_code",
+                            locale
+                    ));
         }
     }
 
@@ -180,8 +209,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("X-User-Email") String email){
+    public ResponseEntity<Void> logout(@RequestHeader("X-User-Email") String email){
         authService.logout(email);
-        return ResponseEntity.ok("Вы успешно вышли из системы");
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 }

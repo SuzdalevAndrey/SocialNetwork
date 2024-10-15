@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.andreyszdlv.authservice.dto.kafkadto.FailureSendRegisterMailKafkaDTO;
-import ru.andreyszdlv.authservice.service.RegisterCompensationService;
+import ru.andreyszdlv.authservice.service.compensation.RegisterCompensationService;
 
 @Component
 @RequiredArgsConstructor

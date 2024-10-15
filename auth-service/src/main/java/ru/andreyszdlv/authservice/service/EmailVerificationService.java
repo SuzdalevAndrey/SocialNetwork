@@ -42,7 +42,8 @@ public class EmailVerificationService {
 
     @Transactional(readOnly = true)
     public boolean isValidCode(String email, String code){
-        return emailVerificationCodeRepository.findByEmail(email)
+        return emailVerificationCodeRepository
+                .findByEmail(email)
                 .orElseThrow(
                         ()->new RegisterUserNotFoundException("errors.404.email_not_found")
                 )

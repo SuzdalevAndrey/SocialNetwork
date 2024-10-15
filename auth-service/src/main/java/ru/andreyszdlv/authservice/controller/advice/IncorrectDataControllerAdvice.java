@@ -24,96 +24,42 @@ public class IncorrectDataControllerAdvice {
 
     private final MessageSource messageSource;
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handleNotFoundUserException(
+    @ExceptionHandler({
+            UsernameNotFoundException.class,
+            RegisterUserNotFoundException.class
+    })
+    public ResponseEntity<ProblemDetail> handleNotFoundException(
             UsernameNotFoundException ex,
             Locale locale) {
 
-        log.error("Executing handleNotFoundUserException method in the IncorrectDataControllerAdvice");
+        log.error("Executing handleNotFoundException method in the IncorrectDataControllerAdvice");
 
         ProblemDetail problemDetail = generateProblemDetail(HttpStatus.NOT_FOUND,
                 ex.getMessage(),
                 locale);
 
-        log.error("UsernameNotFoundException: {}", problemDetail);
+        log.error("NotFoundException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }
 
-    @ExceptionHandler(ValidateTokenException.class)
-    public ResponseEntity<ProblemDetail> handleValidateTokenException(
+    @ExceptionHandler({
+            ValidateTokenException.class,
+            UserAlreadyRegisteredException.class,
+            VerificationCodeNotSuitableException.class,
+            UserNeedConfirmException.class
+    })
+    public ResponseEntity<ProblemDetail> handleConflictException(
             ValidateTokenException ex,
             Locale locale
     ) {
-        log.error("Executing handleValidateTokenException method in the IncorrectDataControllerAdvice");
+        log.error("Executing handleConflictException method in the IncorrectDataControllerAdvice");
 
         ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
                 ex.getMessage(),
                 locale);
 
-        log.error("Token is not valid: {}", problemDetail);
-
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(RegisterUserNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handleRegisterUserNotFoundException(
-            RegisterUserNotFoundException ex,
-            Locale locale){
-        log.error("Executing handleRegisterUserNotFoundException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.NOT_FOUND,
-                ex.getMessage(),
-                locale);
-
-        log.error("RegisterUserNotFound: {}", problemDetail);
-
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(UserAlreadyRegisteredException.class)
-    public ResponseEntity<ProblemDetail> handleUserAlreadyRegisteredException(
-            UserAlreadyRegisteredException ex,
-            Locale locale){
-        log.error("Executing handleUserAlreadyRegisteredException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
-                ex.getMessage(),
-                locale);
-
-        log.error("UserAlreadyRegisteredException: {}", problemDetail);
-
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(UserNeedConfirmException.class)
-    public ResponseEntity<ProblemDetail> handleUserNeedConfirmException(
-            UserNeedConfirmException ex,
-            Locale locale
-    ){
-        log.error("Executing handleUserNeedConfirmException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
-                ex.getMessage(),
-                locale);
-
-        log.error("UserNeedConfirmException: {}", problemDetail);
-
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(VerificationCodeNotSuitableException.class)
-    public ResponseEntity<ProblemDetail> handleVerificationCodeNotSuitableException(
-            VerificationCodeNotSuitableException ex,
-            Locale locale)
-    {
-        log.error("Executing handleVerificationCodeNotSuitableException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
-                ex.getMessage(),
-                locale);
-
-        log.error("VerificationCodeNotSuitableException: {}", problemDetail);
+        log.error("ConflictException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }

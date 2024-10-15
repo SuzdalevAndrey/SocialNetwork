@@ -20,11 +20,11 @@ public class CasheConfig {
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
-        cacheConfigurations.put("",
+        cacheConfigurations.put("accessToken",
                 RedisCacheConfiguration
                         .defaultCacheConfig()
                         .entryTtl(Duration.ofMinutes(15)));
-        cacheConfigurations.put("longLivedCache",
+        cacheConfigurations.put("refreshToken",
                 RedisCacheConfiguration
                         .defaultCacheConfig()
                         .entryTtl(Duration.ofHours(24)));
