@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.andreyszdlv.authservice.api.userservice.UserServiceFeignClient;
-import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserDetailsResponseDTO;
+import ru.andreyszdlv.authservice.dto.feignclient.UserDetailsResponseDTO;
 import ru.andreyszdlv.authservice.model.User;
 
 
@@ -19,12 +19,13 @@ public class UserService {
     private final UserServiceFeignClient userServiceFeignClient;
 
     public UserDetailsService getDetailsService() {
+        log.info("Executing getDetailsService in UserService");
 
         UserDetailsService detailsService = new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String username)
                     throws UsernameNotFoundException {
-                log.info("getDetailsService in getDetailsService");
+                log.info("Load user by email: {}", username);
                 UserDetailsResponseDTO user = userServiceFeignClient
                         .getUserDetailsByUserEmail(username)
                         .getBody();

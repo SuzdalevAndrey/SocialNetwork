@@ -4,8 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -13,12 +13,13 @@ import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
+
 @Service
+@Slf4j
 public class JwtSecurityService {
 
     @Value("${jwt.secret}")
     private String SECRET_KEY;
-
 
     private SecretKey getSigningKey(){
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
@@ -26,6 +27,7 @@ public class JwtSecurityService {
     }
 
     public String generateToken(String email, String role){
+        log.info("Executing generateToken in JwtSecurityService");
         return Jwts.builder()
                 .claims(Map.of("role", role))
                 .subject(email)
@@ -36,6 +38,7 @@ public class JwtSecurityService {
     }
 
     public String generateRefreshToken(String email, String role) {
+        log.info("Executing generateRefreshToken in JwtSecurityService");
         return Jwts.builder()
                 .claims(Map.of("role", role))
                 .subject(email)
@@ -59,10 +62,12 @@ public class JwtSecurityService {
     }
 
     public String extractEmail(String token) {
+        log.info("Extract email from token");
         return extractClaim(token, Claims::getSubject);
     }
 
     public String extractRole(String token) {
+        log.info("Extract role from token");
         return extractAllClaims(token).get("role").toString();
     }
 
@@ -71,6 +76,7 @@ public class JwtSecurityService {
     }
 
     public boolean validateToken(String token) {
+        log.info("Validate token in JwtSecurityService");
         return !extractExpiration(token).before(new Date());
     }
 }

@@ -1,4 +1,4 @@
-package ru.andreyszdlv.authservice.dto.kafkadto;
+package ru.andreyszdlv.authservice.dto.kafka;
 
 import lombok.Builder;
 import ru.andreyszdlv.authservice.enums.ERole;

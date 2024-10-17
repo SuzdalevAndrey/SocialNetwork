@@ -32,7 +32,7 @@ public class IncorrectDataControllerAdvice {
             UsernameNotFoundException ex,
             Locale locale) {
 
-        log.error("Executing handleNotFoundException method in the IncorrectDataControllerAdvice");
+        log.error("Executing handleNotFoundException in IncorrectDataControllerAdvice");
 
         ProblemDetail problemDetail = generateProblemDetail(HttpStatus.NOT_FOUND,
                 ex.getMessage(),
@@ -53,7 +53,7 @@ public class IncorrectDataControllerAdvice {
             ValidateTokenException ex,
             Locale locale
     ) {
-        log.error("Executing handleConflictException method in the IncorrectDataControllerAdvice");
+        log.error("Executing handleConflictException in IncorrectDataControllerAdvice");
 
         ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
                 ex.getMessage(),

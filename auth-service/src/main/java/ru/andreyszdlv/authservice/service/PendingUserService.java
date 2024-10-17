@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.authservice.api.userservice.UserServiceFeignClient;
-import ru.andreyszdlv.authservice.dto.kafkadto.UserDetailsKafkaDTO;
 import ru.andreyszdlv.authservice.enums.ERole;
 import ru.andreyszdlv.authservice.model.PendingUser;
 import ru.andreyszdlv.authservice.repository.PendingUserRepo;
@@ -19,8 +17,6 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class PendingUserService {
 
-    private final UserServiceFeignClient userServiceFeignClient;
-
     private final PendingUserRepo pendingUserRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -29,11 +25,13 @@ public class PendingUserService {
 
     @Transactional(readOnly = true)
     public boolean existsUserByEmail(String email) {
+        log.info("Executing existsUserByEmail in PendingUserService");
         return pendingUserRepository.existsByEmail(email);
     }
 
     @Transactional
     public void savePendingUser(String name, String email, String password){
+        log.info("Executing savePendingUser in PendingUserService with email: {}", email);
 
         PendingUser user = new PendingUser();
 
@@ -43,30 +41,31 @@ public class PendingUserService {
         user.setRole(ERole.USER);
         user.setCreatedAt(LocalDateTime.now());
 
+        log.info("Saving pending user with email: {}", email);
         pendingUserRepository.save(user);
     }
 
     @Transactional
     public void savePendingUserInPermanentBD(String email){
+        log.info("Executing savePendingUserInPermanentBD in PendingUserService with email: {}",
+                email);
 
-        log.info("Getting a user from a table pendings user by email: {}", email);
-
+        log.info("Getting user from pending user table by email: {}", email);
         PendingUser pendingUser = pendingUserRepository
                 .findByEmail(email)
                 .orElseThrow(
                         ()->new NoSuchElementException("errors.404.email_not_found")
                 );
 
+        log.info("Delete user from pending user table by email: {}", email);
         pendingUserRepository.deleteByEmail(email);
 
+        log.info("Send user in kafka for save in permanent BD");
         kafkaProducerService.sendSaveUserEvent(
-                UserDetailsKafkaDTO
-                        .builder()
-                        .name(pendingUser.getName())
-                        .email(pendingUser.getEmail())
-                        .password(pendingUser.getPassword())
-                        .role(pendingUser.getRole())
-                        .build()
+                pendingUser.getName(),
+                pendingUser.getEmail(),
+                pendingUser.getPassword(),
+                pendingUser.getRole()
         );
 
     }

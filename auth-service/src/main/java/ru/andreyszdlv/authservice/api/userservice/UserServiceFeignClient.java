@@ -4,8 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserDetailsResponseDTO;
-import ru.andreyszdlv.authservice.dto.userservicefeigndto.UserResponseDTO;
+import ru.andreyszdlv.authservice.dto.feignclient.UserDetailsResponseDTO;
+import ru.andreyszdlv.authservice.dto.feignclient.UserResponseDTO;
 
 @FeignClient(name = "user-service", path = "/internal/user")
 public interface UserServiceFeignClient {

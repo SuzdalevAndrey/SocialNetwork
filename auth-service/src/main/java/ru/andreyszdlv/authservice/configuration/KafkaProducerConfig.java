@@ -12,9 +12,9 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.andreyszdlv.authservice.dto.kafkadto.UserDetailsKafkaDTO;
-import ru.andreyszdlv.authservice.dto.kafkadto.RegisterUserKafkaDTO;
-import ru.andreyszdlv.authservice.dto.kafkadto.LoginUserKafkaDTO;
+import ru.andreyszdlv.authservice.dto.kafka.UserDetailsKafkaDTO;
+import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
+import ru.andreyszdlv.authservice.dto.kafka.LoginUserKafkaDTO;
 
 import java.util.HashMap;
 import java.util.Map;

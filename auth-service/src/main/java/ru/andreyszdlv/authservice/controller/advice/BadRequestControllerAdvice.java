@@ -26,7 +26,7 @@ public class BadRequestControllerAdvice {
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(final BindException ex, Locale locale) {
-        log.error("Executing handleBindException method in the BadRequestControllerAdvice");
+        log.error("Executing handleBindException in BadRequestControllerAdvice");
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
