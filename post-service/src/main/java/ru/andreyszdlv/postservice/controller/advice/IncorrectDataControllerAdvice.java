@@ -32,7 +32,7 @@ public class IncorrectDataControllerAdvice {
     @ExceptionHandler(FeignException.FeignClientException.class)
     public ResponseEntity<ProblemDetail> handleFeignException(FeignException ex,
                                                               Locale locale){
-        log.error("Executing handleFeignException method in the IncorrectDataControllerAdvice");
+        log.error("Executing handleFeignException");
 
         ProblemDetail problemDetail = createProbemDetail(HttpStatus.valueOf(ex.status()),
                 ex.getMessage(),
@@ -43,77 +43,43 @@ public class IncorrectDataControllerAdvice {
         return ResponseEntity.of(problemDetail).build();
     }
 
-    @ExceptionHandler(NoSuchPostException.class)
-    public ResponseEntity<ProblemDetail> handleNoSuchPostException(NoSuchPostException ex,
-                                                                   Locale locale){
-        log.error("Executing handleNoSuchPostException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = createProbemDetail(HttpStatus.NOT_FOUND,
-                ex.getMessage(),
-                locale);
-
-        log.error("NoSuchPostException: {}", problemDetail);
-
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(AlreadyLikedException.class)
-    public ResponseEntity<ProblemDetail> handleAlreadyLikedException(AlreadyLikedException ex,
-                                                                     Locale locale){
-        log.error("Executing handleAlreadyLikedException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = createProbemDetail(HttpStatus.CONFLICT,
-                ex.getMessage(),
-                locale);
-
-        log.error("AlreadyLikedException: {}", problemDetail);
-
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(NoLikedPostThisUserException.class)
-    public ResponseEntity<ProblemDetail> handleNoLikedPostThisUserException(
-            NoLikedPostThisUserException ex,
+    @ExceptionHandler({
+            NoSuchPostException.class,
+            NoLikedPostThisUserException.class,
+            NoSuchCommentException.class
+    })
+    public ResponseEntity<ProblemDetail> handleNotFoundException(
+            RuntimeException ex,
             Locale locale){
+        log.error("Executing handleNotFoundException");
 
-        log.error("Executing handleNoLikedPostThisUserException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = createProbemDetail(HttpStatus.NOT_FOUND,
+        ProblemDetail problemDetail = createProbemDetail(
+                HttpStatus.NOT_FOUND,
                 ex.getMessage(),
-                locale);
+                locale
+        );
 
-        log.error("NoLikedPostThisUserException: {}", problemDetail);
+        log.error("NotFoundException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }
 
-    @ExceptionHandler(AnotherUsersCommentException.class)
-    public ResponseEntity<ProblemDetail> handleAnotherUsersCommentException(
-            AnotherUsersCommentException ex,
+    @ExceptionHandler({
+            AlreadyLikedException.class,
+            AnotherUsersCommentException.class
+    })
+    public ResponseEntity<ProblemDetail> handleConflictException(
+            RuntimeException ex,
             Locale locale){
+        log.error("Executing handleConflictException");
 
-        log.error("Executing handleAnotherUsersCommentException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = createProbemDetail(HttpStatus.CONFLICT,
+        ProblemDetail problemDetail = createProbemDetail(
+                HttpStatus.CONFLICT,
                 ex.getMessage(),
-                locale);
+                locale
+        );
 
-        log.error("handleAnotherUsersCommentException: {}", problemDetail);
-
-        return ResponseEntity.of(problemDetail).build();
-    }
-
-    @ExceptionHandler(NoSuchCommentException.class)
-    public ResponseEntity<ProblemDetail> handleNoSuchCommentException(NoSuchCommentException ex,
-                                                                      Locale locale){
-
-        log.error("Executing handleNoSuchCommentException method in the IncorrectDataControllerAdvice");
-
-        ProblemDetail problemDetail = createProbemDetail(HttpStatus.NOT_FOUND,
-                ex.getMessage(),
-                locale);
-
-        log.error("NoSuchCommentException: {}", problemDetail);
+        log.error("ConflictException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }
@@ -127,7 +93,8 @@ public class IncorrectDataControllerAdvice {
                                 null,
                                 message,
                                 locale
-                        )).orElse("errors")
+                        )
+                ).orElse("errors")
         );
     }
 }

@@ -29,7 +29,7 @@ public class IncorrectDataControllerAdvice {
             RegisterUserNotFoundException.class
     })
     public ResponseEntity<ProblemDetail> handleNotFoundException(
-            UsernameNotFoundException ex,
+            RuntimeException ex,
             Locale locale) {
 
         log.error("Executing handleNotFoundException in IncorrectDataControllerAdvice");
@@ -50,7 +50,7 @@ public class IncorrectDataControllerAdvice {
             UserNeedConfirmException.class
     })
     public ResponseEntity<ProblemDetail> handleConflictException(
-            ValidateTokenException ex,
+            RuntimeException ex,
             Locale locale
     ) {
         log.error("Executing handleConflictException in IncorrectDataControllerAdvice");

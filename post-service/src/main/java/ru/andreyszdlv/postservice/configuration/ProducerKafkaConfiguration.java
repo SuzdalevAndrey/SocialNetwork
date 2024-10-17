@@ -12,8 +12,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.andreyszdlv.postservice.dto.kafkaDto.CreateCommentKafkaDTO;
-import ru.andreyszdlv.postservice.dto.kafkaDto.CreateLikeKafkaDTO;
+import ru.andreyszdlv.postservice.dto.kafka.CreateCommentKafkaDTO;
+import ru.andreyszdlv.postservice.dto.kafka.CreateLikeKafkaDTO;
 
 import java.util.HashMap;
 
