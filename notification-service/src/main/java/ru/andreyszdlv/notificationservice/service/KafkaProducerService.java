@@ -9,7 +9,7 @@ import ru.andreyszdlv.notificationservice.dto.auth.FailureSendRegisterMailDTO;
 @Service
 @RequiredArgsConstructor
 public class KafkaProducerService {
-    @Value("${spring.kafka.topic.name.failure-send-register-mail}")
+    @Value("${spring.kafka.producer.topic.name.failure-send-register-mail}")
     private String nameTopicFailureSendRegisterMail;
 
     private final KafkaTemplate<String, FailureSendRegisterMailDTO> kafkaTemplateMailFailure;

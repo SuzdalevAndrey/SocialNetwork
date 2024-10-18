@@ -20,7 +20,7 @@ public class PendingUserCleanupService {
     @Transactional
     @Scheduled(fixedRate = 3600000)
     public void removeOldUser(){
-        log.info("Executing removeOldUser in PendingUserCleanupService");
+        log.info("Executing removeOldUser");
 
         LocalDateTime cutOffTime = LocalDateTime
                 .now()

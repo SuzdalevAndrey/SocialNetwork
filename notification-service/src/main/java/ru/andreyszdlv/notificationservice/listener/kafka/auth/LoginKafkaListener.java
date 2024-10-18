@@ -21,7 +21,7 @@ public class LoginKafkaListener {
     private final ApplicationEventPublisher publisher;
 
     @KafkaListener(
-            topics = "${spring.kafka.topic.name.login-user}",
+            topics = "${spring.kafka.consumer.topic.name.login-user}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String message) throws JsonProcessingException {

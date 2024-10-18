@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
+import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -23,36 +25,36 @@ public class IncorrectDataControllerAdvice {
 
     private final MessageSource messageSource;
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ProblemDetail> handleNotFoundUserException(
-            final NoSuchElementException ex,
+    @ExceptionHandler(NoSuchUserException.class)
+    public ResponseEntity<ProblemDetail> handleNotFoundException(
+            final NoSuchUserException ex,
             Locale locale) {
 
-        log.error("The method handleNotFoundUserException in the IncorrectDataControllerAdvice");
+        log.error("Executing handleNotFoundException");
 
         ProblemDetail problemDetail = createProbemDetail(
                 HttpStatus.NOT_FOUND,
                 ex.getMessage(),
                 locale);
 
-        log.error("NoSuchElementException: ", ex);
+        log.error("NotFoundException: ", ex);
 
         return ResponseEntity.of(problemDetail).build();
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ProblemDetail> handleDifferentPasswordsException(
-            final BadCredentialsException ex,
+    @ExceptionHandler(DifferentPasswordsException.class)
+    public ResponseEntity<ProblemDetail> handleConflictException(
+            final DifferentPasswordsException ex,
             Locale locale) {
 
-        log.error("The method handleDifferentPasswordsException in the IncorrectDataControllerAdvice");
+        log.error("Executing handleConflictException");
 
         ProblemDetail problemDetail = createProbemDetail(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.CONFLICT,
                 ex.getMessage(),
                 locale);
 
-        log.error("Password different: " + ex);
+        log.error("ConflictException " + ex);
 
         return ResponseEntity.of(problemDetail).build();
     }

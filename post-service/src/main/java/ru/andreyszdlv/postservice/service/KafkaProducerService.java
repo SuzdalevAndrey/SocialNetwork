@@ -12,10 +12,10 @@ import ru.andreyszdlv.postservice.dto.kafka.CreateLikeKafkaDTO;
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducerService {
-    @Value("${spring.kafka.topic.name.create-like}")
+    @Value("${spring.kafka.producer.topic.name.create-like}")
     private String nameTopicCreateLike;
 
-    @Value("${spring.kafka.topic.name.create-comment}")
+    @Value("${spring.kafka.producer.topic.name.create-comment}")
     private String nameTopicCreateComment;
 
     private final KafkaTemplate<String, CreateLikeKafkaDTO> kafkaTemplateCreateLike;

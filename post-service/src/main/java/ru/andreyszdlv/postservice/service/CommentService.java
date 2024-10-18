@@ -9,6 +9,7 @@ import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.model.Comment;
+import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.CommentRepo;
 import ru.andreyszdlv.postservice.repository.PostRepo;
 
@@ -87,17 +88,18 @@ public class CommentService {
     public void deleteComment(long commentId, String userEmail) {
         log.info("Executing deleteComment for commentId: {}", commentId);
 
-        if(!commentRepository
-                .findById(commentId)
+        log.info("Getting a comment by id: {}", commentId);
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(
-                        ()-> new NoSuchCommentException("errors.404.comment_not_found")
-                )
-                .getUserId()
-                .equals(userServiceFeignClient
-                        .getUserIdByUserEmail(userEmail)
-                        .getBody()
-                )
-        ){
+                        ()->new NoSuchCommentException("errors.404.comment_not_found")
+                );
+
+        log.info("Checking this user with email: {} create comment", userEmail);
+        if(!userEmail.equals(
+                userServiceFeignClient.getUserEmailByUserId(
+                        comment.getUserId()
+                ).getBody()
+        )){
             log.error("Comment does not belong user");
             throw new AnotherUsersCommentException("errors.409.another_user_comment");
         }
@@ -120,11 +122,11 @@ public class CommentService {
                 );
 
         log.info("Checking this user create comment");
-        if(!comment.getUserId().equals(
-                userServiceFeignClient
-                .getUserIdByUserEmail(userEmail)
-                .getBody())
-        ){
+        if(!userEmail.equals(
+                userServiceFeignClient.getUserEmailByUserId(
+                        comment.getUserId()
+                ).getBody()
+        )){
             log.error("Comment does not belong user");
             throw new AnotherUsersCommentException("errors.409.another_user_comment");
         }

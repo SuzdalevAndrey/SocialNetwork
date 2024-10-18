@@ -19,7 +19,7 @@ public class CreateLikeKafkaListener {
     private final ApplicationEventPublisher publisher;
 
     @KafkaListener(
-            topics = "${spring.kafka.topic.name.create-like}",
+            topics = "${spring.kafka.consumer.topic.name.create-like}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String createLikeMessage)

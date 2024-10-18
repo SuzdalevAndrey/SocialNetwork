@@ -66,18 +66,20 @@ public class PostService {
                 );
 
         log.info("Checking this user with email: {} create post", userEmail);
-        if(userEmail.equals(
+        if(!userEmail.equals(
                 userServiceFeignClient.getUserEmailByUserId(
                         post.getUserId()
-                ).getBody())
-        ) {
-            log.info("Check successful, this user create post");
-
-            post.setContent(content);
-
-            log.info("Successful update post with postId: {}, content: {}", id, content);
+                ).getBody()
+        )) {
+            log.error("This user with email: {} no create post", userEmail);
+            throw new AnotherUserCreatePostException("errors.409.another_user_post");
         }
-        throw new AnotherUserCreatePostException("errors.409.another_user_post");
+
+        log.info("Check successful, this user create post");
+
+        post.setContent(content);
+
+        log.info("Successful update post with postId: {}, content: {}", id, content);
     }
 
     @Transactional
@@ -91,20 +93,20 @@ public class PostService {
                 );
 
         log.info("Checking this user with email: {} create post", userEmail);
-        if(userEmail.equals(
+        if(!userEmail.equals(
                 userServiceFeignClient.getUserEmailByUserId(
                         post.getUserId()
-                ).getBody())
-        ) {
-
-            log.info("Deleting post with postId: {}", postId);
-            postRepository.deleteById(postId);
+                ).getBody()
+        )) {
+            log.error("This user with email: {} no create post", userEmail);
+            throw new AnotherUserCreatePostException("errors.409.another_user_post");
         }
 
-        throw new AnotherUserCreatePostException("errors.409.another_user_post");
+        log.info("Deleting post with postId: {}", postId);
+        postRepository.deleteById(postId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Post getPostByPostId(long postId) {
         log.info("Executing getPostByPostId for postId: {}", postId);
 

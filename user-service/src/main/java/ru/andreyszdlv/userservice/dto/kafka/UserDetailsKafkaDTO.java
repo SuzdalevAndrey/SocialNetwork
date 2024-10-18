@@ -1,7 +1,7 @@
-package ru.andreyszdlv.userservice.dto.kafkaDto;
+package ru.andreyszdlv.userservice.dto.kafka;
 
 import lombok.Builder;
-import ru.andreyszdlv.userservice.security.enums.ERole;
+import ru.andreyszdlv.userservice.enums.ERole;
 
 @Builder
 public record UserDetailsKafkaDTO(

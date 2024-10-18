@@ -15,13 +15,13 @@ import ru.andreyszdlv.authservice.enums.ERole;
 @Slf4j
 public class KafkaProducerService {
 
-    @Value("${spring.kafka.topic.name.login-user}")
+    @Value("${spring.kafka.producer.topic.name.login-user}")
     private String nameTopicLoginUser;
 
-    @Value("${spring.kafka.topic.name.register-user}")
+    @Value("${spring.kafka.producer.topic.name.register-user}")
     private String nameTopicRegisterUser;
 
-    @Value("${spring.kafka.topic.name.save-user}")
+    @Value("${spring.kafka.producer.topic.name.save-user}")
     private String nameTopicSaveUser;
 
     private final KafkaTemplate<String, LoginUserKafkaDTO> kafkaTemplateLogin;

@@ -17,7 +17,7 @@ public class FailureSaveUserEventListener {
     private final ObjectMapper mapper;
 
     @KafkaListener(
-            topics = "${spring.kafka.topic.name.failure-save-user}",
+            topics = "${spring.kafka.consumer.topic.name.failure-save-user}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String messageUser) throws JsonProcessingException {

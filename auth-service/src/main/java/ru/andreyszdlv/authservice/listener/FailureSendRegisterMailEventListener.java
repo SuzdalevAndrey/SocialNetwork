@@ -17,7 +17,7 @@ public class FailureSendRegisterMailEventListener {
     private final RegisterCompensationService registerCompensationService;
 
     @KafkaListener(
-            topics = "${spring.kafka.topic.name.failure-send-register-mail}",
+            topics = "${spring.kafka.consumer.topic.name.failure-send-register-mail}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String message) throws JsonProcessingException {

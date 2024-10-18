@@ -19,7 +19,7 @@ public class VerificationCodeCleanupService {
     @Transactional
     @Scheduled(fixedRate = 300000)
     public void removeExpiredVerificationCodes(){
-        log.info("Executing removeExpiredVerificationCodes in VerificationCodeCleanupService");
+        log.info("Executing removeExpiredVerificationCodes");
 
         LocalDateTime cutOffTime = LocalDateTime
                 .now();

@@ -21,7 +21,7 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaBootstrapServers;
 
-    @Value("${spring.kafka.topic.name.failure-send-register-mail}")
+    @Value("${spring.kafka.producer.topic.name.failure-send-register-mail}")
     private String nameTopicFailureSendRegisterMail;
 
     @Bean

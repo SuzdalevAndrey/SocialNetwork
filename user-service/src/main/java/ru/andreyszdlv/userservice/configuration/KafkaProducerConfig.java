@@ -12,9 +12,9 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import ru.andreyszdlv.userservice.dto.kafkaDto.EditEmailKafkaDTO;
-import ru.andreyszdlv.userservice.dto.kafkaDto.EditPasswordKafkaDTO;
-import ru.andreyszdlv.userservice.dto.kafkaDto.UserDetailsKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 
 import java.util.HashMap;
 
@@ -25,13 +25,13 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaBootstrapServers;
 
-    @Value("${spring.kafka.topic.name.edit-email}")
+    @Value("${spring.kafka.producer.topic.name.edit-email}")
     private String nameTopicEditEmail;
 
-    @Value("${spring.kafka.topic.name.edit-password}")
+    @Value("${spring.kafka.producer.topic.name.edit-password}")
     private String nameTopicEditPassword;
 
-    @Value("${spring.kafka.topic.name.failure-save-user}")
+    @Value("${spring.kafka.producer.topic.name.failure-save-user}")
     private String nameTopicFailureSaveUser;
 
     @Bean
