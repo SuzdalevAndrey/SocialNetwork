@@ -112,12 +112,14 @@ public class CommentService {
     public void updateComment(long commentId, String content, String userEmail) {
         log.info("Executing updateComment for commentId: {} and newContent: {}", commentId, content);
 
+        log.info("Checking exists comment by id: {}", commentId);
         Comment comment = commentRepository
                 .findById(commentId)
                 .orElseThrow(
                         ()->new NoSuchCommentException("errors.404.comment_not_found")
                 );
 
+        log.info("Checking this user create comment");
         if(!comment.getUserId().equals(
                 userServiceFeignClient
                 .getUserIdByUserEmail(userEmail)

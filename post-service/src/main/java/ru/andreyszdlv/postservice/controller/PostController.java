@@ -76,7 +76,7 @@ public class PostController {
         }
 
         log.info("Validation successful, creating post with content: {}", request.content());
-        postService.createPost(request.content(), userEmail);
+        postService.createPost(userEmail, request.content());
 
         log.info("Post create completed successfully with content: {}", request.content());
         return ResponseEntity
@@ -113,7 +113,7 @@ public class PostController {
         log.info("Validation successful, updating post with postId: {}, newContent: {}",
                 request.postId(),
                 request.content());
-        postService.updatePost(request.postId(), request.content(), userEmail);
+        postService.updatePost(userEmail, request.postId(), request.content());
 
         log.info("Post update successfully with postId: {}, newContent: {}",
                 request.postId(),
@@ -136,7 +136,7 @@ public class PostController {
                                            @RequestHeader("X-User-Email") String userEmail){
 
         log.info("Executing deletePost for postId: {}", id);
-        postService.deletePost(id, userEmail);
+        postService.deletePost(userEmail, id);
 
         log.info("Post delete successfully with postId: {}", id);
         return ResponseEntity.noContent().build();

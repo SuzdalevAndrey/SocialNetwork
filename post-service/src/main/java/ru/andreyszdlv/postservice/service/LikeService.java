@@ -27,19 +27,19 @@ public class LikeService {
 
     @Transactional
     public void createLike(long postId, String userEmail){
-        log.info("Executing createLike method for postId: {}", postId);
+        log.info("Executing createLike for postId: {}", postId);
 
         if(!postRepository.existsById(postId)) {
             log.error("Post no exists with postId: {}", postId);
             throw new NoSuchPostException("errors.404.post_not_found");
         }
 
-        log.info("Getting a userId by email");
+        log.info("Getting a userId by email: {}", userEmail);
         long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
-        log.info("Successful get userId by email");
+        log.info("Successful get userId: {} by email: {}", userId, userEmail);
 
         if(likeRepository.existsByPostIdAndUserId(postId, userId)){
-            log.error("A user with userId: {} already liked post with postId: {}", userId, postId);
+            log.error("User with userId: {} already liked post with postId: {}", userId, postId);
             throw new AlreadyLikedException("errors.409.already_liked_post");
         }
 
@@ -48,20 +48,27 @@ public class LikeService {
         like.setUserId(userId);
         like.setPostId(postId);
 
-        log.info("Saving a like post with postId: {} and userId: {}", postId, userId);
+        log.info("Saving like post with postId: {} and userId: {}", postId, userId);
         likeRepository.save(like);
 
-        log.info("Successful save a like post with postId: {} and userId: {}", postId, userId);
-
+        log.info("Getting userId author post by postId: {}", postId);
         Long userIdAuthorPost = postRepository
                 .findById(postId)
                 .orElseThrow(
                         ()->new NoSuchPostException("errors.404.post_not_found")
-                ).getUserId();
+                )
+                .getUserId();
 
+        log.info("Getting email author post by userId: {}", userIdAuthorPost);
         String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
+
+        log.info("Getting name author like by email: {}", userEmail);
         String nameAuthorLike = userServiceFeignClient.getNameByUserEmail(userEmail).getBody();
 
+        log.info("Send data email: {}, nameAuthorLike: {} in kafka for create like event",
+                email,
+                nameAuthorLike
+        );
         kafkaProducerService.sendCreateLikeEvent(
                 email,
                 nameAuthorLike
@@ -70,24 +77,22 @@ public class LikeService {
 
     @Transactional
     public void deleteLike(long postId, String userEmail) {
-        log.info("Executing deleteLike method for postId: {}", postId);
+        log.info("Executing deleteLike for postId: {}", postId);
 
         if(!postRepository.existsById(postId)) {
             log.error("Post no exists with postId: {}", postId);
             throw new NoSuchPostException("errors.404.post_not_found");
         }
 
-        log.info("Getting a userId by email");
+        log.info("Getting userId by email: {}", userEmail);
         long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
-        log.info("Successful get userId by email");
 
-        log.info("Deleting a like post with postId: {} and userId: {}", postId, userId);
+        log.info("Deleting like post with postId: {} and userId: {}", postId, userId);
         if (likeRepository.deleteByPostIdAndUserId(postId, userId) == 0) {
-
-            log.error("The user with userId: {} not like post with postId: {}", userId, postId);
+            log.error("User with userId: {} not like post with postId: {}", userId, postId);
             throw new NoLikedPostThisUserException("errors.404.no_liked_post");
         }
 
-        log.info("Successful delete a like post with postId: {} and userId: {}", postId, userId);
+        log.info("Successful delete like post with postId: {} and userId: {}", postId, userId);
     }
 }

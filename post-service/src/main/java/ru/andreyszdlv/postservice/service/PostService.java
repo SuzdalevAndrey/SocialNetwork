@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.exception.AnotherUserCreatePostException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.PostRepo;
@@ -23,30 +24,27 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<Post> getPostsByUserEmail(String userEmail) {
-        log.info("Executing getPostsByUserEmail method");
+        log.info("Executing getPostsByUserEmail for user email: {}", userEmail);
 
-        log.info("Getting a userId by email");
+        log.info("Getting a userId by email: {}", userEmail);
         long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
 
-        log.info("Successful get userId by email");
-
-        log.info("Getting List<Post> with userId: {}", userId);
+        log.info("Getting List<Post> for userId: {}", userId);
         List<Post> responseList = postRepository.findAllByUserId(userId);
 
-        log.info("Successful get List<Post> with userId: {}", userId);
+        log.info("Successful getPostsByUserEmail for user email: {}", userEmail);
         return responseList;
     }
 
     @Transactional
-    public Post createPost(String content, String userEmail) {
+    public Post createPost(String userEmail, String content) {
 
-        log.info("Executing createPost method for content: {}", content);
+        log.info("Executing createPost for content: {}", content);
 
-        log.info("Getting a userId by email");
+        log.info("Getting a userId by email: {}", userEmail);
         long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
 
-        log.info("Successful get userId: {} by email", userId);
-
+        log.info("Creating new post for userId: {} and content: {}", userId, content);
         Post post = new Post();
         post.setContent(content);
         post.setDateCreate(LocalDateTime.now());
@@ -58,58 +56,33 @@ public class PostService {
     }
 
     @Transactional
-    public void updatePost(long id, String content, String userEmail) {
-        log.info("Executing updatePost method for postId: {}, content: {}", id,  content);
+    public void updatePost(String userEmail, long id, String content) {
+        log.info("Executing updatePost for postId: {}, content: {}", id,  content);
 
         log.info("Getting a post by postId: {}", id);
         Post post = postRepository.findById(id)
                 .orElseThrow(
                         ()->new NoSuchPostException("errors.404.post_not_found")
                 );
-        log.info("Successful get post by postId: {}", id);
 
+        log.info("Checking this user with email: {} create post", userEmail);
         if(userEmail.equals(
                 userServiceFeignClient.getUserEmailByUserId(
                         post.getUserId()
                 ).getBody())
         ) {
-
+            log.info("Check successful, this user create post");
 
             post.setContent(content);
 
             log.info("Successful update post with postId: {}, content: {}", id, content);
         }
-        throw new RuntimeException();
+        throw new AnotherUserCreatePostException("errors.409.another_user_post");
     }
 
     @Transactional
-    public void deletePost(long id, String userEmail) {
-        log.info("Executing deletePost method for postId: {}", id);
-
-        log.info("Getting a post by postId: {}", id);
-        Post post = postRepository.findById(id)
-                .orElseThrow(
-                        ()->new NoSuchPostException("errors.404.post_not_found")
-                );
-        log.info("Successful get post by postId: {}", id);
-
-        if(userEmail.equals(
-                userServiceFeignClient.getUserEmailByUserId(
-                        post.getUserId()
-                ).getBody())
-        ) {
-
-            postRepository.deleteById(id);
-
-            log.info("Successful delete post with postId: {}", id);
-        }
-
-        throw new RuntimeException();
-    }
-
-    @Transactional(readOnly = true)
-    public Post getPostByPostId(long postId) {
-        log.info("Executing getPostByPostId method for postId: {}", postId);
+    public void deletePost(String userEmail, long postId) {
+        log.info("Executing deletePost for postId: {}", postId);
 
         log.info("Getting a post by postId: {}", postId);
         Post post = postRepository.findById(postId)
@@ -117,9 +90,33 @@ public class PostService {
                         ()->new NoSuchPostException("errors.404.post_not_found")
                 );
 
+        log.info("Checking this user with email: {} create post", userEmail);
+        if(userEmail.equals(
+                userServiceFeignClient.getUserEmailByUserId(
+                        post.getUserId()
+                ).getBody())
+        ) {
+
+            log.info("Deleting post with postId: {}", postId);
+            postRepository.deleteById(postId);
+        }
+
+        throw new AnotherUserCreatePostException("errors.409.another_user_post");
+    }
+
+    @Transactional(readOnly = true)
+    public Post getPostByPostId(long postId) {
+        log.info("Executing getPostByPostId for postId: {}", postId);
+
+        log.info("Getting a post by postId: {}", postId);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(
+                        ()->new NoSuchPostException("errors.404.post_not_found")
+                );
+
+        log.info("Update number views post with postId: {}", postId);
         post.setNumberViews(post.getNumberViews() + 1);
 
-        log.info("Successful getPostByPostId with postId: {}", postId);
         return post;
     }
 }

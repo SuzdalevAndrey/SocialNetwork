@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
+import ru.andreyszdlv.postservice.exception.AnotherUserCreatePostException;
 import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
@@ -66,7 +67,8 @@ public class IncorrectDataControllerAdvice {
 
     @ExceptionHandler({
             AlreadyLikedException.class,
-            AnotherUsersCommentException.class
+            AnotherUsersCommentException.class,
+            AnotherUserCreatePostException.class
     })
     public ResponseEntity<ProblemDetail> handleConflictException(
             RuntimeException ex,
