@@ -22,6 +22,9 @@ public class MailEditPasswordNotificationListener {
 
     @EventListener
     public void handle(EditPasswordDTO editPasswordDTO){
+        log.info("Executing handle change password event for user: {}",
+                editPasswordDTO.email());
+
         Locale locale = Locale.getDefault();
 
         String header = localizationService.getLocalizedMessage(
@@ -34,6 +37,7 @@ public class MailEditPasswordNotificationListener {
                 locale
         );
 
+        log.info("Sending change password event for user: {}", editPasswordDTO.email());
         mailSender.send(
                 editPasswordDTO.email(),
                 header,

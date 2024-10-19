@@ -22,8 +22,9 @@ public class CreateCommentKafkaListener {
             topics = "${spring.kafka.consumer.topic.name.create-comment}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void listen(String createCommentMessage)
-            throws JsonProcessingException {
+    public void listen(String createCommentMessage) throws JsonProcessingException {
+        log.info("Executing listen message in kafka");
+
         CreateCommentDTO createCommentDTO = mapper.readValue(
                 createCommentMessage,
                 CreateCommentDTO.class);

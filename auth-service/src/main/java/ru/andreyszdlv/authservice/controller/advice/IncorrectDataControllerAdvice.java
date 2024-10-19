@@ -14,6 +14,7 @@ import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
 import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
+import ru.andreyszdlv.authservice.service.LocalizationService;
 
 import java.util.Locale;
 
@@ -22,7 +23,7 @@ import java.util.Locale;
 @AllArgsConstructor
 public class IncorrectDataControllerAdvice {
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @ExceptionHandler({
             UsernameNotFoundException.class,
@@ -69,9 +70,7 @@ public class IncorrectDataControllerAdvice {
                                                 Locale locale){
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 status,
-                messageSource.getMessage(
-                        message,
-                        null,
+                localizationService.getLocalizedMessage(
                         message,
                         locale
                 )

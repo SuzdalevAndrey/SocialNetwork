@@ -20,16 +20,16 @@ public class EditPasswordKafkaListener {
 
     @KafkaListener(topics = "${spring.kafka.consumer.topic.name.edit-password}",
             groupId = "${spring.kafka.consumer.group-id}")
-    public void listener(String editPasswordMessage)
-            throws JsonProcessingException {
+    public void listener(String editPasswordMessage) throws JsonProcessingException {
+        log.info("Executing listen message in kafka");
 
-        EditPasswordDTO editPasswordDTO = mapper.readValue(
+        EditPasswordDTO editPassword = mapper.readValue(
                 editPasswordMessage,
                 EditPasswordDTO.class);
 
-        publisher.publishEvent(editPasswordDTO);
+        publisher.publishEvent(editPassword);
 
-        log.info("Edit password user with email: {}", editPasswordDTO.email());
+        log.info("Edit password user with email: {}", editPassword.email());
     }
 
 }

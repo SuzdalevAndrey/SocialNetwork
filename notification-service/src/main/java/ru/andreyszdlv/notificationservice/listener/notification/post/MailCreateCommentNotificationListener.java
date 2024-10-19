@@ -21,6 +21,9 @@ public class MailCreateCommentNotificationListener {
 
     @EventListener
     public void handle(CreateCommentDTO createCommentDTO){
+        log.info("Executing handle create comment event for email author post: {}",
+                createCommentDTO.email());
+
         Locale locale = Locale.getDefault();
 
         String header = localizationService.getLocalizedMessage(
@@ -33,10 +36,12 @@ public class MailCreateCommentNotificationListener {
                 locale
         );
 
+        log.info("Sending create comment event email to email author post: {}",
+                createCommentDTO.email());
         mailSender.send(
                 createCommentDTO.email(),
                 String.format(header, createCommentDTO.nameCommentAuthor()),
-                String.format(body,createCommentDTO.content())
+                String.format(body, createCommentDTO.content())
         );
     }
 }

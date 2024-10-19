@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.postservice.dto.controller.post.CreatePostRequestDTO;
 import ru.andreyszdlv.postservice.dto.controller.post.UpdatePostRequestDTO;
 import ru.andreyszdlv.postservice.model.Post;
+import ru.andreyszdlv.postservice.service.LocalizationService;
 import ru.andreyszdlv.postservice.service.PostService;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class PostController {
 
     private final PostService postService;
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @GetMapping
     public ResponseEntity<List<Post>> getPostsByUserEmail(
@@ -82,9 +83,7 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        messageSource.getMessage(
-                                "message.ok.create_post",
-                                null,
+                        localizationService.getLocalizedMessage(
                                 "message.ok.create_post",
                                 locale
                         )
@@ -122,9 +121,7 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        messageSource.getMessage(
-                                "message.ok.update_post",
-                                null,
+                        localizationService.getLocalizedMessage(
                                 "message.ok.update_post",
                                 locale
                         )

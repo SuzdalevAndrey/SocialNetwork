@@ -22,15 +22,17 @@ public class EditEmailKafkaListener {
             groupId = "${spring.kafka.consumer.group-id}")
     public void listen(String editEmailMessage)
             throws JsonProcessingException {
+        log.info("Executing listen message in kafka");
 
-        EditEmailDTO editEmailDTO = mapper.readValue(
+        EditEmailDTO editEmail = mapper.readValue(
                 editEmailMessage,
                 EditEmailDTO.class);
 
-        publisher.publishEvent(editEmailDTO);
+        publisher.publishEvent(editEmail);
 
         log.info("Edit oldEmail: {} on newEmail: {}",
-                editEmailDTO.oldEmail(),
-                editEmailDTO.newEmail());
+                editEmail.oldEmail(),
+                editEmail.newEmail()
+        );
     }
 }

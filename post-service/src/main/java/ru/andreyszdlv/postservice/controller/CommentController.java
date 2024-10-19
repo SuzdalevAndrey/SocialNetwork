@@ -20,6 +20,7 @@ import ru.andreyszdlv.postservice.dto.controller.comment.CreateCommentRequestDTO
 import ru.andreyszdlv.postservice.dto.controller.comment.UpdateCommentRequestDTO;
 import ru.andreyszdlv.postservice.model.Comment;
 import ru.andreyszdlv.postservice.service.CommentService;
+import ru.andreyszdlv.postservice.service.LocalizationService;
 
 import java.util.Locale;
 
@@ -31,7 +32,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @PostMapping
     public ResponseEntity<Comment> createComment(@Valid @RequestBody CreateCommentRequestDTO request,
@@ -90,12 +91,10 @@ public class CommentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                    messageSource.getMessage(
-                            "message.ok.update_comment",
-                            null,
+                        localizationService.getLocalizedMessage(
                             "message.ok.update_comment",
                             locale
-                    )
+                        )
                 );
     }
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
+import ru.andreyszdlv.userservice.service.LocalizationService;
 
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -23,7 +24,9 @@ import java.util.Optional;
 @AllArgsConstructor
 public class IncorrectDataControllerAdvice {
 
-    private final MessageSource messageSource;
+//    private final MessageSource messageSource;
+
+    private final LocalizationService localizationService;
 
     @ExceptionHandler(NoSuchUserException.class)
     public ResponseEntity<ProblemDetail> handleNotFoundException(
@@ -63,12 +66,11 @@ public class IncorrectDataControllerAdvice {
         return ProblemDetail.forStatusAndDetail(
                 status,
                 Optional.ofNullable(
-                        messageSource.getMessage(
-                                message,
-                                null,
+                        localizationService.getLocalizedMessage(
                                 message,
                                 locale
-                        )).orElse("errors")
+                        )
+                ).orElse("errors")
         );
     }
 

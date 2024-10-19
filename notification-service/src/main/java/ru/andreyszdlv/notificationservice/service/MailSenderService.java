@@ -1,15 +1,15 @@
 package ru.andreyszdlv.notificationservice.service;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MailSenderService {
 
     @Value("${spring.mail.username}")
@@ -18,6 +18,7 @@ public class MailSenderService {
     private final JavaMailSender mailSender;
 
     public void send(String to, String subject, String body) {
+        log.info("Executing send message in mail: to = {}", to);
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(to);
@@ -25,6 +26,7 @@ public class MailSenderService {
         message.setText(body);
         message.setFrom(from);
 
+        log.info("Sending message to = {}", to);
         mailSender.send(message);
     }
 }

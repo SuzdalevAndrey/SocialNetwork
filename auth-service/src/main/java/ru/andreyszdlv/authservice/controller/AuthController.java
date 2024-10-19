@@ -22,6 +22,7 @@ import ru.andreyszdlv.authservice.dto.controller.RefreshTokenResponseDTO;
 import ru.andreyszdlv.authservice.dto.controller.RegisterRequestDTO;
 import ru.andreyszdlv.authservice.dto.controller.UpdateVerifiCodeRequestDTO;
 import ru.andreyszdlv.authservice.service.AuthService;
+import ru.andreyszdlv.authservice.service.LocalizationService;
 
 import java.util.Locale;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request,
@@ -66,12 +67,12 @@ public class AuthController {
                     request.name());
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(messageSource.getMessage(
-                            "message.ok.register",
-                            null,
-                            "message.ok.register",
-                            locale
-                    ));
+                    .body(
+                            localizationService.getLocalizedMessage(
+                                "message.ok.register",
+                                locale
+                            )
+                    );
         }
     }
 
@@ -150,12 +151,12 @@ public class AuthController {
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(messageSource.getMessage(
-                            "message.ok.confirm_email",
-                            null,
-                            "message.ok.confirm_email",
-                            locale
-                    ));
+                    .body(
+                            localizationService.getLocalizedMessage(
+                                "message.ok.confirm_email",
+                                locale
+                            )
+                    );
         }
 
     }
@@ -186,12 +187,12 @@ public class AuthController {
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(messageSource.getMessage(
-                            "message.ok.update_code",
-                            null,
-                            "message.ok.update_code",
-                            locale
-                    ));
+                    .body(
+                            localizationService.getLocalizedMessage(
+                                "message.ok.update_code",
+                                locale
+                            )
+                    );
         }
     }
 

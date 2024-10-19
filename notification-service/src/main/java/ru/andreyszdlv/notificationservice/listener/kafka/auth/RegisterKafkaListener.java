@@ -23,11 +23,12 @@ public class RegisterKafkaListener {
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String registerUser) throws JsonProcessingException {
+        log.info("Executing listen message in kafka");
 
         RegisterUserDTO user = mapper.readValue(registerUser, RegisterUserDTO.class);
 
         publisher.publishEvent(user);
 
-        log.info("Registered user: " + user.email());
+        log.info("Register user: " + user.email());
     }
 }

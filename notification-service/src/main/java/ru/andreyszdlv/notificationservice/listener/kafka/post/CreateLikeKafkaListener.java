@@ -22,8 +22,8 @@ public class CreateLikeKafkaListener {
             topics = "${spring.kafka.consumer.topic.name.create-like}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void listen(String createLikeMessage)
-            throws JsonProcessingException {
+    public void listen(String createLikeMessage) throws JsonProcessingException {
+        log.info("Executing listen message in kafka");
 
         CreateLikeDTO createLikeDTO = mapper.readValue(
                 createLikeMessage,

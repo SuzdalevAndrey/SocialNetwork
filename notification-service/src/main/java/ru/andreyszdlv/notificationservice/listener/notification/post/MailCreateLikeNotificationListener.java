@@ -22,6 +22,9 @@ public class MailCreateLikeNotificationListener {
 
     @EventListener
     public void handle(CreateLikeDTO createLikeDTO){
+        log.info("Executing handle create like event for email author post: {}",
+                createLikeDTO.email());
+
         Locale locale = Locale.getDefault();
 
         String header = localizationService.getLocalizedMessage(
@@ -34,6 +37,7 @@ public class MailCreateLikeNotificationListener {
                 locale
         );
 
+        log.info("Sending create like event to email author post: {}", createLikeDTO.email());
         mailSender.send(
                 createLikeDTO.email(),
                 header,

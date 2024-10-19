@@ -1,6 +1,7 @@
 package ru.andreyszdlv.notificationservice.listener.notification.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.Locale;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MailEditEmailNotificationListener {
     private final LocalizationService localizationService;
 
@@ -19,6 +21,9 @@ public class MailEditEmailNotificationListener {
 
     @EventListener
     public void handle(EditEmailDTO editEmailDTO){
+        log.info("Executing handle edit email event for user: {}",
+                editEmailDTO.newEmail());
+
         Locale locale = Locale.getDefault();
 
         String header = localizationService.getLocalizedMessage(
@@ -31,6 +36,7 @@ public class MailEditEmailNotificationListener {
                 locale
         );
 
+        log.info("Sending edit email event for user: {}", editEmailDTO.newEmail());
         mailSender.send(
                 editEmailDTO.newEmail(),
                 header,

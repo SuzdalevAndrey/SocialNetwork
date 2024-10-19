@@ -18,6 +18,7 @@ import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
+import ru.andreyszdlv.postservice.service.LocalizationService;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -28,7 +29,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class IncorrectDataControllerAdvice {
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @ExceptionHandler(FeignException.FeignClientException.class)
     public ResponseEntity<ProblemDetail> handleFeignException(FeignException ex,
@@ -90,9 +91,7 @@ public class IncorrectDataControllerAdvice {
         return ProblemDetail.forStatusAndDetail(
                 status,
                 Optional.ofNullable(
-                        messageSource.getMessage(
-                                message,
-                                null,
+                        localizationService.getLocalizedMessage(
                                 message,
                                 locale
                         )

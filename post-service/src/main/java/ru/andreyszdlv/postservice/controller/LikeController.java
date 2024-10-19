@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.andreyszdlv.postservice.service.LikeService;
+import ru.andreyszdlv.postservice.service.LocalizationService;
 
 import java.util.Locale;
 
@@ -25,7 +26,7 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @PostMapping("/{postId}")
     public ResponseEntity<String> createLike(@PathVariable long postId,
@@ -39,13 +40,11 @@ public class LikeController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                messageSource.getMessage(
-                        "message.ok.create_like",
-                        null,
-                        "message.ok.create_like",
-                        locale
-                )
-        );
+                        localizationService.getLocalizedMessage(
+                            "message.ok.create_like",
+                            locale
+                        )
+                );
     }
 
     @DeleteMapping("/{postId}")

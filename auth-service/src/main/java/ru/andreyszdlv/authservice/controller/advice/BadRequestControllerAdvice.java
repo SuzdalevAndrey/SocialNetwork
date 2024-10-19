@@ -13,6 +13,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.andreyszdlv.authservice.service.LocalizationService;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -22,7 +23,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class BadRequestControllerAdvice {
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(final BindException ex, Locale locale) {
@@ -31,12 +32,12 @@ public class BadRequestControllerAdvice {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 Optional.ofNullable(
-                        messageSource.getMessage(
+                        localizationService.getLocalizedMessage(
                             "errors.400.request.title",
-                            null,
-                            "errors.400.request.title",
-                            locale))
-                        .orElse("errors"));
+                            locale
+                        )
+                ).orElse("errors")
+        );
         problemDetail.setProperty(
                 "errors",
             ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()

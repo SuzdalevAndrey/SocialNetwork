@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.userservice.dto.controller.UpdateEmailRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.UpdatePasswordRequestDTO;
+import ru.andreyszdlv.userservice.service.LocalizationService;
 import ru.andreyszdlv.userservice.service.UserService;
 
 import java.util.Locale;
@@ -27,7 +28,7 @@ public class UserController {
 
     private final UserService userService;
 
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
     @PatchMapping("/edit-email")
     public ResponseEntity<String> updateEmailUser(@Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,
@@ -60,9 +61,7 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        messageSource.getMessage(
-                            "message.ok.update_email",
-                            null,
+                        localizationService.getLocalizedMessage(
                             "message.ok.update_email",
                             locale
                         )
@@ -94,9 +93,7 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        messageSource.getMessage(
-                                "message.ok.change_password",
-                                null,
+                        localizationService.getLocalizedMessage(
                                 "message.ok.change_password",
                                 locale
                         )
