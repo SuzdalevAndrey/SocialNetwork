@@ -1,5 +1,6 @@
 package ru.andreyszdlv.authservice.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,6 +43,8 @@ public class AuthService {
 
     private final AccessAndRefreshJwtService accessAndRefreshJwtService;
 
+    private final MeterRegistry meterRegistry;
+
     @Transactional
     public void registerUser(RegisterRequestDTO request) {
         log.info("Executing registerUser in AuthService for email: {} and name: {}",
@@ -69,6 +72,8 @@ public class AuthService {
 
         log.info("Send message to kafka contains userEmail: {} and code", request.email());
         kafkaProducerService.sendRegisterEvent(request.email(), verificationCode);
+
+        meterRegistry.counter("user_registry").increment();
     }
 
     @Transactional

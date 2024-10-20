@@ -1,5 +1,6 @@
 package ru.andreyszdlv.userservice.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,8 @@ public class UserService {
     private final KafkaProducerService kafkaProducerService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public void updateEmailUser(String oldEmail, String newEmail) {
@@ -66,6 +69,8 @@ public class UserService {
 
             log.info("Send data email: {} in kafka for update password event", userEmail);
             kafkaProducerService.sendEditPasswordEvent(userEmail);
+
+            meterRegistry.counter("user_change_password").increment();
         }
         else{
 

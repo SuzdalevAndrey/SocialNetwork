@@ -1,5 +1,7 @@
 package ru.andreyszdlv.postservice.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class PostService {
     private final PostRepo postRepository;
 
     private final UserServiceFeignClient userServiceFeignClient;
+
+    private final MeterRegistry meterRegistry;
 
     @Transactional(readOnly = true)
     public List<Post> getPostsByUserEmail(String userEmail) {
@@ -51,8 +55,27 @@ public class PostService {
         post.setNumberViews(0L);
         post.setUserId(userId);
 
+        Post responsePost = postRepository.save(post);
         log.info("Successful create post with content: {}", content);
-        return postRepository.save(post);
+        meterRegistry
+                .counter(
+                        "posts_per_user",
+                        List.of(Tag.of("id", String.valueOf(userId)))
+                )
+                .increment();
+
+        meterRegistry
+                .counter(
+                        "comments_per_post",
+                        List.of(Tag.of("post_id", String.valueOf(responsePost.getId())))
+                );
+
+        meterRegistry
+                .counter(
+                        "likes_per_post",
+                        List.of(Tag.of("post_id", String.valueOf(responsePost.getId())))
+                );
+        return responsePost;
     }
 
     @Transactional

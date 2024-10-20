@@ -1,5 +1,7 @@
 package ru.andreyszdlv.postservice.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import ru.andreyszdlv.postservice.repository.CommentRepo;
 import ru.andreyszdlv.postservice.repository.PostRepo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -27,6 +30,8 @@ public class CommentService {
     private final UserServiceFeignClient userServiceFeignClient;
 
     private final KafkaProducerService kafkaProducerService;
+
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public Comment createComment(long postId, String content, String userEmail){
@@ -81,6 +86,11 @@ public class CommentService {
                 content
         );
 
+        meterRegistry.counter(
+                "comments_per_post",
+                        List.of(Tag.of("post_id",String.valueOf(postId)))
+                )
+                .increment();
         return commentResponse;
     }
 

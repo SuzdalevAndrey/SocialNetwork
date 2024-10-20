@@ -1,5 +1,7 @@
 package ru.andreyszdlv.postservice.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,8 @@ import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.model.Like;
 import ru.andreyszdlv.postservice.repository.LikeRepo;
 import ru.andreyszdlv.postservice.repository.PostRepo;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -24,6 +28,8 @@ public class LikeService {
     private final UserServiceFeignClient userServiceFeignClient;
 
     private final KafkaProducerService kafkaProducerService;
+
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public void createLike(long postId, String userEmail){
@@ -73,6 +79,13 @@ public class LikeService {
                 email,
                 nameAuthorLike
         );
+
+        meterRegistry
+                .counter(
+                        "likes_per_post",
+                        List.of(Tag.of("post_id", String.valueOf(postId)))
+                )
+                .increment();
     }
 
     @Transactional
