@@ -30,7 +30,7 @@ public class RoleUserFilter extends OncePerRequestFilter {
 
         String role = request.getHeader("X-User-Role");
 
-        String email = request.getHeader("X-User-Email");
+        String userId = request.getHeader("X-User-Id");
 
         if (role == null) {
             filterChain.doFilter(request, response);
@@ -38,7 +38,7 @@ public class RoleUserFilter extends OncePerRequestFilter {
         }
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                email,
+                userId,
                 "",
                 Stream.of(role).map(SimpleGrantedAuthority::new).toList());
 

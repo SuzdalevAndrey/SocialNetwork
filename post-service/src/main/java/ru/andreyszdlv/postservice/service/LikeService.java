@@ -32,17 +32,13 @@ public class LikeService {
     private final MeterRegistry meterRegistry;
 
     @Transactional
-    public void createLike(long postId, String userEmail){
+    public void createLike(long userId, long postId){
         log.info("Executing createLike for postId: {}", postId);
 
         if(!postRepository.existsById(postId)) {
             log.error("Post no exists with postId: {}", postId);
             throw new NoSuchPostException("errors.404.post_not_found");
         }
-
-        log.info("Getting a userId by email: {}", userEmail);
-        long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
-        log.info("Successful get userId: {} by email: {}", userId, userEmail);
 
         if(likeRepository.existsByPostIdAndUserId(postId, userId)){
             log.error("User with userId: {} already liked post with postId: {}", userId, postId);
@@ -68,8 +64,8 @@ public class LikeService {
         log.info("Getting email author post by userId: {}", userIdAuthorPost);
         String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
 
-        log.info("Getting name author like by email: {}", userEmail);
-        String nameAuthorLike = userServiceFeignClient.getNameByUserEmail(userEmail).getBody();
+        log.info("Getting name author like by userId: {}", userId);
+        String nameAuthorLike = userServiceFeignClient.getNameByUserId(userId).getBody();
 
         log.info("Send data email: {}, nameAuthorLike: {} in kafka for create like event",
                 email,
@@ -89,16 +85,13 @@ public class LikeService {
     }
 
     @Transactional
-    public void deleteLike(long postId, String userEmail) {
+    public void deleteLike(long userId, long postId) {
         log.info("Executing deleteLike for postId: {}", postId);
 
         if(!postRepository.existsById(postId)) {
             log.error("Post no exists with postId: {}", postId);
             throw new NoSuchPostException("errors.404.post_not_found");
         }
-
-        log.info("Getting userId by email: {}", userEmail);
-        long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
 
         log.info("Deleting like post with postId: {} and userId: {}", postId, userId);
         if (likeRepository.deleteByPostIdAndUserId(postId, userId) == 0) {

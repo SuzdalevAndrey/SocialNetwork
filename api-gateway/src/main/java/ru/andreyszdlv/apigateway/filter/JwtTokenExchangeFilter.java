@@ -37,7 +37,7 @@ public class JwtTokenExchangeFilter implements GlobalFilter, Ordered {
                 .flatMap(
                         userInfo->{
                             ServerHttpRequest request = exchange.getRequest().mutate()
-                                    .header("X-User-Email", (String) userInfo.get("email"))
+                                    .header("X-User-Id", (String) userInfo.get("userId"))
                                     .header("X-User-Role", (String) userInfo.get("role"))
                                     .build();
                             return chain.filter(exchange.mutate().request(request).build());

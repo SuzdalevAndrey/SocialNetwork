@@ -1,13 +1,25 @@
 package ru.andreyszdlv.postservice.dto.controller.post;
 
+import lombok.Builder;
+import ru.andreyszdlv.postservice.model.Comment;
 import ru.andreyszdlv.postservice.model.Like;
-import ru.andreyszdlv.postservice.model.Post;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
 public record PostResponseDTO(
-        Post post,
+        long id,
 
-        List<Like> likes
-) {
-}
+        String content,
+
+        long numberViews,
+
+        LocalDateTime dateCreate,
+
+        long userId,
+
+        List<Like> likes,
+
+        List<Comment> comments
+) {}

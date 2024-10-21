@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.postservice.dto.controller.post.CreatePostRequestDTO;
+import ru.andreyszdlv.postservice.dto.controller.post.PostResponseDTO;
 import ru.andreyszdlv.postservice.dto.controller.post.UpdatePostRequestDTO;
+import ru.andreyszdlv.postservice.mapper.PostMapper;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.service.LocalizationService;
 import ru.andreyszdlv.postservice.service.PostService;
@@ -37,33 +39,27 @@ public class PostController {
     private final LocalizationService localizationService;
 
     @GetMapping
-    public ResponseEntity<List<Post>> getPostsByUserEmail(
-            @RequestHeader("X-User-Email") String userEmail
-    ){
+    public ResponseEntity<List<PostResponseDTO>> getPostsByUserId(@RequestHeader("X-User-Id") long userId){
 
-        log.info("Executing getPostsByUserEmail for userEmail: {}", userEmail);
+        log.info("Executing getPostsByUserId for userId: {}", userId);
 
-        List<Post> responsePosts = postService.getPostsByUserEmail(userEmail);
-        log.info("Successful getPostsByUserEmail for userEmail: {}", userEmail);
-
-        return ResponseEntity.ok(responsePosts);
+        return ResponseEntity.ok(postService.getPostsByUserId(userId));
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long postId){
+    public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long postId){
         log.info("Executing getPostById for postId: {}", postId);
 
-        Post responsePost = postService.getPostByPostId(postId);
+        PostResponseDTO responsePost = postService.getPostByPostId(postId);
         log.info("Successful get post for postId: {}", postId);
 
         return ResponseEntity.ok(responsePost);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createPost(@Valid @RequestBody CreatePostRequestDTO request,
+    @PostMapping
+    public ResponseEntity<PostResponseDTO> createPost(@Valid @RequestBody CreatePostRequestDTO request,
                                            BindingResult bindingResult,
-                                           @RequestHeader("X-User-Email") String userEmail,
-                                           Locale locale)
+                                           @RequestHeader("X-User-Id") long userId)
             throws BindException {
         log.info("Executing createPost for content: {}", request.content());
 
@@ -77,23 +73,18 @@ public class PostController {
         }
 
         log.info("Validation successful, creating post with content: {}", request.content());
-        postService.createPost(userEmail, request.content());
 
-        log.info("Post create completed successfully with content: {}", request.content());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        localizationService.getLocalizedMessage(
-                                "message.ok.create_post",
-                                locale
-                        )
+                        postService.createPost(userId, request.content())
                 );
     }
 
     @PatchMapping("/update")
     public ResponseEntity<String> updatePost(@Valid @RequestBody UpdatePostRequestDTO request,
                                            BindingResult bindingResult,
-                                           @RequestHeader("X-User-Email") String userEmail,
+                                           @RequestHeader("X-User-Id") long userId,
                                            Locale locale)
             throws BindException {
         log.info("Executing updatePost for postId: {} with newContent: {}",
@@ -112,7 +103,7 @@ public class PostController {
         log.info("Validation successful, updating post with postId: {}, newContent: {}",
                 request.postId(),
                 request.content());
-        postService.updatePost(userEmail, request.postId(), request.content());
+        postService.updatePost(userId, request.postId(), request.content());
 
         log.info("Post update successfully with postId: {}, newContent: {}",
                 request.postId(),
@@ -130,10 +121,10 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable long id,
-                                           @RequestHeader("X-User-Email") String userEmail){
+                                           @RequestHeader("X-User-Id") long userId){
 
         log.info("Executing deletePost for postId: {}", id);
-        postService.deletePost(userEmail, id);
+        postService.deletePost(userId, id);
 
         log.info("Post delete successfully with postId: {}", id);
         return ResponseEntity.noContent().build();

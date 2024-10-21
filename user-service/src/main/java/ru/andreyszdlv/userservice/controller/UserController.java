@@ -34,19 +34,15 @@ public class UserController {
 
     private final LocalizationService localizationService;
 
-    private final FriendService friendService;
-
-    private final TempFriendService tempFriendService;
-
     @PatchMapping("/edit-email")
     public ResponseEntity<String> updateEmailUser(@Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,
                                                   BindingResult bindingResult,
-                                                  @RequestHeader("X-User-Email") String oldEmail,
+                                                  @RequestHeader("X-User-Id") long userId,
                                                   Locale locale)
             throws BindException {
 
-        log.info("Executing updateEmailUser: oldEmail = {}, newEmail = {}",
-                oldEmail,
+        log.info("Executing updateEmailUser for userId = {}, newEmail = {}",
+                userId,
                 updateEmailRequestDTO.email()
         );
 
@@ -59,11 +55,11 @@ public class UserController {
             throw new BindException(bindingResult);
         }
 
-        log.info("Validation successful, oldEmail = {}, newEmail = {}",
-                oldEmail,
+        log.info("Validation successful, userId = {}, newEmail = {}",
+                userId,
                 updateEmailRequestDTO.email()
         );
-        userService.updateEmailUser(oldEmail, updateEmailRequestDTO.email());
+        userService.updateEmailUser(userId, updateEmailRequestDTO.email());
 
         log.info("Email update completed successfully");
         return ResponseEntity
@@ -80,11 +76,11 @@ public class UserController {
     @PatchMapping("/change-password")
     public ResponseEntity<String> updatePasswordUser(@Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO,
                                                      BindingResult bindingResult,
-                                                     @RequestHeader("X-User-Email") String userEmail,
+                                                     @RequestHeader("X-User-Id") long userId,
                                                      Locale locale)
             throws BindException{
 
-        log.info("Executing updatePasswordUser for userEmail: {}", userEmail);
+        log.info("Executing updatePasswordUser for userId: {}", userId);
 
         if(bindingResult.hasErrors()) {
             log.error("Validation errors during password update: {}",
@@ -94,10 +90,10 @@ public class UserController {
             throw new BindException(bindingResult);
         }
 
-        log.info("Validation successful, updating password for userEmail: {}", userEmail);
-        userService.updatePasswordUser(userEmail, updatePasswordRequestDTO.oldPassword(), updatePasswordRequestDTO.newPassword());
+        log.info("Validation successful, updating password for userId: {}", userId);
+        userService.updatePasswordUser(userId, updatePasswordRequestDTO.oldPassword(), updatePasswordRequestDTO.newPassword());
 
-        log.info("Password update completed successfully");
+        log.info("Password update completed successfully for userId: {}", userId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(

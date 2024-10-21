@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
-import ru.andreyszdlv.userservice.service.UserService;
+import ru.andreyszdlv.userservice.service.InternalUserService;
 
 @RestController
 @RequestMapping("/internal/user")
@@ -17,38 +17,27 @@ import ru.andreyszdlv.userservice.service.UserService;
 @Slf4j
 public class InternalUserController {
 
-    private final UserService userService;
-
-    @GetMapping("/id/{email}")
-    public ResponseEntity<Long> getUserIdByUserEmail(@PathVariable String email){
-        log.info("Executing getUserIdByUserEmail for email: {}", email);
-
-        log.info("Getting user id by email: {}", email);
-        Long userId = userService.getUserIdByEmail(email);
-
-        log.info("Successfully get userId: {} by email: {}", userId, email);
-        return ResponseEntity.ok(userId);
-    }
+    private final InternalUserService internalUserService;
 
     @GetMapping("/email/{userId}")
     public ResponseEntity<String> getUserEmailByUserId(@PathVariable long userId){
         log.info("Executing getUserEmailByUserId for userId: {}", userId);
 
         log.info("Getting email by id: {}", userId);
-        String email = userService.getUserEmailByUserId(userId);
+        String email = internalUserService.getUserEmailByUserId(userId);
 
         log.info("Successfully get email: {} by userId: {}", email, userId);
         return ResponseEntity.ok(email);
     }
 
-    @GetMapping("/name/{email}")
-    public ResponseEntity<String> getNameByUserEmail(@PathVariable String email){
-        log.info("Executing getNameByUserEmail for email: {}", email);
+    @GetMapping("/name/{userId}")
+    public ResponseEntity<String> getNameByUserId(@PathVariable long userId){
+        log.info("Executing getNameByUserEmail for userId: {}", userId);
 
-        log.info("Getting name by email: {}", email);
-        String name = userService.getNameByUserEmail(email);
+        log.info("Getting name by userId: {}", userId);
+        String name = internalUserService.getNameByUserId(userId);
 
-        log.info("Successfully get name: {} by email: {}", name, email);
+        log.info("Successfully get name: {} by userId: {}", name, userId);
         return ResponseEntity.ok(name);
     }
 
@@ -57,7 +46,7 @@ public class InternalUserController {
         log.info("Executing getUserDetailsByUserEmail by email: {}", email);
 
         log.info("Getting user details by email: {}", email);
-        UserDetailsResponseDTO response = userService.getUserDetailsByEmail(email);
+        UserDetailsResponseDTO response = internalUserService.getUserDetailsByEmail(email);
 
         log.info("Successfully get user details by email: {}", email);
         return ResponseEntity.ok(response);
@@ -69,7 +58,7 @@ public class InternalUserController {
         log.info("Executing existsUserByEmail by email: {}", email);
 
         log.info("Checking exists user by email: {}", email);
-        boolean exists = userService.existsUserByEmail(email);
+        boolean exists = internalUserService.existsUserByEmail(email);
 
         log.info("Successfully exists user by email: {}", email);
         return ResponseEntity.ok(exists);
@@ -80,7 +69,7 @@ public class InternalUserController {
         log.info("Executing getUserByEmail for email: {}", email);
 
         log.info("Getting user by email: {}", email);
-        UserResponseDTO userResponse = userService.getUserByUserEmail(email);
+        UserResponseDTO userResponse = internalUserService.getUserByUserEmail(email);
 
         log.info("Successfully get user by email: {}", email);
         return ResponseEntity.ok(userResponse);

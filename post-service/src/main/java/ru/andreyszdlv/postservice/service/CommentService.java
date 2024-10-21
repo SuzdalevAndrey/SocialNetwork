@@ -7,9 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
 import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
+import ru.andreyszdlv.postservice.mapper.CommentMapper;
 import ru.andreyszdlv.postservice.model.Comment;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.CommentRepo;
@@ -33,12 +35,14 @@ public class CommentService {
 
     private final MeterRegistry meterRegistry;
 
+    private final CommentMapper commentMapper;
+
     @Transactional
-    public Comment createComment(long postId, String content, String userEmail){
-        log.info("Executing createComment for postId: {}, content: {}, user email: {}",
+    public CommentResponseDTO createComment(long userId, long postId, String content){
+        log.info("Executing createComment for userId: {}, postId: {}, content: {}",
+                userId,
                 postId,
-                content,
-                userEmail);
+                content);
 
         log.info("Checking exists post by id: {}", postId);
         if(!postRepository.existsById(postId)){
@@ -48,10 +52,7 @@ public class CommentService {
 
         Comment comment = new Comment();
 
-        log.info("Getting a userId by email: {}", userEmail);
-        comment.setUserId(userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody());
-        log.info("Successful get userId by email");
-
+        comment.setUserId(userId);
         comment.setPostId(postId);
         comment.setContent(content);
         comment.setDateCreate(LocalDateTime.now());
@@ -72,8 +73,8 @@ public class CommentService {
         log.info("Getting email author post by author id: {}", userIdAuthorPost);
         String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
 
-        log.info("Getting name author comment by email author comment: {}", userEmail);
-        String nameAuthorComment = userServiceFeignClient.getNameByUserEmail(userEmail).getBody();
+        log.info("Getting name author comment by userId: {}", userId);
+        String nameAuthorComment = userServiceFeignClient.getNameByUserId(userId).getBody();
 
         log.info("Send data email: {}, nameAuthor: {}, content: {} in kafka for create comment event",
                 email,
@@ -91,11 +92,11 @@ public class CommentService {
                         List.of(Tag.of("post_id",String.valueOf(postId)))
                 )
                 .increment();
-        return commentResponse;
+        return commentMapper.commentToCommentReponseDTO(commentResponse);
     }
 
     @Transactional
-    public void deleteComment(long commentId, String userEmail) {
+    public void deleteComment(long userId, long commentId) {
         log.info("Executing deleteComment for commentId: {}", commentId);
 
         log.info("Getting a comment by id: {}", commentId);
@@ -104,12 +105,8 @@ public class CommentService {
                         ()->new NoSuchCommentException("errors.404.comment_not_found")
                 );
 
-        log.info("Checking this user with email: {} create comment", userEmail);
-        if(!userEmail.equals(
-                userServiceFeignClient.getUserEmailByUserId(
-                        comment.getUserId()
-                ).getBody()
-        )){
+        log.info("Checking this user with userId: {} create comment", userId);
+        if(!comment.getUserId().equals(userId)){
             log.error("Comment does not belong user");
             throw new AnotherUsersCommentException("errors.409.another_user_comment");
         }
@@ -121,7 +118,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(long commentId, String content, String userEmail) {
+    public void updateComment(long userId, long commentId, String content) {
         log.info("Executing updateComment for commentId: {} and newContent: {}", commentId, content);
 
         log.info("Checking exists comment by id: {}", commentId);
@@ -132,11 +129,7 @@ public class CommentService {
                 );
 
         log.info("Checking this user create comment");
-        if(!userEmail.equals(
-                userServiceFeignClient.getUserEmailByUserId(
-                        comment.getUserId()
-                ).getBody()
-        )){
+        if(!comment.getUserId().equals(userId)){
             log.error("Comment does not belong user");
             throw new AnotherUsersCommentException("errors.409.another_user_comment");
         }

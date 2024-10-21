@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.dto.controller.post.PostResponseDTO;
 import ru.andreyszdlv.postservice.exception.AnotherUserCreatePostException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
+import ru.andreyszdlv.postservice.mapper.PostMapper;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.PostRepo;
 
@@ -22,31 +24,26 @@ public class PostService {
 
     private final PostRepo postRepository;
 
-    private final UserServiceFeignClient userServiceFeignClient;
+    private final PostMapper postMapper;
 
     private final MeterRegistry meterRegistry;
 
     @Transactional(readOnly = true)
-    public List<Post> getPostsByUserEmail(String userEmail) {
-        log.info("Executing getPostsByUserEmail for user email: {}", userEmail);
-
-        log.info("Getting a userId by email: {}", userEmail);
-        long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
+    public List<PostResponseDTO> getPostsByUserId(long userId) {
+        log.info("Executing getPostsByUserId for user id: {}", userId);
 
         log.info("Getting List<Post> for userId: {}", userId);
-        List<Post> responseList = postRepository.findAllByUserId(userId);
-
-        log.info("Successful getPostsByUserEmail for user email: {}", userEmail);
-        return responseList;
+        return postRepository
+                .findAllByUserId(userId)
+                .stream()
+                .map(postMapper::postToPostResponseDTO)
+                .toList();
     }
 
     @Transactional
-    public Post createPost(String userEmail, String content) {
+    public PostResponseDTO createPost(long userId, String content) {
 
         log.info("Executing createPost for content: {}", content);
-
-        log.info("Getting a userId by email: {}", userEmail);
-        long userId = userServiceFeignClient.getUserIdByUserEmail(userEmail).getBody();
 
         log.info("Creating new post for userId: {} and content: {}", userId, content);
         Post post = new Post();
@@ -56,30 +53,16 @@ public class PostService {
         post.setUserId(userId);
 
         Post responsePost = postRepository.save(post);
+
         log.info("Successful create post with content: {}", content);
-        meterRegistry
-                .counter(
-                        "posts_per_user",
-                        List.of(Tag.of("id", String.valueOf(userId)))
-                )
-                .increment();
 
-        meterRegistry
-                .counter(
-                        "comments_per_post",
-                        List.of(Tag.of("post_id", String.valueOf(responsePost.getId())))
-                );
+        incrementMetrics(userId, post.getId());
 
-        meterRegistry
-                .counter(
-                        "likes_per_post",
-                        List.of(Tag.of("post_id", String.valueOf(responsePost.getId())))
-                );
-        return responsePost;
+        return postMapper.postToPostResponseDTO(responsePost);
     }
 
     @Transactional
-    public void updatePost(String userEmail, long id, String content) {
+    public void updatePost(long userId, long id, String content) {
         log.info("Executing updatePost for postId: {}, content: {}", id,  content);
 
         log.info("Getting a post by postId: {}", id);
@@ -88,13 +71,9 @@ public class PostService {
                         ()->new NoSuchPostException("errors.404.post_not_found")
                 );
 
-        log.info("Checking this user with email: {} create post", userEmail);
-        if(!userEmail.equals(
-                userServiceFeignClient.getUserEmailByUserId(
-                        post.getUserId()
-                ).getBody()
-        )) {
-            log.error("This user with email: {} no create post", userEmail);
+        log.info("Checking this user with userId: {} create post", userId);
+        if(!post.getUserId().equals(userId)) {
+            log.error("This user with userId: {} no create post", userId);
             throw new AnotherUserCreatePostException("errors.409.another_user_post");
         }
 
@@ -106,7 +85,7 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(String userEmail, long postId) {
+    public void deletePost(long userId, long postId) {
         log.info("Executing deletePost for postId: {}", postId);
 
         log.info("Getting a post by postId: {}", postId);
@@ -115,13 +94,9 @@ public class PostService {
                         ()->new NoSuchPostException("errors.404.post_not_found")
                 );
 
-        log.info("Checking this user with email: {} create post", userEmail);
-        if(!userEmail.equals(
-                userServiceFeignClient.getUserEmailByUserId(
-                        post.getUserId()
-                ).getBody()
-        )) {
-            log.error("This user with email: {} no create post", userEmail);
+        log.info("Checking this user with userId: {} create post", userId);
+        if(!post.getUserId().equals(userId)) {
+            log.error("This user with userId: {} no create post", userId);
             throw new AnotherUserCreatePostException("errors.409.another_user_post");
         }
 
@@ -130,7 +105,7 @@ public class PostService {
     }
 
     @Transactional
-    public Post getPostByPostId(long postId) {
+    public PostResponseDTO getPostByPostId(long postId) {
         log.info("Executing getPostByPostId for postId: {}", postId);
 
         log.info("Getting a post by postId: {}", postId);
@@ -142,6 +117,12 @@ public class PostService {
         log.info("Update number views post with postId: {}", postId);
         post.setNumberViews(post.getNumberViews() + 1);
 
-        return post;
+        return postMapper.postToPostResponseDTO(post);
+    }
+
+    private void incrementMetrics(long userId, long postId) {
+        meterRegistry.counter("posts_per_user", List.of(Tag.of("id", String.valueOf(userId)))).increment();
+        meterRegistry.counter("comments_per_post", List.of(Tag.of("post_id", String.valueOf(postId)))).increment();
+        meterRegistry.counter("likes_per_post", List.of(Tag.of("post_id", String.valueOf(postId)))).increment();
     }
 }

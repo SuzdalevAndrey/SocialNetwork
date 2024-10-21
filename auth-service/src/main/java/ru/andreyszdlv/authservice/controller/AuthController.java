@@ -207,8 +207,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("X-User-Email") String email){
-        authService.logout(email);
+    public ResponseEntity<Void> logout(@RequestHeader("X-User-Id") long userId){
+        authService.logout(userId);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();

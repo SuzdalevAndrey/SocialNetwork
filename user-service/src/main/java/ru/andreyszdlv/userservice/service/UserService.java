@@ -28,18 +28,20 @@ public class UserService {
     private final MeterRegistry meterRegistry;
 
     @Transactional
-    public void updateEmailUser(String oldEmail, String newEmail) {
+    public void updateEmailUser(long userId, String newEmail) {
 
-        log.info("Executing updateEmailUser: oldEmail = {}, newEmail = {}",
-                oldEmail,
+        log.info("Executing updateEmailUser: userId = {}, newEmail = {}",
+                userId,
                 newEmail);
 
-        log.info("Getting user by email: {}", oldEmail);
+        log.info("Getting user by id: {}", userId);
         User user = userRepository
-                .findByEmail(oldEmail)
+                .findById(userId)
                 .orElseThrow(
                         ()->new NoSuchUserException("errors.404.user_not_found")
                 );
+
+        String oldEmail = user.getEmail();
 
         user.setEmail(newEmail);
 
@@ -51,24 +53,24 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePasswordUser(String userEmail, String oldPassword, String newPassword) {
+    public void updatePasswordUser(long userId, String oldPassword, String newPassword) {
 
-        log.info("Executing updatePasswordUser for email: {}", userEmail);
+        log.info("Executing updatePasswordUser for userId: {}", userId);
 
-        log.info("Getting user by email: {}", userEmail);
+        log.info("Getting user by userId: {}", userId);
         User user = userRepository
-                .findByEmail(userEmail)
+                .findById(userId)
                 .orElseThrow(
                         ()->new NoSuchUserException("errors.404.user_not_found")
                 );
 
-        log.info("Checking password comparison for user email: {}", userEmail);
+        log.info("Checking password comparison for userId: {}", userId);
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
-            log.info("Updating password for user email: {}", userEmail);
+            log.info("Updating password for userId: {}", userId);
             user.setPassword(passwordEncoder.encode(newPassword));
 
-            log.info("Send data email: {} in kafka for update password event", userEmail);
-            kafkaProducerService.sendEditPasswordEvent(userEmail);
+            log.info("Send data email: {} in kafka for update password event", user.getEmail());
+            kafkaProducerService.sendEditPasswordEvent(user.getEmail());
 
             meterRegistry.counter("user_change_password").increment();
         }
@@ -78,123 +80,5 @@ public class UserService {
 
             throw new DifferentPasswordsException("errors.409.invalid_password");
         }
-    }
-
-    @Transactional(readOnly = true)
-    public Long getUserIdByEmail(String email) {
-        log.info("Executing getUserIdByEmail for email: {}", email);
-
-        log.info("Getting a userId by email: {}", email);
-        Long userId = userRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                )
-                .getId();
-
-        return userId;
-    }
-
-    @Transactional(readOnly = true)
-    public String getUserEmailByUserId(long userId) {
-        log.info("Executing getUserEmailByUserId for userId: {}", userId);
-
-        log.info("Getting email by userId: {}", userId);
-        String email = userRepository
-                .findById(userId)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                )
-                .getEmail();
-
-        return email;
-    }
-
-    @Transactional(readOnly = true)
-    public String getNameByUserEmail(String email) {
-        log.info("Executing getNameByUserEmail for email: {}", email);
-
-        log.info("Getting name by email: {}", email);
-        String name = userRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                )
-                .getName();
-
-        return name;
-    }
-
-    @Transactional(readOnly = true)
-    public UserDetailsResponseDTO getUserDetailsByEmail(String email) {
-        log.info("Executing getUserDetailsByEmail for email: {}", email);
-
-        log.info("Getting user by email: {}", email);
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(
-                    ()->new NoSuchUserException("errors.404.user_not_found")
-                );
-
-        return UserDetailsResponseDTO
-                .builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .role(user.getRole())
-                .build();
-    }
-
-    @Transactional
-    public void saveUser(String name, String email, String password, ERole role) {
-        log.info("Executing saveUser for email: {}", email);
-
-        User user = new User();
-
-        user.setEmail(email);
-        user.setName(name);
-        user.setPassword(password);
-        user.setRole(role);
-
-        log.info("Saving user with email: {}", email);
-        try {
-            userRepository.save(user);
-        }
-        catch (Exception ex){
-            log.error("Send data name, email: {}, password, role in kafka for failure save user event",
-                    email
-            );
-            kafkaProducerService.sendFailureSaveUserEvent(
-                    name,
-                    email,
-                    password,
-                    role
-            );
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public Boolean existsUserByEmail(String email) {
-        log.info("Executing existsUserByEmail for email: {}", email);
-        return userRepository.existsByEmail(email);
-    }
-
-    @Transactional(readOnly = true)
-    public UserResponseDTO getUserByUserEmail(String email) {
-        log.info("Executing getUserByUserEmail for email: {}", email);
-
-        log.info("Getting user by email: {}", email);
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(
-                    ()->new NoSuchUserException("errors.404.user_not_found")
-                );
-
-        return UserResponseDTO
-                .builder()
-                .name(user.getName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .build();
     }
 }

@@ -1,6 +1,7 @@
 package ru.andreyszdlv.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +22,7 @@ import java.util.Locale;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user/friends")
+@Slf4j
 public class FriendController {
 
     private final LocalizationService localizationService;
@@ -30,17 +32,21 @@ public class FriendController {
     private final FriendService friendService;
 
     @GetMapping
-    public List<UserFriendResponseDTO> getFriendsByEmail(@RequestHeader("X-User-Email") String email){
-        return friendService.getFriendsByEmail(email);
+    public List<UserFriendResponseDTO> getFriends(@RequestHeader("X-User-Id") long userId){
+        log.info("Executing getFriends for userId: {}", userId);
+        return friendService.getFriendsByUserId(userId);
     }
 
     @PostMapping("/create-request/{friendId}")
-    public ResponseEntity<String> createRequestFriend(@RequestHeader("X-User-Email") String userEmail,
-                                                      @PathVariable Long friendId){
+    public ResponseEntity<String> createRequestFriend(@RequestHeader("X-User-Id") long userId,
+                                                      @PathVariable long friendId){
+        log.info("Executing createRequestFriend for userId: {}, friendId: {}", userId, friendId);
         Locale locale = Locale.getDefault();
 
-        tempFriendService.createRequestFriend(userEmail, friendId);
+        log.info("Creating request friend for userId: {}, friendId: {}", userId, friendId);
+        tempFriendService.createRequestFriend(userId, friendId);
 
+        log.info("Successfully created request for userId: {}, friendId: {}", userId, friendId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
@@ -52,11 +58,12 @@ public class FriendController {
     }
 
     @PostMapping("/confirm-request/{userId}")
-    public ResponseEntity<String> confirmRequestFriend(@PathVariable Long userId,
-                                                       @RequestHeader("X-User-Email") String friendEmail){
+    public ResponseEntity<String> confirmRequestFriend(@PathVariable long userId,
+                                                       @RequestHeader("X-User-Id") long friendId){
+        log.info("Executing confirmRequestFriend for userId: {}, friendId: {}", userId, friendId);
         Locale locale = Locale.getDefault();
 
-        friendService.confirmRequestFriend(userId, friendEmail);
+        friendService.confirmRequestFriend(userId, friendId);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -69,28 +76,31 @@ public class FriendController {
     }
 
     @DeleteMapping("/delete-my-request/{friendId}")
-    public ResponseEntity<Void> deleteMyRequest(@RequestHeader("X-User-Email") String userEmail,
-                                                @PathVariable Long friendId){
+    public ResponseEntity<Void> deleteMyRequest(@RequestHeader("X-User-Id") long userId,
+                                                @PathVariable long friendId){
+        log.info("Executing deleteMyRequest for userId: {}, friendId: {}", userId, friendId);
 
-        tempFriendService.deleteMyRequest(userEmail, friendId);
+        tempFriendService.deleteMyRequest(userId, friendId);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/delete-request/{userId}")
-    public ResponseEntity<Void> deleteRequest(@PathVariable Long userId,
-                                              @RequestHeader("X-User-Email") String friendEmail){
+    public ResponseEntity<Void> deleteRequest(@PathVariable long userId,
+                                              @RequestHeader("X-User-Id") long friendId){
+        log.info("Executing deleteRequest for userId: {}, friendId: {}", userId, friendId);
 
-        tempFriendService.deleteRequest(userId, friendEmail);
+        tempFriendService.deleteRequest(userId, friendId);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/delete-friend/{friendId}")
-    public ResponseEntity<Void> deleteFriend(@RequestHeader("X-User-Email") String userEmail,
-                                             @PathVariable Long friendId){
+    public ResponseEntity<Void> deleteFriend(@RequestHeader("X-User-Id") long userId,
+                                             @PathVariable long friendId){
+        log.info("Executing deleteFriend for userId: {}, friendId: {}", userId, friendId);
 
-        friendService.deleteFriend(userEmail, friendId);
+        friendService.deleteFriend(userId, friendId);
 
         return ResponseEntity.noContent().build();
     }

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
+import ru.andreyszdlv.userservice.service.InternalUserService;
 import ru.andreyszdlv.userservice.service.UserService;
 
 @Component
@@ -16,7 +17,7 @@ public class SaveUserEventListener {
 
     private final ObjectMapper mapper;
 
-    private final UserService userService;
+    private final InternalUserService internalUserService;
 
     @KafkaListener(
             topics = "${spring.kafka.consumer.topic.name.save-user}",
@@ -30,7 +31,7 @@ public class SaveUserEventListener {
         UserDetailsKafkaDTO user = mapper.readValue(messageUser, UserDetailsKafkaDTO.class);
 
         log.info("Saving user with email: {}", user.email());
-        userService.saveUser(
+        internalUserService.saveUser(
                 user.name(),
                 user.email(),
                 user.password(),

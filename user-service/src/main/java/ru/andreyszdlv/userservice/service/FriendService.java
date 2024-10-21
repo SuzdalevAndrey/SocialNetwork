@@ -5,17 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.userservice.dto.controller.UserFriendResponseDTO;
-import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.exception.NoSuchRequestFriendException;
-import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.exception.UsersNoFriendsException;
 import ru.andreyszdlv.userservice.model.Friend;
-import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.FriendRepo;
 import ru.andreyszdlv.userservice.repository.TempFriendRepo;
 import ru.andreyszdlv.userservice.repository.UserRepo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,14 +26,16 @@ public class FriendService {
     private final FriendRepo friendRepository;
 
     @Transactional
-    public void confirmRequestFriend(Long userId, String friendEmail) {
-        long friendId = getUserIdByEmail(friendEmail);
+    public void confirmRequestFriend(long userId, long friendId) {
+        log.info("Executing confirmRequestFriend for userId={}, friendId={}", userId, friendId);
 
-        log.info("userId: {}, friendId: {}", userId, friendId);
+        log.info("Request send checking: userId={}, friendId={}", userId, friendId);
         if(!tempFriendRepository.existsByUserIdAndFriendId(userId, friendId)){
+            log.error("Request no send: userId={}, friendId={}", userId, friendId);
             throw new NoSuchRequestFriendException("errors.404.request_not_found");
         }
 
+        log.info("Saving friends for userId={}, friendId={}", userId, friendId);
         Friend friend1 = new Friend();
         friend1.setUserId(userId);
         friend1.setFriendId(friendId);
@@ -48,32 +46,30 @@ public class FriendService {
         friend2.setUserId(friendId);
         friendRepository.save(friend2);
 
+        log.info("Deleting request friendship for userId={}, friendId={}", userId, friendId);
         tempFriendRepository.deleteByUserIdAndFriendId(userId, friendId);
     }
 
     @Transactional
-    public void deleteFriend(String userEmail, Long friendId) {
-        long userId = getUserIdByEmail(userEmail);
+    public void deleteFriend(long userId, long friendId) {
+        log.info("Executing deleteFriend for userId={}, friendId={}", userId, friendId);
 
-        if(!friendRepository.existsByUserIdAndFriendId(userId, friendId))
+        log.info("Friendship checking: userId={}, friendId={}", userId, friendId);
+        if(!friendRepository.existsByUserIdAndFriendId(userId, friendId)){
+            log.error("Users no friends: userId={}, friendId={}", userId, friendId);
             throw new UsersNoFriendsException("errors.409.users_no_friend");
+        }
 
+        log.info("Deleting friend: userId={}, friendId={}", userId, friendId);
         friendRepository.deleteByUserIdAndFriendId(userId, friendId);
 
+        log.info("Deleting friend: userId={}, friendId={}", friendId, userId);
         friendRepository.deleteByUserIdAndFriendId(friendId, userId);
     }
 
-    public List<UserFriendResponseDTO> getFriendsByEmail(String email) {
-        long userId = getUserIdByEmail(email);
-
+    public List<UserFriendResponseDTO> getFriendsByUserId(long userId) {
+        log.info("Executing getFriendsById for userId={}", userId);
         return userRepository.findUserFriends(userId);
     }
 
-    private long getUserIdByEmail(String email){
-        return userRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                ).getId();
-    }
 }

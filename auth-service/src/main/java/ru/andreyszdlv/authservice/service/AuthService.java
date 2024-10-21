@@ -92,16 +92,22 @@ public class AuthService {
                 .getUserByEmail(request.email())
                 .getBody();
 
-        log.info("Token generation for user: {}", user.email());
-        String token = jwtSecurityService.generateToken(user.email(), user.role().name());
+        log.info("Token generation for user: {}", user.id());
+        String token = jwtSecurityService.generateToken(
+                user.id(),
+                user.role().name()
+        );
 
-        log.info("RefreshToken generation for user: {}", user.email());
-        String refreshToken = jwtSecurityService.generateRefreshToken(user.email(), user.role().name());
+        log.info("RefreshToken generation for user: {}", user.id());
+        String refreshToken = jwtSecurityService.generateRefreshToken(
+                user.id(),
+                user.role().name()
+        );
 
-        accessAndRefreshJwtService.saveAccessTokenByUserEmail(user.email(), token);
-        accessAndRefreshJwtService.saveRefreshTokenByUserEmail(user.email(), refreshToken);
+        accessAndRefreshJwtService.saveAccessTokenByUserId(user.id(), token);
+        accessAndRefreshJwtService.saveRefreshTokenByUserId(user.id(), refreshToken);
 
-        log.info("Login completed successfully with email: {}", request.email());
+        log.info("Login completed successfully with id: {}", user.id());
         kafkaProducerService.sendLoginEvent(user.name(), user.email());
 
         return new LoginResponseDTO(token, refreshToken);
@@ -113,26 +119,26 @@ public class AuthService {
 
         String token = request.refreshToken();
 
-        String email = jwtSecurityService.extractEmail(token);
-        log.info("Extract email: {}", email);
+        long userId = jwtSecurityService.extractUserId(token);
+        log.info("Extract userId: {}", userId);
 
         String role = jwtSecurityService.extractRole(token);
         log.info("Extract role: {}", role);
 
         log.info("Validate token");
         if(jwtSecurityService.validateToken(token)
-                && accessAndRefreshJwtService.getRefreshTokenByUserEmail(email) != null
-                && accessAndRefreshJwtService.getRefreshTokenByUserEmail(email).equals(token)
+                && accessAndRefreshJwtService.getRefreshTokenByUserId(userId) != null
+                && accessAndRefreshJwtService.getRefreshTokenByUserId(userId).equals(token)
         ){
             log.info("Successfully validated token");
 
             log.info("Generate refresh and access token");
-            String accessToken = jwtSecurityService.generateToken(email, role);
-            String refreshToken = jwtSecurityService.generateRefreshToken(email, role);
+            String accessToken = jwtSecurityService.generateToken(userId, role);
+            String refreshToken = jwtSecurityService.generateRefreshToken(userId, role);
 
             log.info("Save tokens to cache");
-            accessAndRefreshJwtService.saveAccessTokenByUserEmail(email, accessToken);
-            accessAndRefreshJwtService.saveRefreshTokenByUserEmail(email, refreshToken);
+            accessAndRefreshJwtService.saveAccessTokenByUserId(userId, accessToken);
+            accessAndRefreshJwtService.saveRefreshTokenByUserId(userId, refreshToken);
 
             log.info("Refresh token completed successfully");
             return new RefreshTokenResponseDTO(
@@ -184,13 +190,13 @@ public class AuthService {
     public Map<String, String> generateDataUserUsingToken(String token) {
         log.info("Executing generateDataUserUsingToken in AuthService");
 
-        String email = jwtSecurityService.extractEmail(token);
-        log.info("Extract email: {}", email);
+        long userId = jwtSecurityService.extractUserId(token);
+        log.info("Extract userId: {}", userId);
 
         log.info("Validate token");
         if(jwtSecurityService.validateToken(token)
-                && accessAndRefreshJwtService.getAccessTokenByUserEmail(email) != null
-                && accessAndRefreshJwtService.getAccessTokenByUserEmail(email).equals(token)
+                && accessAndRefreshJwtService.getAccessTokenByUserId(userId) != null
+                && accessAndRefreshJwtService.getAccessTokenByUserId(userId).equals(token)
         ){
             log.info("Token is valid");
 
@@ -198,10 +204,11 @@ public class AuthService {
 
             HashMap<String, String> dataUser = new HashMap<>(2);
 
-            dataUser.put("email", email);
+            dataUser.put("userId", String.valueOf(userId));
 
             String role = jwtSecurityService.extractRole(token);
             log.info("Extract role: {}", role);
+
             dataUser.put("role", role);
 
             return dataUser;
@@ -209,9 +216,9 @@ public class AuthService {
         throw new ValidateTokenException("errors.409.is_not_valid_token");
     }
 
-    public void logout(String email) {
+    public void logout(long userId) {
         log.info("Executing logout in AuthService");
 
-        accessAndRefreshJwtService.deleteByUserEmail(email);
+        accessAndRefreshJwtService.deleteByUserId(userId);
     }
 }

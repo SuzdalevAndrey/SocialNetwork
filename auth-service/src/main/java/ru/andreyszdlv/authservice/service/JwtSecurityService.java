@@ -26,22 +26,22 @@ public class JwtSecurityService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email, String role){
+    public String generateToken(long userId, String role){
         log.info("Executing generateToken in JwtSecurityService");
         return Jwts.builder()
                 .claims(Map.of("role", role))
-                .subject(email)
+                .subject(String.valueOf(userId))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String generateRefreshToken(String email, String role) {
+    public String generateRefreshToken(long userId, String role) {
         log.info("Executing generateRefreshToken in JwtSecurityService");
         return Jwts.builder()
                 .claims(Map.of("role", role))
-                .subject(email)
+                .subject(String.valueOf(userId))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * 60))
                 .signWith(getSigningKey())
@@ -61,9 +61,9 @@ public class JwtSecurityService {
                 .getPayload();
     }
 
-    public String extractEmail(String token) {
-        log.info("Extract email from token");
-        return extractClaim(token, Claims::getSubject);
+    public long extractUserId(String token) {
+        log.info("Extract userId from token");
+        return Long.parseLong(extractClaim(token, Claims::getSubject));
     }
 
     public String extractRole(String token) {

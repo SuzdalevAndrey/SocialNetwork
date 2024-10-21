@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
 import ru.andreyszdlv.postservice.dto.controller.comment.CreateCommentRequestDTO;
 import ru.andreyszdlv.postservice.dto.controller.comment.UpdateCommentRequestDTO;
 import ru.andreyszdlv.postservice.model.Comment;
@@ -26,7 +27,7 @@ import java.util.Locale;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/posts/comment")
+@RequestMapping("/api/posts")
 @AllArgsConstructor
 public class CommentController {
 
@@ -34,13 +35,14 @@ public class CommentController {
 
     private final LocalizationService localizationService;
 
-    @PostMapping
-    public ResponseEntity<Comment> createComment(@Valid @RequestBody CreateCommentRequestDTO request,
-                                                 BindingResult bindingResult,
-                                                 @RequestHeader("X-User-Email") String userEmail)
+    @PostMapping("/{postId}/comment")
+    public ResponseEntity<CommentResponseDTO> createComment(@Valid @RequestBody CreateCommentRequestDTO request,
+                                                            @RequestHeader("X-User-Id") long userId,
+                                                            @PathVariable long postId,
+                                                            BindingResult bindingResult)
             throws BindException {
         log.info("Executing createComment for postId: {} and content request: {}",
-                request.postId(),
+                postId,
                 request.content());
 
         if(bindingResult.hasErrors()){
@@ -52,27 +54,21 @@ public class CommentController {
         }
 
         log.info("Validation successful, create comment");
-        Comment newComment = commentService.createComment(
-                request.postId(),
-                request.content(),
-                userEmail
-        );
-
-        log.info("Successful comment creation with content: {}", request.content());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(newComment);
+                .body(commentService.createComment(userId, postId, request.content()));
     }
 
-    @PatchMapping
+    @PatchMapping("/comment/{commentId}")
     public ResponseEntity<String> updateComment(@Valid @RequestBody UpdateCommentRequestDTO request,
-                                                BindingResult bindingResult,
-                                                @RequestHeader("X-User-Email") String userEmail,
-                                                Locale locale)
+                                                @PathVariable long commentId,
+                                                @RequestHeader("X-User-Id") long userId,
+                                                Locale locale,
+                                                BindingResult bindingResult)
             throws BindException {
         log.info("Executing updateComment for commentId: {} and content request: {}",
-                request.commentId(),
+                commentId,
                 request.content());
 
         if(bindingResult.hasErrors()){
@@ -84,7 +80,7 @@ public class CommentController {
         }
 
         log.info("Validation successful, update comment");
-        commentService.updateComment(request.commentId(), request.content(), userEmail);
+        commentService.updateComment(userId, commentId, request.content());
 
         log.info("Successful update comment with new content: {}", request.content());
 
@@ -98,12 +94,12 @@ public class CommentController {
                 );
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable long commentId,
-                                              @RequestHeader("X-User-Email") String userEmail) {
+                                              @RequestHeader("X-User-Id") long userId) {
         log.info("Executing deleteComment for commentId: {}", commentId);
 
-        commentService.deleteComment(commentId, userEmail);
+        commentService.deleteComment(userId, commentId);
         log.info("Successful delete comment with commentId: {}", commentId);
 
         return ResponseEntity.noContent().build();

@@ -20,7 +20,7 @@ import java.util.Locale;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/posts/like")
+@RequestMapping("/api/posts")
 @AllArgsConstructor
 public class LikeController {
 
@@ -28,13 +28,13 @@ public class LikeController {
 
     private final LocalizationService localizationService;
 
-    @PostMapping("/{postId}")
+    @PostMapping("/{postId}/like")
     public ResponseEntity<String> createLike(@PathVariable long postId,
-                                             @RequestHeader("X-User-Email") String userEmail,
+                                             @RequestHeader("X-User-Id") long userId,
                                              Locale locale){
         log.info("Executing createLike for postId: {}", postId);
 
-        likeService.createLike(postId, userEmail);
+        likeService.createLike(userId, postId);
         log.info("Successful create like with postId: {}", postId);
 
         return ResponseEntity
@@ -47,12 +47,12 @@ public class LikeController {
                 );
     }
 
-    @DeleteMapping("/{postId}")
+    @DeleteMapping("/{postId}/like")
     public ResponseEntity<Void> deleteLike(@PathVariable long postId,
-                                             @RequestHeader("X-User-Email") String userEmail){
+                                             @RequestHeader("X-User-Id") long userId){
         log.info("Executing deleteLike for postId: {}", postId);
 
-        likeService.deleteLike(postId,userEmail);
+        likeService.deleteLike(userId, postId);
         log.info("Successful delete like with postId: {}", postId);
 
         return ResponseEntity
