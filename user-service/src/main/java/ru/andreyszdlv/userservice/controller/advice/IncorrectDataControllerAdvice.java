@@ -12,7 +12,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
+import ru.andreyszdlv.userservice.exception.NoSuchRequestFriendException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
+import ru.andreyszdlv.userservice.exception.RequestInFriendsAlreadySendException;
+import ru.andreyszdlv.userservice.exception.UsersAlreadyFriendsException;
+import ru.andreyszdlv.userservice.exception.UsersNoFriendsException;
 import ru.andreyszdlv.userservice.service.LocalizationService;
 
 import java.util.Locale;
@@ -24,13 +28,14 @@ import java.util.Optional;
 @AllArgsConstructor
 public class IncorrectDataControllerAdvice {
 
-//    private final MessageSource messageSource;
-
     private final LocalizationService localizationService;
 
-    @ExceptionHandler(NoSuchUserException.class)
+    @ExceptionHandler({
+            NoSuchUserException.class,
+            NoSuchRequestFriendException.class,
+    })
     public ResponseEntity<ProblemDetail> handleNotFoundException(
-            final NoSuchUserException ex,
+            RuntimeException ex,
             Locale locale) {
 
         log.error("Executing handleNotFoundException");
@@ -40,14 +45,19 @@ public class IncorrectDataControllerAdvice {
                 ex.getMessage(),
                 locale);
 
-        log.error("NotFoundException: ", ex);
+        log.error("NotFoundException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }
 
-    @ExceptionHandler(DifferentPasswordsException.class)
+    @ExceptionHandler({
+            DifferentPasswordsException.class,
+            RequestInFriendsAlreadySendException.class,
+            UsersAlreadyFriendsException.class,
+            UsersNoFriendsException.class
+    })
     public ResponseEntity<ProblemDetail> handleConflictException(
-            final DifferentPasswordsException ex,
+            RuntimeException ex,
             Locale locale) {
 
         log.error("Executing handleConflictException");
@@ -57,7 +67,7 @@ public class IncorrectDataControllerAdvice {
                 ex.getMessage(),
                 locale);
 
-        log.error("ConflictException " + ex);
+        log.error("ConflictException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }

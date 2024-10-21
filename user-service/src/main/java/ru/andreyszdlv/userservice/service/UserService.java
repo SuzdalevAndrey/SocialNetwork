@@ -76,7 +76,7 @@ public class UserService {
 
             log.error("User password and the received password do not match");
 
-            throw new DifferentPasswordsException("errors.400.invalid_password");
+            throw new DifferentPasswordsException("errors.409.invalid_password");
         }
     }
 
