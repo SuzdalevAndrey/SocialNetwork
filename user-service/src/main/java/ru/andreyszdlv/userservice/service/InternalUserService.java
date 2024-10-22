@@ -8,6 +8,7 @@ import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
+import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
 
@@ -19,6 +20,8 @@ public class InternalUserService {
     private final UserRepo userRepository;
 
     private final KafkaProducerService kafkaProducerService;
+
+    private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
     public String getUserEmailByUserId(long userId) {
@@ -61,13 +64,7 @@ public class InternalUserService {
                         ()->new NoSuchUserException("errors.404.user_not_found")
                 );
 
-        return UserDetailsResponseDTO
-                .builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .role(user.getRole())
-                .build();
+        return userMapper.userToUserDetailsResponseDTO(user);
     }
 
     @Transactional
@@ -115,12 +112,6 @@ public class InternalUserService {
                         ()->new NoSuchUserException("errors.404.user_not_found")
                 );
 
-        return UserResponseDTO
-                .builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .build();
+        return userMapper.userToUserResponseDTO(user);
     }
 }

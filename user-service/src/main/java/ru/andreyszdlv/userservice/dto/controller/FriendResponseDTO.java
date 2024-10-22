@@ -3,7 +3,7 @@ package ru.andreyszdlv.userservice.dto.controller;
 import lombok.Builder;
 
 @Builder
-public record UserFriendResponseDTO(
+public record FriendResponseDTO(
         String name,
         String email
 )

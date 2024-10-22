@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.userservice.dto.controller.UserFriendResponseDTO;
+import ru.andreyszdlv.userservice.dto.controller.FriendResponseDTO;
 import ru.andreyszdlv.userservice.exception.NoSuchRequestFriendException;
 import ru.andreyszdlv.userservice.exception.UsersNoFriendsException;
 import ru.andreyszdlv.userservice.model.Friend;
@@ -67,7 +67,7 @@ public class FriendService {
         friendRepository.deleteByUserIdAndFriendId(friendId, userId);
     }
 
-    public List<UserFriendResponseDTO> getFriendsByUserId(long userId) {
+    public List<FriendResponseDTO> getFriendsByUserId(long userId) {
         log.info("Executing getFriendsById for userId={}", userId);
         return userRepository.findUserFriends(userId);
     }

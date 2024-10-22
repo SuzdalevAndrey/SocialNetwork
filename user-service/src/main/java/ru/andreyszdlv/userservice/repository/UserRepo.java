@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import ru.andreyszdlv.userservice.dto.controller.UserFriendResponseDTO;
+import ru.andreyszdlv.userservice.dto.controller.FriendResponseDTO;
 import ru.andreyszdlv.userservice.model.User;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public interface UserRepo extends JpaRepository<User,Long> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT new ru.andreyszdlv.userservice.dto.controller.UserFriendResponseDTO(u.name, u.email) " +
+    @Query("SELECT new ru.andreyszdlv.userservice.dto.controller.FriendResponseDTO(u.name, u.email) " +
             "FROM User u JOIN Friend f ON u.id = f.friendId WHERE f.userId = :userId")
-    List<UserFriendResponseDTO> findUserFriends(@Param("userId") Long userId);
+    List<FriendResponseDTO> findUserFriends(@Param("userId") Long userId);
 }

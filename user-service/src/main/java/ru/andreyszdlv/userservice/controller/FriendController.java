@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.userservice.dto.controller.UserFriendResponseDTO;
+import ru.andreyszdlv.userservice.dto.controller.FriendResponseDTO;
 import ru.andreyszdlv.userservice.service.FriendService;
 import ru.andreyszdlv.userservice.service.LocalizationService;
 import ru.andreyszdlv.userservice.service.TempFriendService;
@@ -32,7 +32,7 @@ public class FriendController {
     private final FriendService friendService;
 
     @GetMapping
-    public List<UserFriendResponseDTO> getFriends(@RequestHeader("X-User-Id") long userId){
+    public List<FriendResponseDTO> getFriends(@RequestHeader("X-User-Id") long userId){
         log.info("Executing getFriends for userId: {}", userId);
         return friendService.getFriendsByUserId(userId);
     }

@@ -8,6 +8,9 @@ import ru.andreyszdlv.postservice.model.Comment;
 public class CommentMapperImpl implements CommentMapper{
     @Override
     public CommentResponseDTO commentToCommentReponseDTO(Comment comment) {
+        if(comment == null)
+            return null;
+
         return CommentResponseDTO
                 .builder()
                 .id(comment.getId())

@@ -33,11 +33,9 @@ public class PostService {
         log.info("Executing getPostsByUserId for user id: {}", userId);
 
         log.info("Getting List<Post> for userId: {}", userId);
-        return postRepository
-                .findAllByUserId(userId)
-                .stream()
-                .map(postMapper::postToPostResponseDTO)
-                .toList();
+        return postMapper.listPostToListPostResponseDTO(
+                postRepository.findAllByUserId(userId)
+        );
     }
 
     @Transactional
