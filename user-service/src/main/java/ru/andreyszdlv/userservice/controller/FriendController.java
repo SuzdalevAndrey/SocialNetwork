@@ -32,9 +32,9 @@ public class FriendController {
     private final FriendService friendService;
 
     @GetMapping
-    public List<FriendResponseDTO> getFriends(@RequestHeader("X-User-Id") long userId){
+    public ResponseEntity<List<FriendResponseDTO>> getFriends(@RequestHeader("X-User-Id") long userId){
         log.info("Executing getFriends for userId: {}", userId);
-        return friendService.getFriendsByUserId(userId);
+        return ResponseEntity.ok(friendService.getFriendsByUserId(userId));
     }
 
     @PostMapping("/create-request/{friendId}")
