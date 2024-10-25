@@ -31,6 +31,7 @@ public class KafkaProducerService {
 
     public void sendEditEmailEvent(String oldEmail, String newEmail){
         log.info("Executing sendEditEmailEvent in kafka with oldEmail");
+        log.info("nameTopicEditEmail: "+ nameTopicEditEmail);
         kafkaTemplateEditEmail.send(
                 nameTopicEditEmail,
                 new EditEmailKafkaDTO(oldEmail, newEmail)
@@ -39,6 +40,7 @@ public class KafkaProducerService {
 
     public void sendEditPasswordEvent(String email){
         log.info("Executing sendEditPasswordEvent in kafka");
+        log.info("nameTopicEditPassword: "+ nameTopicEditPassword);
         kafkaTemplateEditPassword.send(
                 nameTopicEditPassword,
                 new EditPasswordKafkaDTO(email)
@@ -52,6 +54,7 @@ public class KafkaProducerService {
         log.info("Executing sendFailureSaveUserEvent in kafka with name, email: {}, password, role",
                 email
         );
+        log.info("nameTopicFailureSaveUser: "+ nameTopicFailureSaveUser);
         kafkaTemplateFailureSave.send(
                 nameTopicFailureSaveUser,
                 UserDetailsKafkaDTO

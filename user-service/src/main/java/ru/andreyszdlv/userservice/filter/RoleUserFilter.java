@@ -30,12 +30,12 @@ public class RoleUserFilter extends OncePerRequestFilter {
 
         String role = request.getHeader("X-User-Role");
 
-        String userId = request.getHeader("X-User-Id");
-
         if (role == null) {
             filterChain.doFilter(request, response);
             return;
         }
+
+        String userId = request.getHeader("X-User-Id");
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 userId,

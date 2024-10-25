@@ -26,10 +26,11 @@ import ru.andreyszdlv.userservice.repository.UserRepo;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.andreyszdlv.userservice.service.KafkaProducerService;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -145,7 +146,7 @@ class UserControllerIT {
         String email = "email@mail.ru";
         User user = new User();
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("000000"));
+        user.setPassword(passwordEncoder.encode(oldPassword));
         UpdatePasswordRequestDTO requestDTO = new UpdatePasswordRequestDTO(oldPassword, newPassword);
         long userId = userRepository.save(user).getId();
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -162,5 +163,76 @@ class UserControllerIT {
                 );
         assertTrue(passwordEncoder.matches(newPassword, userRepository.findById(userId).get().getPassword()));
         verify(kafkaProducerService, times(1)).sendEditPasswordEvent(email);
+    }
+
+    @Test
+    public void updatePasswordUser_Returns400_WhenPasswordInvalid() throws Exception{
+        long userId = 1L;
+        String oldPassword = "";
+        String newPassword = "";
+        UpdatePasswordRequestDTO requestDTO = new UpdatePasswordRequestDTO(oldPassword, newPassword);
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .patch("/api/user/change-password")
+                .header("X-User-Id", userId)
+                .header("X-User-Role", "USER")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO));
+
+        mockMvc.perform(request)
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON),
+                        jsonPath("$").exists()
+                );
+        verify(kafkaProducerService, times(0)).sendEditPasswordEvent(anyString());
+    }
+
+    @Test
+    public void updatePasswordUser_Returns404_WhenUserNoExists() throws Exception{
+        long userId = 1L;
+        String oldPassword = "000000";
+        String newPassword = "0000000";
+        UpdatePasswordRequestDTO requestDTO = new UpdatePasswordRequestDTO(oldPassword, newPassword);
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .patch("/api/user/change-password")
+                .header("X-User-Id", userId)
+                .header("X-User-Role", "USER")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO));
+
+        mockMvc.perform(request)
+                .andExpectAll(
+                        status().isNotFound(),
+                        content().contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON),
+                        jsonPath("$").exists()
+                );
+        verify(kafkaProducerService, times(0)).sendEditPasswordEvent(anyString());
+    }
+
+    @Test
+    public void updatePasswordUser_Returns409_WhenDifferentPasswords() throws Exception{
+        String oldPassword = "0000000";
+        String newPassword = "00000000";
+        String email = "email@mail.ru";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode("000000"));
+        UpdatePasswordRequestDTO requestDTO = new UpdatePasswordRequestDTO(oldPassword, newPassword);
+        long userId = userRepository.save(user).getId();
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .patch("/api/user/change-password")
+                .header("X-User-Id", userId)
+                .header("X-User-Role", "USER")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO));
+
+        mockMvc.perform(request)
+                .andExpectAll(
+                        status().isConflict(),
+                        content().contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON),
+                        jsonPath("$").exists()
+                );
+        assertFalse(passwordEncoder.matches(newPassword, userRepository.findById(userId).get().getPassword()));
+        verify(kafkaProducerService, times(0)).sendEditPasswordEvent(email);
     }
 }
