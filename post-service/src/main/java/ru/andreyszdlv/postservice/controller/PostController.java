@@ -81,14 +81,15 @@ public class PostController {
                 );
     }
 
-    @PatchMapping("/update")
-    public ResponseEntity<String> updatePost(@Valid @RequestBody UpdatePostRequestDTO request,
-                                           BindingResult bindingResult,
-                                           @RequestHeader("X-User-Id") long userId,
-                                           Locale locale)
+    @PatchMapping("/{postId}")
+    public ResponseEntity<String> updatePost(@PathVariable long postId,
+                                             @Valid @RequestBody UpdatePostRequestDTO request,
+                                             BindingResult bindingResult,
+                                             @RequestHeader("X-User-Id") long userId,
+                                             Locale locale)
             throws BindException {
         log.info("Executing updatePost for postId: {} with newContent: {}",
-                request.postId(),
+                postId,
                 request.content());
 
         if(bindingResult.hasErrors()){
@@ -101,12 +102,12 @@ public class PostController {
         }
 
         log.info("Validation successful, updating post with postId: {}, newContent: {}",
-                request.postId(),
+                postId,
                 request.content());
-        postService.updatePost(userId, request.postId(), request.content());
+        postService.updatePost(userId, postId, request.content());
 
         log.info("Post update successfully with postId: {}, newContent: {}",
-                request.postId(),
+                postId,
                 request.content());
 
         return ResponseEntity

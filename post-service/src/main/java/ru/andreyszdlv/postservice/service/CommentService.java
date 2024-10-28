@@ -65,9 +65,8 @@ public class CommentService {
         log.info("Getting a userId author post by postId");
         Long userIdAuthorPost = postRepository
                 .findById(postId)
-                .orElseThrow(
-                        ()->new NoSuchPostException("errors.404.post_not_found")
-                ).getUserId();
+                .get()
+                .getUserId();
         log.info("Successful get userId: {} author post by postId", userIdAuthorPost);
 
         log.info("Getting email author post by author id: {}", userIdAuthorPost);

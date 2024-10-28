@@ -88,19 +88,20 @@ class FriendControllerIT {
                 .header("X-User-Id", user1.getId())
                 .header("X-User-Role", "USER");
 
-        mockMvc.perform(request).andExpectAll(
-                status().isOk(),
-                content().json(
-                          """
-                          [
-                              {
-                                 "name": "name2",
-                                 "email":"email2"
-                              }
-                          ]
-                          """
-                )
-        );
+        mockMvc.perform(request)
+                .andExpectAll(
+                    status().isOk(),
+                    content().json(
+                              """
+                              [
+                                  {
+                                     "name": "name2",
+                                     "email":"email2"
+                                  }
+                              ]
+                              """
+                    )
+                );
     }
 
     @Test
