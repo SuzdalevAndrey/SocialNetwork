@@ -54,7 +54,7 @@ public class PostService {
 
         log.info("Successful create post with content: {}", content);
 
-        incrementMetrics(userId, post.getId());
+        incrementMetrics(userId, responsePost.getId());
 
         return postMapper.postToPostResponseDTO(responsePost);
     }

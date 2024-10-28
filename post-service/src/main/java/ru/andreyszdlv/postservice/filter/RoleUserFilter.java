@@ -21,7 +21,8 @@ import java.util.stream.Stream;
 @Slf4j
 @AllArgsConstructor
 @Component
-public class RoleUserFilter extends OncePerRequestFilter {
+public class
+RoleUserFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
