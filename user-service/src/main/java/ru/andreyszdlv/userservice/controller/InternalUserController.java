@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.service.InternalUserService;
@@ -65,11 +66,11 @@ public class InternalUserController {
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<UserResponseDTO> getUserByEmail(@PathVariable String email){
+    public ResponseEntity<InternalUserResponseDTO> getUserByEmail(@PathVariable String email){
         log.info("Executing getUserByEmail for email: {}", email);
 
         log.info("Getting user by email: {}", email);
-        UserResponseDTO userResponse = internalUserService.getUserByUserEmail(email);
+        InternalUserResponseDTO userResponse = internalUserService.getUserByUserEmail(email);
 
         log.info("Successfully get user by email: {}", email);
         return ResponseEntity.ok(userResponse);

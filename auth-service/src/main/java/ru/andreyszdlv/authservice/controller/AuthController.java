@@ -213,4 +213,9 @@ public class AuthController {
                 .status(HttpStatus.NO_CONTENT)
                 .build();
     }
+
+    @PostMapping
+    public ResponseEntity<String> hello(){
+        return ResponseEntity.ok("Hello!");
+    }
 }

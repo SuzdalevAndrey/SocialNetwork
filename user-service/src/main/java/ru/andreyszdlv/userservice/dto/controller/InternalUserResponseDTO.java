@@ -4,8 +4,9 @@ import lombok.Builder;
 import ru.andreyszdlv.userservice.enums.ERole;
 
 @Builder
-public record UserResponseDTO (
+public record InternalUserResponseDTO(
+        long id,
         String name,
         String email,
-        String idImage
+        ERole role
 ){ }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
@@ -195,7 +196,7 @@ class InternalUserServiceTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
         when(userMapper.userToUserResponseDTO(user)).thenReturn(mockUserDTO);
-        UserResponseDTO result = internalUserService.getUserByUserEmail(email);
+        InternalUserResponseDTO result = internalUserService.getUserByUserEmail(email);
 
         assertNotNull(result);
         assertEquals(email, result.email());

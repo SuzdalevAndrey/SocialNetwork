@@ -16,7 +16,7 @@ public interface UserRepo extends JpaRepository<User,Long> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT new ru.andreyszdlv.userservice.dto.controller.FriendResponseDTO(u.name, u.email) " +
+    @Query("SELECT new ru.andreyszdlv.userservice.dto.controller.FriendResponseDTO(u.name, u.idImage) " +
             "FROM User u JOIN Friend f ON u.id = f.friendId WHERE f.userId = :userId")
     List<FriendResponseDTO> findUserFriends(@Param("userId") Long userId);
 }

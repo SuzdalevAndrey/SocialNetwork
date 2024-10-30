@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
@@ -102,7 +103,7 @@ public class InternalUserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDTO getUserByUserEmail(String email) {
+    public InternalUserResponseDTO getUserByUserEmail(String email) {
         log.info("Executing getUserByUserEmail for email: {}", email);
 
         log.info("Getting user by email: {}", email);
@@ -112,6 +113,6 @@ public class InternalUserService {
                         ()->new NoSuchUserException("errors.404.user_not_found")
                 );
 
-        return userMapper.userToUserResponseDTO(user);
+        return userMapper.userToInternalUserResponseDTO(user);
     }
 }

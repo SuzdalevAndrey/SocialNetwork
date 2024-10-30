@@ -30,6 +30,8 @@ public class User implements UserDetails {
 
     private ERole role;
 
+    private String idImage;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

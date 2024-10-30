@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.validation.BindException;
+import ru.andreyszdlv.userservice.exception.ImageUploadException;
 import ru.andreyszdlv.userservice.service.LocalizationService;
 
 import java.util.Locale;
@@ -47,6 +48,26 @@ public class BadRequestControllerAdvice {
         );
 
         log.error("BindException: {}", problemDetail);
+
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<ProblemDetail> handleImageUploadException(ImageUploadException ex, Locale locale) {
+
+        log.error("Executing handleImageUploadException");
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                Optional.ofNullable(
+                        localizationService.getLocalizedMessage(
+                                ex.getMessage(),
+                                locale
+                        )
+                ).orElse("errors")
+        );
+
+        log.error("ImageUploadException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }
