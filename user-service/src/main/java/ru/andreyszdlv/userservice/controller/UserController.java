@@ -124,17 +124,24 @@ public class UserController {
     }
 
     @PostMapping("/avatar")
-    public ResponseEntity<String> uploadImage(@RequestHeader("X-User-Id") long userId,
+    public ResponseEntity<String> uploadAvatar(@RequestHeader("X-User-Id") long userId,
                                               @Valid @ModelAttribute UserImageRequestDTO imageDTO) {
-        log.info("Executing uploadImage for userId: {}", userId);
-        return ResponseEntity.status(HttpStatus.CREATED)
+        log.info("Executing uploadAvatar for userId: {}", userId);
+
+        log.info("Uploading avatar for userId: {}", userId);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .body(userService.uploadImage(userId, imageDTO));
     }
 
     @GetMapping("/my-avatar")
-    public ResponseEntity<byte[]> getAvatar(@RequestHeader("X-User-Id") long userId){
-        log.info("Executing getAvatar for userId: {}", userId);
+    public ResponseEntity<byte[]> getMyAvatar(@RequestHeader("X-User-Id") long userId){
+        log.info("Executing getMyAvatar for userId: {}", userId);
+
+        log.info("Getting user avatar for userId: {}", userId);
         ImageResponseDTO responseDTO = userService.getMyAvatar(userId);
+
+        log.info("Successfully getMyAvatar for userId: {}", userId);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.parseMediaType(responseDTO.contentType()))
@@ -142,9 +149,13 @@ public class UserController {
     }
 
     @GetMapping("/avatar/{idImage}")
-    public ResponseEntity<byte[]> getImage(@PathVariable String idImage){
-        log.info("Executing getImage for idImage: {}", idImage);
-        ImageResponseDTO responseDTO = userService.getAvatar(idImage);
+    public ResponseEntity<byte[]> getAvatarByIdImage(@PathVariable String idImage){
+        log.info("Executing getAvatarByIdImage for idImage: {}", idImage);
+
+        log.info("Getting user avatar for idImage: {}", idImage);
+        ImageResponseDTO responseDTO = userService.getAvatarByIdImage(idImage);
+
+        log.info("Successfully getAvatarByIdImage for idImage: {}", idImage);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.parseMediaType(responseDTO.contentType()))

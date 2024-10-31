@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.validation.BindException;
+import ru.andreyszdlv.userservice.exception.EmptyImageFileException;
 import ru.andreyszdlv.userservice.exception.ImageUploadException;
 import ru.andreyszdlv.userservice.service.LocalizationService;
 
@@ -32,14 +33,10 @@ public class BadRequestControllerAdvice {
 
         log.error("Executing handleBindException");
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        ProblemDetail problemDetail = createProblemDetail(
                 HttpStatus.BAD_REQUEST,
-                Optional.ofNullable(
-                        localizationService.getLocalizedMessage(
-                            "errors.400.request.title",
-                            locale
-                        )
-                ).orElse("errors")
+                "errors.400.request.title",
+                locale
         );
 
         problemDetail.setProperty(
@@ -52,24 +49,34 @@ public class BadRequestControllerAdvice {
         return ResponseEntity.of(problemDetail).build();
     }
 
-    @ExceptionHandler(ImageUploadException.class)
-    public ResponseEntity<ProblemDetail> handleImageUploadException(ImageUploadException ex, Locale locale) {
+    @ExceptionHandler({
+            EmptyImageFileException.class,
+            ImageUploadException.class,
+    })
+    public ResponseEntity<ProblemDetail> handleBadRequest(ImageUploadException ex, Locale locale) {
 
-        log.error("Executing handleImageUploadException");
+        log.error("Executing handleBadRequest");
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        ProblemDetail problemDetail = createProblemDetail(
                 HttpStatus.BAD_REQUEST,
-                Optional.ofNullable(
-                        localizationService.getLocalizedMessage(
-                                ex.getMessage(),
-                                locale
-                        )
-                ).orElse("errors")
+                ex.getMessage(),
+                locale
         );
 
-        log.error("ImageUploadException: {}", problemDetail);
+        log.error("BadRequest: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }
 
+    private ProblemDetail createProblemDetail(HttpStatus status, String message, Locale locale) {
+        return ProblemDetail.forStatusAndDetail(
+                status,
+                Optional.ofNullable(
+                        localizationService.getLocalizedMessage(
+                                message,
+                                locale
+                        )
+                ).orElse("errors")
+        );
+    }
 }

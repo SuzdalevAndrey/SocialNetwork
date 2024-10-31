@@ -12,6 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
+import ru.andreyszdlv.userservice.exception.NoSuchImageException;
 import ru.andreyszdlv.userservice.exception.NoSuchRequestFriendException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.exception.RequestInFriendsAlreadySendException;
@@ -33,6 +34,7 @@ public class IncorrectDataControllerAdvice {
     @ExceptionHandler({
             NoSuchUserException.class,
             NoSuchRequestFriendException.class,
+            NoSuchImageException.class
     })
     public ResponseEntity<ProblemDetail> handleNotFoundException(
             RuntimeException ex,

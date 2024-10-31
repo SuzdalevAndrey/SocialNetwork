@@ -6,6 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 public record UserImageRequestDTO(
 
         @NotNull(message = "{data.user.image.is_empty}")
-        MultipartFile multipartFile
+        MultipartFile file
 ) {
 }

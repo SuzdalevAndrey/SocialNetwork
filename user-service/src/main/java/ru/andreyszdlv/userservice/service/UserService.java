@@ -112,7 +112,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ImageResponseDTO getAvatar(String idImage) {
+    public ImageResponseDTO getAvatarByIdImage(String idImage) {
         log.info("Executing getAvatar for idImage: {}", idImage);
 
         log.info("Getting image for idImage: {}", idImage);
