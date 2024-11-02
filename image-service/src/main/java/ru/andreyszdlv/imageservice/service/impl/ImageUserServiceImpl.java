@@ -1,14 +1,14 @@
 package ru.andreyszdlv.imageservice.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.andreyszdlv.imageservice.api.userservice.UserServiceFeignClient;
-import ru.andreyszdlv.imageservice.dto.IdImageRequestDTO;
-import ru.andreyszdlv.imageservice.dto.ImageRequestDTO;
-import ru.andreyszdlv.imageservice.dto.ImageResponseDTO;
+import ru.andreyszdlv.imageservice.dto.controller.IdImageRequestDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageRequestDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageResponseDTO;
 import ru.andreyszdlv.imageservice.props.MinioProperties;
 import ru.andreyszdlv.imageservice.service.ImageUserService;
+import ru.andreyszdlv.imageservice.service.KafkaProducerService;
 import ru.andreyszdlv.imageservice.service.MinioService;
 
 
@@ -20,15 +20,19 @@ public class ImageUserServiceImpl implements ImageUserService {
 
     private final String bucketName;
 
+    private final KafkaProducerService kafkaProducerService;
+
     private final UserServiceFeignClient userServiceFeignClient;
 
     ImageUserServiceImpl(
             MinioService minioService,
             MinioProperties minioProperties,
-            UserServiceFeignClient userServiceFeignClient){
+            UserServiceFeignClient userServiceFeignClient,
+            KafkaProducerService kafkaProducerService){
         this.minioService = minioService;
         this.bucketName = minioProperties.getBucketUserAvatar();
         this.userServiceFeignClient = userServiceFeignClient;
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     @Override
@@ -36,15 +40,18 @@ public class ImageUserServiceImpl implements ImageUserService {
         log.info("Executing saveImage for user: {}", userId);
 
         log.info("Saving image for user: {}", userId);
-        String imageId = minioService.upload(
+        String newImageId = minioService.upload(
                 image.file(),
                 bucketName
         );
 
-        log.info("Sending idImage: {} in user-service for user: {}", imageId, userId);
-        userServiceFeignClient.saveUserIdImage(userId, new IdImageRequestDTO(imageId));
+        log.info("Send data userId: {}, imageId: {} in kafka for saveImageIdEvent",
+                userId,
+                newImageId
+        );
+        kafkaProducerService.sendSaveImageIdEvent(userId, newImageId);
 
-        return imageId;
+        return newImageId;
     }
 
     @Override
@@ -59,5 +66,24 @@ public class ImageUserServiceImpl implements ImageUserService {
                 imageId,
                 bucketName
         );
+    }
+
+    @Override
+    public void deleteAvatar(long userId) {
+        log.info("Executing deleteAvatar for user: {}", userId);
+
+        log.info("Retrieving imageId for user: {} from user-service", userId);
+        String imageId = userServiceFeignClient.deleteImageIdByUserId(userId).getBody();
+
+        log.info("Deleting image: {}", imageId);
+        minioService.deleteImage(imageId, bucketName);
+    }
+
+    @Override
+    public void deleteImage(String imageId) {
+        log.info("Executing deleteImage for imageId: {}", imageId);
+
+        log.info("Deleting image: {}", imageId);
+        minioService.deleteImage(imageId, bucketName);
     }
 }

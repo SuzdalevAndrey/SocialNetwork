@@ -7,42 +7,41 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.FailureSaveImageIdKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.SuccessSaveImageIdKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
+import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducerService {
-    @Value("${spring.kafka.producer.topic.name.edit-email}")
-    private String nameTopicEditEmail;
 
-    @Value("${spring.kafka.producer.topic.name.edit-password}")
-    private String nameTopicEditPassword;
-
-    @Value("${spring.kafka.producer.topic.name.failure-save-user}")
-    private String nameTopicFailureSaveUser;
+    private final KafkaProducerProperties producerProperties;
 
     private final KafkaTemplate<String, EditEmailKafkaDTO> kafkaTemplateEditEmail;
 
     private final KafkaTemplate<String, EditPasswordKafkaDTO> kafkaTemplateEditPassword;
 
-    private final KafkaTemplate<String, UserDetailsKafkaDTO> kafkaTemplateFailureSave;
+    private final KafkaTemplate<String, UserDetailsKafkaDTO> kafkaTemplateFailureSaveUser;
+
+    private final KafkaTemplate<String, FailureSaveImageIdKafkaDTO> kafkaTemplateFailureSaveImageId;
+
+    private final KafkaTemplate<String, SuccessSaveImageIdKafkaDTO> kafkaTemplateSuccessSaveImageId;
 
     public void sendEditEmailEvent(String oldEmail, String newEmail){
         log.info("Executing sendEditEmailEvent in kafka with oldEmail");
-        log.info("nameTopicEditEmail: "+ nameTopicEditEmail);
         kafkaTemplateEditEmail.send(
-                nameTopicEditEmail,
+                producerProperties.getTopicNameEditEmail(),
                 new EditEmailKafkaDTO(oldEmail, newEmail)
         );
     }
 
     public void sendEditPasswordEvent(String email){
         log.info("Executing sendEditPasswordEvent in kafka");
-        log.info("nameTopicEditPassword: "+ nameTopicEditPassword);
         kafkaTemplateEditPassword.send(
-                nameTopicEditPassword,
+                producerProperties.getTopicNameEditPassword(),
                 new EditPasswordKafkaDTO(email)
         );
     }
@@ -54,9 +53,8 @@ public class KafkaProducerService {
         log.info("Executing sendFailureSaveUserEvent in kafka with name, email: {}, password, role",
                 email
         );
-        log.info("nameTopicFailureSaveUser: "+ nameTopicFailureSaveUser);
-        kafkaTemplateFailureSave.send(
-                nameTopicFailureSaveUser,
+        kafkaTemplateFailureSaveUser.send(
+                producerProperties.getTopicNameFailureSaveUser(),
                 UserDetailsKafkaDTO
                         .builder()
                         .name(name)
@@ -64,6 +62,26 @@ public class KafkaProducerService {
                         .password(password)
                         .role(role)
                         .build()
+        );
+    }
+
+    public void sendFailureSaveImageIdEvent(String newImageId){
+        log.info("Executing sendFailureSaveImageIdEvent in kafka with newImageId: {}",
+                newImageId
+        );
+        kafkaTemplateFailureSaveImageId.send(
+                producerProperties.getTopicNameFailureSaveImageId(),
+                new FailureSaveImageIdKafkaDTO(newImageId)
+        );
+    }
+
+    public void sendSuccessSaveImageIdEvent(String oldImageId){
+        log.info("Executing sendSuccessSaveImageIdEvent in kafka with oldImageId: {}",
+                oldImageId
+        );
+        kafkaTemplateSuccessSaveImageId.send(
+                producerProperties.getTopicNameSuccessSaveImageId(),
+                new SuccessSaveImageIdKafkaDTO(oldImageId)
         );
     }
 

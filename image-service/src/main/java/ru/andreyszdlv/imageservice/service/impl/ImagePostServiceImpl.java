@@ -2,8 +2,8 @@ package ru.andreyszdlv.imageservice.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.andreyszdlv.imageservice.dto.ImageRequestDTO;
-import ru.andreyszdlv.imageservice.dto.ImageResponseDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageRequestDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageResponseDTO;
 import ru.andreyszdlv.imageservice.props.MinioProperties;
 import ru.andreyszdlv.imageservice.service.ImagePostService;
 import ru.andreyszdlv.imageservice.service.MinioService;

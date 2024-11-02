@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
+import ru.andreyszdlv.userservice.props.KafkaConsumerProperties;
 import ru.andreyszdlv.userservice.service.InternalUserService;
 import ru.andreyszdlv.userservice.service.UserService;
 
@@ -20,8 +21,8 @@ public class SaveUserEventListener {
     private final InternalUserService internalUserService;
 
     @KafkaListener(
-            topics = "${spring.kafka.consumer.topic.name.save-user}",
-            groupId = "${spring.kafka.consumer.group-id}"
+            topics = "#{@kafkaConsumerProperties.topicNameSaveUser}",
+            groupId = "#{@kafkaConsumerProperties.groupId}"
     )
     public void listen(String messageUser)
             throws JsonProcessingException {

@@ -1,7 +1,7 @@
 package ru.andreyszdlv.imageservice.service;
 
-import ru.andreyszdlv.imageservice.dto.ImageRequestDTO;
-import ru.andreyszdlv.imageservice.dto.ImageResponseDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageRequestDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageResponseDTO;
 
 public interface ImagePostService {
 

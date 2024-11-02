@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.userservice.dto.controller.IdImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
@@ -103,12 +102,23 @@ public class InternalUserService {
     }
 
     @Transactional
-    public void saveIdImage(long userId, IdImageRequestDTO idImageRequestDTO) {
+    public void saveImageId(long userId, String newImageId) {
         log.info("Executing saveIdImage for userId: {}", userId);
         User user = userService.getUserById(userId);
 
-        log.info("Saving id image for user: {}", userId);
-        user.setIdImage(idImageRequestDTO.idImage());
+        String oldImageId = user.getIdImage();
+
+        try {
+            log.info("Saving id image for user: {}", userId);
+            user.setIdImage(newImageId);
+
+            log.info("Sending success save image id event in kafka for oldImageId: {}", oldImageId);
+            kafkaProducerService.sendSuccessSaveImageIdEvent(oldImageId);
+        }
+        catch (Exception e){
+            log.info("Sending failure save image id event in kafka for newImageId: {}", newImageId);
+            kafkaProducerService.sendFailureSaveImageIdEvent(newImageId);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -117,5 +127,17 @@ public class InternalUserService {
         User user = userService.getUserById(userId);
 
         return user.getIdImage();
+    }
+
+    @Transactional
+    public String deleteImageIdByUserId(long userId) {
+        log.info("Executing deleteImageIdByUserId for userId: {}", userId);
+        User user = userService.getUserById(userId);
+
+        String imageId = user.getIdImage();
+
+        user.setIdImage(null);
+
+        return imageId;
     }
 }

@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.imageservice.dto.ImageRequestDTO;
-import ru.andreyszdlv.imageservice.dto.ImageResponseDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageRequestDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageResponseDTO;
 import ru.andreyszdlv.imageservice.service.ImagePostService;
 
 @RestController

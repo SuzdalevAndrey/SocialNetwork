@@ -2,19 +2,14 @@ package ru.andreyszdlv.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.userservice.dto.controller.IdImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
-import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.service.InternalUserService;
 
 @RestController
@@ -81,20 +76,17 @@ public class InternalUserController {
         return ResponseEntity.ok(userResponse);
     }
 
-    @PostMapping("/save-id-image/{userId}")
-    public ResponseEntity<Void> saveUserIdImage(@PathVariable long userId,
-                                                @RequestBody IdImageRequestDTO requestDTO) {
-
-        internalUserService.saveIdImage(userId, requestDTO);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .build();
-    }
-
     @GetMapping("/{userId}/idImage")
     public ResponseEntity<String> getIdImageByUserId(@PathVariable long userId) {
 
         return ResponseEntity.ok(internalUserService.getIdImageByUserId(userId));
+    }
+
+    @DeleteMapping("/{userId}/imageId")
+    ResponseEntity<String> deleteImageIdByUserId(@PathVariable long userId){
+
+        String imageId = internalUserService.deleteImageIdByUserId(userId);
+
+        return ResponseEntity.ok(imageId);
     }
 }

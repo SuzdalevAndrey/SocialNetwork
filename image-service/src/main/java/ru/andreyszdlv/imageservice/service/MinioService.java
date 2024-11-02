@@ -5,19 +5,19 @@ import io.minio.GetObjectArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import lombok.Getter;
+import io.minio.RemoveObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.andreyszdlv.imageservice.dto.ImageResponseDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageResponseDTO;
 import ru.andreyszdlv.imageservice.exception.CreateBucketException;
+import ru.andreyszdlv.imageservice.exception.DeleteImageException;
 import ru.andreyszdlv.imageservice.exception.EmptyImageFileException;
 import ru.andreyszdlv.imageservice.exception.ImageInputStreamCreationException;
 import ru.andreyszdlv.imageservice.exception.ImageUploadException;
 import ru.andreyszdlv.imageservice.exception.NoSuchImageException;
-import ru.andreyszdlv.imageservice.props.MinioProperties;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -145,6 +145,24 @@ public class MinioService {
         } catch (Exception e) {
             log.error("Error: get image failed");
             throw new NoSuchImageException("errors.404.image_not_found");
+        }
+    }
+
+    public void deleteImage(String imageId, String bucketName) {
+        log.info("Executing deleteImage for imageId: {} and bucketName: {}", imageId, bucketName);
+
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs
+                            .builder()
+                            .bucket(bucketName)
+                            .object(imageId)
+                            .build()
+            );
+        }
+        catch (Exception e){
+            log.error("Error: delete image failed");
+            throw new DeleteImageException("errors.500.image_delete_failed");
         }
     }
 }

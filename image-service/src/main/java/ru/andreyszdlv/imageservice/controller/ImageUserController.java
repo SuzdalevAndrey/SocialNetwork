@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.imageservice.dto.ImageRequestDTO;
-import ru.andreyszdlv.imageservice.dto.ImageResponseDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageRequestDTO;
+import ru.andreyszdlv.imageservice.dto.controller.ImageResponseDTO;
 import ru.andreyszdlv.imageservice.service.ImageUserService;
 
 @RestController
@@ -66,5 +67,14 @@ public class ImageUserController {
                 .ok()
                 .contentType(MediaType.parseMediaType(responseDTO.contentType()))
                 .body(responseDTO.content());
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMyAvatar(@RequestHeader("X-User-Id") long userId){
+        log.info("Executing deleteMyAvatar for user: {}", userId);
+
+        imageUserService.deleteAvatar(userId);
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,5 +1,6 @@
 package ru.andreyszdlv.userservice.configuration;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -14,31 +15,25 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.FailureSaveImageIdKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.SuccessSaveImageIdKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
+import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
 
 import java.util.HashMap;
 
 @Configuration
 @EnableKafka
+@RequiredArgsConstructor
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
-    private String kafkaBootstrapServers;
-
-    @Value("${spring.kafka.producer.topic.name.edit-email}")
-    private String nameTopicEditEmail;
-
-    @Value("${spring.kafka.producer.topic.name.edit-password}")
-    private String nameTopicEditPassword;
-
-    @Value("${spring.kafka.producer.topic.name.failure-save-user}")
-    private String nameTopicFailureSaveUser;
+    private final KafkaProducerProperties producerProperties;
 
     @Bean
     public ProducerFactory<String, EditEmailKafkaDTO> editEmailProducerFactory() {
         HashMap<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -56,7 +51,7 @@ public class KafkaProducerConfig {
     public ProducerFactory<String, EditPasswordKafkaDTO> editPasswordProducerFactory() {
         HashMap<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -74,7 +69,7 @@ public class KafkaProducerConfig {
     public ProducerFactory<String, UserDetailsKafkaDTO> failureSaveUserProducerFactory() {
         HashMap<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -89,9 +84,45 @@ public class KafkaProducerConfig {
     }
 
     @Bean
+    public ProducerFactory<String, FailureSaveImageIdKafkaDTO> failureSaveImageIdProducerFactory() {
+        HashMap<String, Object> props = new HashMap<>();
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProperties.getBootstrapServers());
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    @Bean
+    public KafkaTemplate<String, FailureSaveImageIdKafkaDTO> failureSaveImageIdKafkaTemplate(
+            ProducerFactory<String, FailureSaveImageIdKafkaDTO> producerFactory
+    ) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public ProducerFactory<String, SuccessSaveImageIdKafkaDTO> successSaveUserProducerFactory() {
+        HashMap<String, Object> props = new HashMap<>();
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProperties.getBootstrapServers());
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    @Bean
+    public KafkaTemplate<String, SuccessSaveImageIdKafkaDTO> successSaveUserKafkaTemplate(
+            ProducerFactory<String, SuccessSaveImageIdKafkaDTO> producerFactory
+    ) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
     public NewTopic newTopicFailureSaveUser(){
         return TopicBuilder
-                .name(nameTopicFailureSaveUser)
+                .name(producerProperties.getTopicNameFailureSaveUser())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -100,7 +131,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicEditEmail(){
         return TopicBuilder
-                .name(nameTopicEditEmail)
+                .name(producerProperties.getTopicNameEditEmail())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -109,7 +140,25 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicEditPassword(){
         return TopicBuilder
-                .name(nameTopicEditPassword)
+                .name(producerProperties.getTopicNameEditPassword())
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic newTopicFailureSaveImageId(){
+        return TopicBuilder
+                .name(producerProperties.getTopicNameFailureSaveImageId())
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic newTopicSuccessSaveImageId(){
+        return TopicBuilder
+                .name(producerProperties.getTopicNameSuccessSaveImageId())
                 .partitions(1)
                 .replicas(1)
                 .build();

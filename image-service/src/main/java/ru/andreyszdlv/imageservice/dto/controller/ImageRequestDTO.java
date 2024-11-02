@@ -1,4 +1,4 @@
-package ru.andreyszdlv.imageservice.dto;
+package ru.andreyszdlv.imageservice.dto.controller;
 
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
