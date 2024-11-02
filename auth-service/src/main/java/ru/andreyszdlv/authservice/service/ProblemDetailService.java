@@ -1,4 +1,4 @@
-package ru.andreyszdlv.imageservice.service;
+package ru.andreyszdlv.authservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +15,7 @@ public class ProblemDetailService {
 
     private final LocalizationService localizationService;
 
-    public ProblemDetail createProblemDetail(HttpStatus status,
-                                             String message,
-                                             Locale locale) {
+    public ProblemDetail createProblemDetail(HttpStatus status, String message, Locale locale) {
         log.info("Executing createProblemDetail for message {}", message);
 
         return ProblemDetail.forStatusAndDetail(
@@ -28,5 +26,4 @@ public class ProblemDetailService {
                 )
         );
     }
-
 }

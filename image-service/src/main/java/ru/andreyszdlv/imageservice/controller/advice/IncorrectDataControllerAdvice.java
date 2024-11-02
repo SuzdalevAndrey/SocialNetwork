@@ -7,8 +7,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.andreyszdlv.imageservice.exception.EmptyImageFileException;
-import ru.andreyszdlv.imageservice.exception.ImageUploadException;
 import ru.andreyszdlv.imageservice.exception.NoSuchImageException;
 import ru.andreyszdlv.imageservice.service.ProblemDetailService;
 

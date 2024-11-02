@@ -10,31 +10,27 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.andreyszdlv.postservice.service.LocalizationService;
+import ru.andreyszdlv.postservice.service.ProblemDetailService;
 
 import java.util.Locale;
-import java.util.Optional;
 
 @Slf4j
 @ControllerAdvice
 @AllArgsConstructor
 public class BadRequestControllerAdvice {
 
-    private final LocalizationService localizationService;
+    private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<ProblemDetail> handleBadRequest(BindException ex, Locale locale){
+    public ResponseEntity<ProblemDetail> handleBadRequest(BindException ex, Locale locale) {
         log.error("Executing handleBindException");
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
                 HttpStatus.BAD_REQUEST,
-                Optional.ofNullable(
-                        localizationService.getLocalizedMessage(
-                            "error.400.request.title",
-                            locale
-                        )
-                ).orElse("errors")
+                "error.400.request.title",
+                locale
         );
+
         problemDetail.setProperty(
                 "errors",
                 ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList());

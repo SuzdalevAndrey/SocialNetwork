@@ -1,8 +1,7 @@
 package ru.andreyszdlv.authservice.controller.advice;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +13,16 @@ import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
 import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
-import ru.andreyszdlv.authservice.service.LocalizationService;
+import ru.andreyszdlv.authservice.service.ProblemDetailService;
 
 import java.util.Locale;
 
 @Slf4j
 @ControllerAdvice
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class IncorrectDataControllerAdvice {
 
-    private final LocalizationService localizationService;
+    private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler({
             UsernameNotFoundException.class,
@@ -35,9 +34,11 @@ public class IncorrectDataControllerAdvice {
 
         log.error("Executing handleNotFoundException in IncorrectDataControllerAdvice");
 
-        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.NOT_FOUND,
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
+                HttpStatus.NOT_FOUND,
                 ex.getMessage(),
-                locale);
+                locale
+        );
 
         log.error("NotFoundException: {}", problemDetail);
 
@@ -56,26 +57,14 @@ public class IncorrectDataControllerAdvice {
     ) {
         log.error("Executing handleConflictException in IncorrectDataControllerAdvice");
 
-        ProblemDetail problemDetail = generateProblemDetail(HttpStatus.CONFLICT,
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
+                HttpStatus.CONFLICT,
                 ex.getMessage(),
-                locale);
+                locale
+        );
 
         log.error("ConflictException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
-    }
-
-    private ProblemDetail generateProblemDetail(HttpStatus status,
-                                                String message,
-                                                Locale locale){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                status,
-                localizationService.getLocalizedMessage(
-                        message,
-                        locale
-                )
-        );
-
-        return problemDetail;
     }
 }

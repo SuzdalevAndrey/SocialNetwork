@@ -11,24 +11,23 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.validation.BindException;
-import ru.andreyszdlv.userservice.service.LocalizationService;
+import ru.andreyszdlv.userservice.service.ProblemDetailService;
 
 import java.util.Locale;
-import java.util.Optional;
 
 @Slf4j
 @ControllerAdvice
 @AllArgsConstructor
 public class BadRequestControllerAdvice {
 
-    private final LocalizationService localizationService;
+    private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(final BindException ex, Locale locale) {
 
         log.error("Executing handleBindException");
 
-        ProblemDetail problemDetail = createProblemDetail(
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
                 HttpStatus.BAD_REQUEST,
                 "errors.400.request.title",
                 locale
@@ -42,17 +41,5 @@ public class BadRequestControllerAdvice {
         log.error("BindException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
-    }
-
-    private ProblemDetail createProblemDetail(HttpStatus status, String message, Locale locale) {
-        return ProblemDetail.forStatusAndDetail(
-                status,
-                Optional.ofNullable(
-                        localizationService.getLocalizedMessage(
-                                message,
-                                locale
-                        )
-                ).orElse("errors")
-        );
     }
 }

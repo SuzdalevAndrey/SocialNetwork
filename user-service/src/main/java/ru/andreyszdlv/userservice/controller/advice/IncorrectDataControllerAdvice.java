@@ -13,17 +13,16 @@ import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.exception.RequestInFriendsAlreadySendException;
 import ru.andreyszdlv.userservice.exception.UsersAlreadyFriendsException;
 import ru.andreyszdlv.userservice.exception.UsersNoFriendsException;
-import ru.andreyszdlv.userservice.service.LocalizationService;
+import ru.andreyszdlv.userservice.service.ProblemDetailService;
 
 import java.util.Locale;
-import java.util.Optional;
 
 @Slf4j
 @ControllerAdvice
 @AllArgsConstructor
 public class IncorrectDataControllerAdvice {
 
-    private final LocalizationService localizationService;
+    private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler({
             NoSuchUserException.class,
@@ -35,10 +34,11 @@ public class IncorrectDataControllerAdvice {
 
         log.error("Executing handleNotFoundException");
 
-        ProblemDetail problemDetail = createProbemDetail(
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
                 HttpStatus.NOT_FOUND,
                 ex.getMessage(),
-                locale);
+                locale
+        );
 
         log.error("NotFoundException: {}", problemDetail);
 
@@ -57,25 +57,14 @@ public class IncorrectDataControllerAdvice {
 
         log.error("Executing handleConflictException");
 
-        ProblemDetail problemDetail = createProbemDetail(
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
                 HttpStatus.CONFLICT,
                 ex.getMessage(),
-                locale);
+                locale
+        );
 
         log.error("ConflictException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
-    }
-
-    private ProblemDetail createProbemDetail(HttpStatus status, String message, Locale locale){
-        return ProblemDetail.forStatusAndDetail(
-                status,
-                Optional.ofNullable(
-                        localizationService.getLocalizedMessage(
-                                message,
-                                locale
-                        )
-                ).orElse("errors")
-        );
     }
 }

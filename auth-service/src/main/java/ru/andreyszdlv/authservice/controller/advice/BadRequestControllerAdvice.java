@@ -3,9 +3,6 @@ package ru.andreyszdlv.authservice.controller.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -13,34 +10,30 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.andreyszdlv.authservice.service.LocalizationService;
+import ru.andreyszdlv.authservice.service.ProblemDetailService;
 
 import java.util.Locale;
-import java.util.Optional;
 
 @Slf4j
 @ControllerAdvice
 @AllArgsConstructor
 public class BadRequestControllerAdvice {
 
-    private final LocalizationService localizationService;
+    private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(final BindException ex, Locale locale) {
         log.error("Executing handleBindException in BadRequestControllerAdvice");
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
                 HttpStatus.BAD_REQUEST,
-                Optional.ofNullable(
-                        localizationService.getLocalizedMessage(
-                            "errors.400.request.title",
-                            locale
-                        )
-                ).orElse("errors")
+                "errors.400.request.title",
+                locale
         );
+
         problemDetail.setProperty(
                 "errors",
-            ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()
+                ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()
         );
 
         log.error("Bad request: {}", problemDetail);

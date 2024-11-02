@@ -3,11 +3,7 @@ package ru.andreyszdlv.postservice.controller.advice;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -18,10 +14,9 @@ import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
-import ru.andreyszdlv.postservice.service.LocalizationService;
+import ru.andreyszdlv.postservice.service.ProblemDetailService;
 
 import java.util.Locale;
-import java.util.Optional;
 
 
 @Slf4j
@@ -29,16 +24,18 @@ import java.util.Optional;
 @AllArgsConstructor
 public class IncorrectDataControllerAdvice {
 
-    private final LocalizationService localizationService;
+    private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler(FeignException.FeignClientException.class)
     public ResponseEntity<ProblemDetail> handleFeignException(FeignException ex,
                                                               Locale locale){
         log.error("Executing handleFeignException");
 
-        ProblemDetail problemDetail = createProbemDetail(HttpStatus.valueOf(ex.status()),
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
+                HttpStatus.valueOf(ex.status()),
                 ex.getMessage(),
-                locale);
+                locale
+        );
 
         log.error("FeignException: {}", problemDetail);
 
@@ -55,7 +52,7 @@ public class IncorrectDataControllerAdvice {
             Locale locale){
         log.error("Executing handleNotFoundException");
 
-        ProblemDetail problemDetail = createProbemDetail(
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
                 HttpStatus.NOT_FOUND,
                 ex.getMessage(),
                 locale
@@ -76,7 +73,7 @@ public class IncorrectDataControllerAdvice {
             Locale locale){
         log.error("Executing handleConflictException");
 
-        ProblemDetail problemDetail = createProbemDetail(
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
                 HttpStatus.CONFLICT,
                 ex.getMessage(),
                 locale
@@ -85,17 +82,5 @@ public class IncorrectDataControllerAdvice {
         log.error("ConflictException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
-    }
-
-    private ProblemDetail createProbemDetail(HttpStatus status, String message, Locale locale){
-        return ProblemDetail.forStatusAndDetail(
-                status,
-                Optional.ofNullable(
-                        localizationService.getLocalizedMessage(
-                                message,
-                                locale
-                        )
-                ).orElse("errors")
-        );
     }
 }
