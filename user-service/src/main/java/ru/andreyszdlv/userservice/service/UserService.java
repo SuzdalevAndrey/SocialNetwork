@@ -6,16 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.userservice.dto.controller.ImageResponseDTO;
-import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
-import ru.andreyszdlv.userservice.dto.controller.UserImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
-import ru.andreyszdlv.userservice.enums.ERole;
 
 @Slf4j
 @Service
@@ -30,15 +26,13 @@ public class UserService {
 
     private final MeterRegistry meterRegistry;
 
-    private final ImageService imageService;
-
     private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
     public UserResponseDTO getUserProfileById(long userId) {
         log.info("Executing getUserById for id: {}", userId);
 
-        User user = getUserFromBDById(userId);
+        User user = getUserById(userId);
 
         return userMapper.userToUserResponseDTO(user);
     }
@@ -50,7 +44,7 @@ public class UserService {
                 userId,
                 newEmail);
 
-        User user = getUserFromBDById(userId);
+        User user = getUserById(userId);
 
         String oldEmail = user.getEmail();
 
@@ -68,7 +62,7 @@ public class UserService {
 
         log.info("Executing updatePasswordUser for userId: {}", userId);
 
-        User user = getUserFromBDById(userId);
+        User user = getUserById(userId);
 
         log.info("Checking password comparison for userId: {}", userId);
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
@@ -88,41 +82,57 @@ public class UserService {
         }
     }
 
-    @Transactional
-    public String uploadImage(long userId, UserImageRequestDTO imageDTO) {
-        log.info("Executing uploadImage for userId: {}", userId);
-        User user = getUserFromBDById(userId);
+//    @Transactional
+//    public String uploadImage(long userId, ImageRequestDTO imageDTO) {
+//        log.info("Executing uploadImage for userId: {}", userId);
+//        User user = getUserById(userId);
+//
+//        log.info("Uploading image fro userId: {}", userId);
+//        String idImage = imageServiceFeignClient.saveAvatarUser(imageDTO).getBody();
+//
+//        log.info("Setting id image for user: {}", userId);
+//        user.setIdImage(idImage);
+//        return idImage;
+//    }
 
-        log.info("Uploading image fro userId: {}", userId);
-        String idImage = imageService.upload(imageDTO);
-
-        log.info("Setting id image for user: {}", userId);
-        user.setIdImage(idImage);
-        return idImage;
-    }
+//    @Transactional(readOnly = true)
+//    public ImageResponseDTO getMyAvatar(long userId) {
+//        log.info("Executing getMyAvatar for userId: {}", userId);
+//
+//        User user = getUserById(userId);
+//
+//        log.info("Getting avatar for userId: {}", userId);
+//        return imageServiceFeignClient.getUserAvatar(user.getIdImage()).getBody();
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public ImageResponseDTO getAvatarByIdImage(String idImage) {
+//        log.info("Executing getAvatar for idImage: {}", idImage);
+//
+//        log.info("Getting image for idImage: {}", idImage);
+//        return imageServiceFeignClient.getUserAvatar(idImage).getBody();
+//    }
 
     @Transactional(readOnly = true)
-    public ImageResponseDTO getMyAvatar(long userId) {
-        log.info("Executing getMyAvatar for userId: {}", userId);
+    public User getUserById(long id){
+        log.info("Executing getUserById");
 
-        User user = getUserFromBDById(userId);
-
-        log.info("Getting avatar for userId: {}", userId);
-        return imageService.getImage(user.getIdImage());
-    }
-
-    @Transactional(readOnly = true)
-    public ImageResponseDTO getAvatarByIdImage(String idImage) {
-        log.info("Executing getAvatar for idImage: {}", idImage);
-
-        log.info("Getting image for idImage: {}", idImage);
-        return imageService.getImage(idImage);
-    }
-
-    private User getUserFromBDById(long id){
         log.info("Getting user by id: {}", id);
         User user = userRepository
                 .findById(id)
+                .orElseThrow(
+                        ()->new NoSuchUserException("errors.404.user_not_found")
+                );
+        return user;
+    }
+
+    @Transactional
+    public User getUserByEmail(String email){
+        log.info("Executing getUserByEmail");
+
+        log.info("Getting user by email: {}", email);
+        User user = userRepository
+                .findByEmail(email)
                 .orElseThrow(
                         ()->new NoSuchUserException("errors.404.user_not_found")
                 );

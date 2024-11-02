@@ -1,4 +1,4 @@
-package ru.andreyszdlv.userservice.exception;
+package ru.andreyszdlv.imageservice.exception;
 
 public class EmptyImageFileException extends RuntimeException{
     public EmptyImageFileException(String message) {

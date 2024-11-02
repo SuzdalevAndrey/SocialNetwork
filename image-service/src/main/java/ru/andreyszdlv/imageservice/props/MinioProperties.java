@@ -1,4 +1,4 @@
-package ru.andreyszdlv.userservice.props;
+package ru.andreyszdlv.imageservice.props;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,5 +11,6 @@ public class MinioProperties {
     String endpoint;
     String accessKey;
     String secretKey;
-    String bucket;
+    String bucketUserAvatar;
+    String bucketPost;
 }

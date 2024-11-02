@@ -18,6 +18,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.andreyszdlv.userservice.configuration.KafkaConsumerConfig;
 import ru.andreyszdlv.userservice.configuration.KafkaProducerConfig;
+import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.listener.SaveUserEventListener;
@@ -208,7 +209,7 @@ class InternalUserControllerIT {
         user.setName(name);
         user.setEmail(email);
         long userId = userRepository.save(user).getId();
-        UserResponseDTO responseDTO = UserResponseDTO
+        InternalUserResponseDTO responseDTO = InternalUserResponseDTO
                 .builder()
                 .id(userId)
                 .name(name)

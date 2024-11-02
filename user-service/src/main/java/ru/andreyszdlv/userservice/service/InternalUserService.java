@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.andreyszdlv.userservice.dto.controller.IdImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
-import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
-import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
@@ -24,16 +23,15 @@ public class InternalUserService {
 
     private final UserMapper userMapper;
 
+    private final UserService userService;
+
     @Transactional(readOnly = true)
     public String getUserEmailByUserId(long userId) {
         log.info("Executing getUserEmailByUserId for userId: {}", userId);
 
         log.info("Getting email by userId: {}", userId);
-        String email = userRepository
-                .findById(userId)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                )
+        String email = userService
+                .getUserById(userId)
                 .getEmail();
 
         return email;
@@ -44,11 +42,8 @@ public class InternalUserService {
         log.info("Executing getNameByUserId for userId: {}", userId);
 
         log.info("Getting name by userId: {}", userId);
-        String name = userRepository
-                .findById(userId)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                )
+        String name = userService
+                .getUserById(userId)
                 .getName();
 
         return name;
@@ -59,11 +54,7 @@ public class InternalUserService {
         log.info("Executing getUserDetailsByEmail for email: {}", email);
 
         log.info("Getting user by email: {}", email);
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                );
+        User user = userService.getUserByEmail(email);
 
         return userMapper.userToUserDetailsResponseDTO(user);
     }
@@ -82,8 +73,7 @@ public class InternalUserService {
         log.info("Saving user with email: {}", email);
         try {
             userRepository.save(user);
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             log.error("Send data name, email: {}, password, role in kafka for failure save user event",
                     email
             );
@@ -107,12 +97,25 @@ public class InternalUserService {
         log.info("Executing getUserByUserEmail for email: {}", email);
 
         log.info("Getting user by email: {}", email);
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        ()->new NoSuchUserException("errors.404.user_not_found")
-                );
+        User user = userService.getUserByEmail(email);
 
         return userMapper.userToInternalUserResponseDTO(user);
+    }
+
+    @Transactional
+    public void saveIdImage(long userId, IdImageRequestDTO idImageRequestDTO) {
+        log.info("Executing saveIdImage for userId: {}", userId);
+        User user = userService.getUserById(userId);
+
+        log.info("Saving id image for user: {}", userId);
+        user.setIdImage(idImageRequestDTO.idImage());
+    }
+
+    @Transactional(readOnly = true)
+    public String getIdImageByUserId(long userId) {
+        log.info("Executing getIdImageByUserId for userId: {}", userId);
+        User user = userService.getUserById(userId);
+
+        return user.getIdImage();
     }
 }

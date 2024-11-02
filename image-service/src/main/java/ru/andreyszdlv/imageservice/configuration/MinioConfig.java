@@ -1,19 +1,19 @@
-package ru.andreyszdlv.userservice.configuration;
+package ru.andreyszdlv.imageservice.configuration;
 
 import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.andreyszdlv.userservice.props.MinioProperties;
+import ru.andreyszdlv.imageservice.props.MinioProperties;
 
 @Configuration
 @RequiredArgsConstructor
-public class MinIoConfig {
+public class MinioConfig {
 
     private final MinioProperties minioProperties;
 
     @Bean
-    MinioClient minioClient() {
+    public MinioClient minioClient() {
         return MinioClient
                 .builder()
                 .endpoint(minioProperties.getEndpoint())
