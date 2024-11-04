@@ -2,13 +2,10 @@ package ru.andreyszdlv.userservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
-import ru.andreyszdlv.userservice.dto.kafka.FailureSaveImageIdKafkaDTO;
-import ru.andreyszdlv.userservice.dto.kafka.SuccessSaveImageIdKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
@@ -25,10 +22,6 @@ public class KafkaProducerService {
     private final KafkaTemplate<String, EditPasswordKafkaDTO> kafkaTemplateEditPassword;
 
     private final KafkaTemplate<String, UserDetailsKafkaDTO> kafkaTemplateFailureSaveUser;
-
-    private final KafkaTemplate<String, FailureSaveImageIdKafkaDTO> kafkaTemplateFailureSaveImageId;
-
-    private final KafkaTemplate<String, SuccessSaveImageIdKafkaDTO> kafkaTemplateSuccessSaveImageId;
 
     public void sendEditEmailEvent(String oldEmail, String newEmail){
         log.info("Executing sendEditEmailEvent in kafka with oldEmail");
@@ -64,25 +57,4 @@ public class KafkaProducerService {
                         .build()
         );
     }
-
-    public void sendFailureSaveImageIdEvent(String newImageId){
-        log.info("Executing sendFailureSaveImageIdEvent in kafka with newImageId: {}",
-                newImageId
-        );
-        kafkaTemplateFailureSaveImageId.send(
-                producerProperties.getTopicNameFailureSaveImageId(),
-                new FailureSaveImageIdKafkaDTO(newImageId)
-        );
-    }
-
-    public void sendSuccessSaveImageIdEvent(String oldImageId){
-        log.info("Executing sendSuccessSaveImageIdEvent in kafka with oldImageId: {}",
-                oldImageId
-        );
-        kafkaTemplateSuccessSaveImageId.send(
-                producerProperties.getTopicNameSuccessSaveImageId(),
-                new SuccessSaveImageIdKafkaDTO(oldImageId)
-        );
-    }
-
 }

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.validation.BindException;
+import ru.andreyszdlv.userservice.exception.EmptyImageException;
+import ru.andreyszdlv.userservice.exception.ImageUploadException;
 import ru.andreyszdlv.userservice.service.ProblemDetailService;
 
 import java.util.Locale;
@@ -42,4 +44,25 @@ public class BadRequestControllerAdvice {
 
         return ResponseEntity.of(problemDetail).build();
     }
+
+    @ExceptionHandler({
+            EmptyImageException.class,
+            ImageUploadException.class
+    })
+    public ResponseEntity<ProblemDetail> handleBadRequestException(final RuntimeException ex,
+                                                                   Locale locale) {
+
+        log.error("Executing handleBadRequestException");
+
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                locale
+        );
+
+        log.error("BadRequestException: {}", problemDetail);
+
+        return ResponseEntity.of(problemDetail).build();
+    }
+
 }

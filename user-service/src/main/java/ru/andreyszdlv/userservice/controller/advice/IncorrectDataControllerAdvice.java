@@ -8,9 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
+import ru.andreyszdlv.userservice.exception.NoSuchImageException;
 import ru.andreyszdlv.userservice.exception.NoSuchRequestFriendException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.exception.RequestInFriendsAlreadySendException;
+import ru.andreyszdlv.userservice.exception.UserAlreadyHaveAvatarException;
+import ru.andreyszdlv.userservice.exception.UserNotHaveAvatarException;
 import ru.andreyszdlv.userservice.exception.UsersAlreadyFriendsException;
 import ru.andreyszdlv.userservice.exception.UsersNoFriendsException;
 import ru.andreyszdlv.userservice.service.ProblemDetailService;
@@ -26,7 +29,8 @@ public class IncorrectDataControllerAdvice {
 
     @ExceptionHandler({
             NoSuchUserException.class,
-            NoSuchRequestFriendException.class
+            NoSuchRequestFriendException.class,
+            NoSuchImageException.class
     })
     public ResponseEntity<ProblemDetail> handleNotFoundException(
             RuntimeException ex,
@@ -49,7 +53,9 @@ public class IncorrectDataControllerAdvice {
             DifferentPasswordsException.class,
             RequestInFriendsAlreadySendException.class,
             UsersAlreadyFriendsException.class,
-            UsersNoFriendsException.class
+            UsersNoFriendsException.class,
+            UserAlreadyHaveAvatarException.class,
+            UserNotHaveAvatarException.class
     })
     public ResponseEntity<ProblemDetail> handleConflictException(
             RuntimeException ex,

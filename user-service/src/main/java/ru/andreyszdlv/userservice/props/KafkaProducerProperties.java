@@ -18,8 +18,4 @@ public class KafkaProducerProperties {
     private String topicNameEditPassword;
 
     private String topicNameFailureSaveUser;
-
-    private String topicNameFailureSaveImageId;
-
-    private String topicNameSuccessSaveImageId;
 }

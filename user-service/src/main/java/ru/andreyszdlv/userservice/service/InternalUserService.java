@@ -100,44 +100,4 @@ public class InternalUserService {
 
         return userMapper.userToInternalUserResponseDTO(user);
     }
-
-    @Transactional
-    public void saveImageId(long userId, String newImageId) {
-        log.info("Executing saveIdImage for userId: {}", userId);
-        User user = userService.getUserById(userId);
-
-        String oldImageId = user.getIdImage();
-
-        try {
-            log.info("Saving id image for user: {}", userId);
-            user.setIdImage(newImageId);
-
-            log.info("Sending success save image id event in kafka for oldImageId: {}", oldImageId);
-            kafkaProducerService.sendSuccessSaveImageIdEvent(oldImageId);
-        }
-        catch (Exception e){
-            log.info("Sending failure save image id event in kafka for newImageId: {}", newImageId);
-            kafkaProducerService.sendFailureSaveImageIdEvent(newImageId);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public String getIdImageByUserId(long userId) {
-        log.info("Executing getIdImageByUserId for userId: {}", userId);
-        User user = userService.getUserById(userId);
-
-        return user.getIdImage();
-    }
-
-    @Transactional
-    public String deleteImageIdByUserId(long userId) {
-        log.info("Executing deleteImageIdByUserId for userId: {}", userId);
-        User user = userService.getUserById(userId);
-
-        String imageId = user.getIdImage();
-
-        user.setIdImage(null);
-
-        return imageId;
-    }
 }

@@ -5,7 +5,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -15,8 +14,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
-import ru.andreyszdlv.userservice.dto.kafka.FailureSaveImageIdKafkaDTO;
-import ru.andreyszdlv.userservice.dto.kafka.SuccessSaveImageIdKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
 
@@ -84,42 +81,6 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, FailureSaveImageIdKafkaDTO> failureSaveImageIdProducerFactory() {
-        HashMap<String, Object> props = new HashMap<>();
-
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProperties.getBootstrapServers());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-
-        return new DefaultKafkaProducerFactory<>(props);
-    }
-
-    @Bean
-    public KafkaTemplate<String, FailureSaveImageIdKafkaDTO> failureSaveImageIdKafkaTemplate(
-            ProducerFactory<String, FailureSaveImageIdKafkaDTO> producerFactory
-    ) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
-    @Bean
-    public ProducerFactory<String, SuccessSaveImageIdKafkaDTO> successSaveUserProducerFactory() {
-        HashMap<String, Object> props = new HashMap<>();
-
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProperties.getBootstrapServers());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-
-        return new DefaultKafkaProducerFactory<>(props);
-    }
-
-    @Bean
-    public KafkaTemplate<String, SuccessSaveImageIdKafkaDTO> successSaveUserKafkaTemplate(
-            ProducerFactory<String, SuccessSaveImageIdKafkaDTO> producerFactory
-    ) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
-    @Bean
     public NewTopic newTopicFailureSaveUser(){
         return TopicBuilder
                 .name(producerProperties.getTopicNameFailureSaveUser())
@@ -141,24 +102,6 @@ public class KafkaProducerConfig {
     public NewTopic newTopicEditPassword(){
         return TopicBuilder
                 .name(producerProperties.getTopicNameEditPassword())
-                .partitions(1)
-                .replicas(1)
-                .build();
-    }
-
-    @Bean
-    public NewTopic newTopicFailureSaveImageId(){
-        return TopicBuilder
-                .name(producerProperties.getTopicNameFailureSaveImageId())
-                .partitions(1)
-                .replicas(1)
-                .build();
-    }
-
-    @Bean
-    public NewTopic newTopicSuccessSaveImageId(){
-        return TopicBuilder
-                .name(producerProperties.getTopicNameSuccessSaveImageId())
                 .partitions(1)
                 .replicas(1)
                 .build();

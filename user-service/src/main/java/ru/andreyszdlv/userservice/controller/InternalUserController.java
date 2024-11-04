@@ -53,7 +53,6 @@ public class InternalUserController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/exists/{email}")
     public ResponseEntity<Boolean> existsUserByEmail(@PathVariable String email) {
         log.info("Executing existsUserByEmail by email: {}", email);
@@ -74,19 +73,5 @@ public class InternalUserController {
 
         log.info("Successfully get user by email: {}", email);
         return ResponseEntity.ok(userResponse);
-    }
-
-    @GetMapping("/{userId}/idImage")
-    public ResponseEntity<String> getIdImageByUserId(@PathVariable long userId) {
-
-        return ResponseEntity.ok(internalUserService.getIdImageByUserId(userId));
-    }
-
-    @DeleteMapping("/{userId}/imageId")
-    ResponseEntity<String> deleteImageIdByUserId(@PathVariable long userId){
-
-        String imageId = internalUserService.deleteImageIdByUserId(userId);
-
-        return ResponseEntity.ok(imageId);
     }
 }

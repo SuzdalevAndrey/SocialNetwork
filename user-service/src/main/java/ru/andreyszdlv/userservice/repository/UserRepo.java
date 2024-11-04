@@ -10,7 +10,6 @@ import ru.andreyszdlv.userservice.model.User;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface UserRepo extends JpaRepository<User,Long> {
     Optional<User> findByEmail(String email);
 

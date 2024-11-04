@@ -4,21 +4,15 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
-import ru.andreyszdlv.userservice.dto.controller.ImageResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UpdateEmailRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.UpdatePasswordRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
@@ -117,43 +111,4 @@ public class UserController {
                         )
                 );
     }
-
-//    @PostMapping("/avatar")
-//    public ResponseEntity<String> uploadAvatar(@RequestHeader("X-User-Id") long userId,
-//                                              @Valid @ModelAttribute ImageRequestDTO imageDTO) {
-//        log.info("Executing uploadAvatar for userId: {}", userId);
-//
-//        log.info("Uploading avatar for userId: {}", userId);
-//        return ResponseEntity
-//                .status(HttpStatus.CREATED)
-//                .body(userService.uploadImage(userId, imageDTO));
-//    }
-
-//    @GetMapping("/my-avatar")
-//    public ResponseEntity<byte[]> getMyAvatar(@RequestHeader("X-User-Id") long userId){
-//        log.info("Executing getMyAvatar for userId: {}", userId);
-//
-//        log.info("Getting user avatar for userId: {}", userId);
-//        ImageResponseDTO responseDTO = userService.getMyAvatar(userId);
-//
-//        log.info("Successfully getMyAvatar for userId: {}", userId);
-//        return ResponseEntity
-//                .ok()
-//                .contentType(MediaType.parseMediaType(responseDTO.contentType()))
-//                .body(responseDTO.content());
-//    }
-//
-//    @GetMapping("/avatar/{idImage}")
-//    public ResponseEntity<byte[]> getAvatarByIdImage(@PathVariable String idImage){
-//        log.info("Executing getAvatarByIdImage for idImage: {}", idImage);
-//
-//        log.info("Getting user avatar for idImage: {}", idImage);
-//        ImageResponseDTO responseDTO = userService.getAvatarByIdImage(idImage);
-//
-//        log.info("Successfully getAvatarByIdImage for idImage: {}", idImage);
-//        return ResponseEntity
-//                .ok()
-//                .contentType(MediaType.parseMediaType(responseDTO.contentType()))
-//                .body(responseDTO.content());
-//    }
 }
