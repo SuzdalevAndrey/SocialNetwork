@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
 import ru.andreyszdlv.postservice.exception.AnotherUserCreatePostException;
 import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
+import ru.andreyszdlv.postservice.exception.ImagePostCountException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
+import ru.andreyszdlv.postservice.exception.NoSuchImageException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
+import ru.andreyszdlv.postservice.exception.PostNoSuchImageException;
 import ru.andreyszdlv.postservice.service.ProblemDetailService;
 
 import java.util.Locale;
@@ -45,7 +48,9 @@ public class IncorrectDataControllerAdvice {
     @ExceptionHandler({
             NoSuchPostException.class,
             NoLikedPostThisUserException.class,
-            NoSuchCommentException.class
+            NoSuchCommentException.class,
+            NoSuchImageException.class,
+            PostNoSuchImageException.class
     })
     public ResponseEntity<ProblemDetail> handleNotFoundException(
             RuntimeException ex,
@@ -66,7 +71,8 @@ public class IncorrectDataControllerAdvice {
     @ExceptionHandler({
             AlreadyLikedException.class,
             AnotherUsersCommentException.class,
-            AnotherUserCreatePostException.class
+            AnotherUserCreatePostException.class,
+            ImagePostCountException.class
     })
     public ResponseEntity<ProblemDetail> handleConflictException(
             RuntimeException ex,

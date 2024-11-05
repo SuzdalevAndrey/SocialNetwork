@@ -29,6 +29,8 @@ public class LikeService {
 
     private final KafkaProducerService kafkaProducerService;
 
+    private final PostValidationService postValidationService;
+
     private final MeterRegistry meterRegistry;
 
     @Transactional
@@ -54,11 +56,8 @@ public class LikeService {
         likeRepository.save(like);
 
         log.info("Getting userId author post by postId: {}", postId);
-        Long userIdAuthorPost = postRepository
-                .findById(postId)
-                .orElseThrow(
-                        ()->new NoSuchPostException("errors.404.post_not_found")
-                )
+        Long userIdAuthorPost = postValidationService
+                .getPostByIdOrThrow(postId)
                 .getUserId();
 
         log.info("Getting email author post by userId: {}", userIdAuthorPost);

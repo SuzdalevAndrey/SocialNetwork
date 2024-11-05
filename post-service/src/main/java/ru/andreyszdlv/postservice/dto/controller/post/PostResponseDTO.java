@@ -21,5 +21,7 @@ public record PostResponseDTO(
 
         List<Like> likes,
 
-        List<Comment> comments
+        List<Comment> comments,
+
+        List<String> imageIds
 ) {}

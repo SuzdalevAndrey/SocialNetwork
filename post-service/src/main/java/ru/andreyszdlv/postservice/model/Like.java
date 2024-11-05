@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
-@Table(schema = "posts", name="t_likes")
+@Table(name="t_likes")
 @Data
 public class Like {
     @Id

@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.dto.controller.post.CreatePostRequestDTO;
 import ru.andreyszdlv.postservice.dto.controller.post.PostResponseDTO;
+import ru.andreyszdlv.postservice.dto.controller.post.UpdatePostRequestDTO;
 import ru.andreyszdlv.postservice.exception.AnotherUserCreatePostException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.mapper.PostMapper;
@@ -28,6 +30,10 @@ public class PostService {
 
     private final MeterRegistry meterRegistry;
 
+    private final ImageService imageService;
+
+    private final PostValidationService postValidationService;
+
     @Transactional(readOnly = true)
     public List<PostResponseDTO> getPostsByUserId(long userId) {
         log.info("Executing getPostsByUserId for user id: {}", userId);
@@ -39,20 +45,28 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDTO createPost(long userId, String content) {
+    public PostResponseDTO createPost(long userId, CreatePostRequestDTO postRequestDTO) {
 
-        log.info("Executing createPost for content: {}", content);
+        log.info("Executing createPost for content: {}", postRequestDTO.content());
 
-        log.info("Creating new post for userId: {} and content: {}", userId, content);
+        log.info("Creating new post for userId: {} and content: {}", userId, postRequestDTO.content());
         Post post = new Post();
-        post.setContent(content);
+        post.setContent(postRequestDTO.content());
         post.setDateCreate(LocalDateTime.now());
         post.setNumberViews(0L);
         post.setUserId(userId);
 
+        log.info("Uploading images for post: {}", post.getId());
+        List<String> imagesId = postRequestDTO.images()
+                .parallelStream()
+                .map(imageService::uploadImage)
+                .toList();
+
+        post.setImageIds(imagesId);
+
         Post responsePost = postRepository.save(post);
 
-        log.info("Successful create post with content: {}", content);
+        log.info("Successful create post with content: {}", postRequestDTO.content());
 
         incrementMetrics(userId, responsePost.getId());
 
@@ -60,26 +74,34 @@ public class PostService {
     }
 
     @Transactional
-    public void updatePost(long userId, long id, String content) {
-        log.info("Executing updatePost for postId: {}, content: {}", id,  content);
+    public PostResponseDTO updatePost(long userId, long postId, UpdatePostRequestDTO postRequestDTO) {
+        log.info("Executing updatePost for postId: {}, content: {}",
+                postId,
+                postRequestDTO.content()
+        );
 
-        log.info("Getting a post by postId: {}", id);
-        Post post = postRepository.findById(id)
-                .orElseThrow(
-                        ()->new NoSuchPostException("errors.404.post_not_found")
-                );
+        Post post = postValidationService.getPostByIdOrThrow(postId);
 
-        log.info("Checking this user with userId: {} create post", userId);
-        if(!post.getUserId().equals(userId)) {
-            log.error("This user with userId: {} no create post", userId);
-            throw new AnotherUserCreatePostException("errors.409.another_user_post");
-        }
+        postValidationService.validateUserOwnership(post, userId);
 
-        log.info("Check successful, this user create post");
+        post.setContent(postRequestDTO.content());
 
-        post.setContent(content);
+        log.info("Successful update post with postId: {}, content: {}",
+                postId,
+                postRequestDTO.content()
+        );
 
-        log.info("Successful update post with postId: {}, content: {}", id, content);
+        List<String> newImageIds = postRequestDTO
+                .images()
+                .parallelStream()
+                .map(imageService::uploadImage)
+                .toList();
+
+        post.getImageIds().forEach(imageService::deleteImageById);
+
+        post.setImageIds(newImageIds);
+
+        return postMapper.postToPostResponseDTO(post);
     }
 
     @Transactional
@@ -87,19 +109,15 @@ public class PostService {
         log.info("Executing deletePost for postId: {}", postId);
 
         log.info("Getting a post by postId: {}", postId);
-        Post post = postRepository.findById(postId)
-                .orElseThrow(
-                        ()->new NoSuchPostException("errors.404.post_not_found")
-                );
+        Post post = postValidationService.getPostByIdOrThrow(postId);
 
-        log.info("Checking this user with userId: {} create post", userId);
-        if(!post.getUserId().equals(userId)) {
-            log.error("This user with userId: {} no create post", userId);
-            throw new AnotherUserCreatePostException("errors.409.another_user_post");
-        }
+        postValidationService.validateUserOwnership(post, userId);
 
         log.info("Deleting post with postId: {}", postId);
         postRepository.deleteById(postId);
+
+        log.info("Deleting images for post with postId: {}", postId);
+        post.getImageIds().forEach(imageService::deleteImageById);
     }
 
     @Transactional
@@ -107,10 +125,7 @@ public class PostService {
         log.info("Executing getPostByPostId for postId: {}", postId);
 
         log.info("Getting a post by postId: {}", postId);
-        Post post = postRepository.findById(postId)
-                .orElseThrow(
-                        ()->new NoSuchPostException("errors.404.post_not_found")
-                );
+        Post post = postValidationService.getPostByIdOrThrow(postId);
 
         log.info("Update number views post with postId: {}", postId);
         post.setNumberViews(post.getNumberViews() + 1);

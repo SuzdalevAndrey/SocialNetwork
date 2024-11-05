@@ -2,12 +2,15 @@ package ru.andreyszdlv.postservice.model;
 
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -18,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Table(schema = "posts", name="t_posts")
+@Table(name="t_posts")
 @Entity
 public class Post {
     @Id
@@ -39,8 +42,13 @@ public class Post {
     private Long userId;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    List<Like> likes;
+    private List<Like> likes;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    List<Comment> comments;
+    private List<Comment> comments;
+
+    @ElementCollection
+    @CollectionTable(name = "t_post_images", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "image_id")
+    private List<String> imageIds;
 }

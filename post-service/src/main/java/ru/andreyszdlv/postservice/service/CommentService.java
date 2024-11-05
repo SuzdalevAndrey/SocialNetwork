@@ -37,6 +37,8 @@ public class CommentService {
 
     private final CommentMapper commentMapper;
 
+    private final PostValidationService postValidationService;
+
     @Transactional
     public CommentResponseDTO createComment(long userId, long postId, String content){
         log.info("Executing createComment for userId: {}, postId: {}, content: {}",
@@ -63,9 +65,8 @@ public class CommentService {
         log.info("Successful save comment with postId: {}, content: {}", postId, content);
 
         log.info("Getting a userId author post by postId");
-        Long userIdAuthorPost = postRepository
-                .findById(postId)
-                .get()
+        Long userIdAuthorPost = postValidationService
+                .getPostByIdOrThrow(postId)
                 .getUserId();
         log.info("Successful get userId: {} author post by postId", userIdAuthorPost);
 

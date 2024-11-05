@@ -10,6 +10,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,8 +37,6 @@ public class PostController {
 
     private final PostService postService;
 
-    private final LocalizationService localizationService;
-
     @GetMapping
     public ResponseEntity<List<PostResponseDTO>> getPostsByUserId(@RequestHeader("X-User-Id") long userId){
 
@@ -57,10 +56,11 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponseDTO> createPost(@Valid @RequestBody CreatePostRequestDTO request,
-                                           BindingResult bindingResult,
-                                           @RequestHeader("X-User-Id") long userId)
-            throws BindException {
+    public ResponseEntity<PostResponseDTO> createPost(
+            @Valid @ModelAttribute CreatePostRequestDTO request,
+            BindingResult bindingResult,
+            @RequestHeader("X-User-Id") long userId
+    ) throws BindException {
         log.info("Executing createPost for content: {}", request.content());
 
         if(bindingResult.hasErrors()){
@@ -77,16 +77,15 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        postService.createPost(userId, request.content())
+                        postService.createPost(userId, request)
                 );
     }
 
     @PatchMapping("/{postId}")
-    public ResponseEntity<String> updatePost(@PathVariable long postId,
-                                             @Valid @RequestBody UpdatePostRequestDTO request,
+    public ResponseEntity<PostResponseDTO> updatePost(@PathVariable long postId,
+                                             @Valid @ModelAttribute UpdatePostRequestDTO request,
                                              BindingResult bindingResult,
-                                             @RequestHeader("X-User-Id") long userId,
-                                             Locale locale)
+                                             @RequestHeader("X-User-Id") long userId)
             throws BindException {
         log.info("Executing updatePost for postId: {} with newContent: {}",
                 postId,
@@ -104,20 +103,10 @@ public class PostController {
         log.info("Validation successful, updating post with postId: {}, newContent: {}",
                 postId,
                 request.content());
-        postService.updatePost(userId, postId, request.content());
-
-        log.info("Post update successfully with postId: {}, newContent: {}",
-                postId,
-                request.content());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(
-                        localizationService.getLocalizedMessage(
-                                "message.ok.update_post",
-                                locale
-                        )
-                );
+                .body(postService.updatePost(userId, postId, request));
     }
 
     @DeleteMapping("/{id}")

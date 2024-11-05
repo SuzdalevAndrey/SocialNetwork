@@ -10,6 +10,8 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.andreyszdlv.postservice.exception.EmptyImageException;
+import ru.andreyszdlv.postservice.exception.ImageUploadException;
 import ru.andreyszdlv.postservice.service.ProblemDetailService;
 
 import java.util.Locale;
@@ -22,7 +24,7 @@ public class BadRequestControllerAdvice {
     private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<ProblemDetail> handleBadRequest(BindException ex, Locale locale) {
+    public ResponseEntity<ProblemDetail> handleBindException(BindException ex, Locale locale) {
         log.error("Executing handleBindException");
 
         ProblemDetail problemDetail = problemDetailService.createProblemDetail(
@@ -35,7 +37,27 @@ public class BadRequestControllerAdvice {
                 "errors",
                 ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList());
 
-        log.error("Bad request: {}", problemDetail);
+        log.error("BindException: {}", problemDetail);
+
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler({
+            EmptyImageException.class,
+            ImageUploadException.class
+    })
+    public ResponseEntity<ProblemDetail> handleBadRequestException(final RuntimeException ex,
+                                                                   Locale locale) {
+
+        log.error("Executing handleBadRequestException");
+
+        ProblemDetail problemDetail = problemDetailService.createProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                locale
+        );
+
+        log.error("BadRequestException: {}", problemDetail);
 
         return ResponseEntity.of(problemDetail).build();
     }
