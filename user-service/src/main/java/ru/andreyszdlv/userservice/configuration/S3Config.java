@@ -9,6 +9,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
@@ -35,6 +36,27 @@ public class S3Config {
                 .serviceConfiguration(
                         S3Configuration
                                 .builder()
+                                .pathStyleAccessEnabled(true)
+                                .build()
+                )
+                .build();
+    }
+
+    @Bean
+    public S3Presigner s3Presigner(){
+        return S3Presigner.builder()
+                .endpointOverride(URI.create(s3Properties.getEndpoint()))
+                .credentialsProvider(
+                        StaticCredentialsProvider.create(
+                                AwsBasicCredentials.create(
+                                        s3Properties.getAccessKey(),
+                                        s3Properties.getSecretKey()
+                                )
+                        )
+                )
+                .region(Region.AP_NORTHEAST_1)
+                .serviceConfiguration(
+                        S3Configuration.builder()
                                 .pathStyleAccessEnabled(true)
                                 .build()
                 )

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.userservice.dto.controller.ImageIdResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
-import ru.andreyszdlv.userservice.dto.controller.ImageResponseDTO;
+import ru.andreyszdlv.userservice.dto.controller.ImageUrlResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
@@ -39,7 +39,7 @@ public class UserService {
     public UserResponseDTO getUserProfileById(long userId) {
         log.info("Executing getUserById for id: {}", userId);
 
-        User user = getUserById(userId);
+        User user = getUserByIdOrThrow(userId);
 
         return userMapper.userToUserResponseDTO(user);
     }
@@ -51,7 +51,7 @@ public class UserService {
                 userId,
                 newEmail);
 
-        User user = getUserById(userId);
+        User user = getUserByIdOrThrow(userId);
 
         String oldEmail = user.getEmail();
 
@@ -69,7 +69,7 @@ public class UserService {
 
         log.info("Executing updatePasswordUser for userId: {}", userId);
 
-        User user = getUserById(userId);
+        User user = getUserByIdOrThrow(userId);
 
         log.info("Checking password comparison for userId: {}", userId);
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
@@ -90,7 +90,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserById(long id){
+    public User getUserByIdOrThrow(long id){
         log.info("Executing getUserById");
 
         log.info("Getting user by id: {}", id);
@@ -118,7 +118,7 @@ public class UserService {
     @Transactional
     public ImageIdResponseDTO uploadAvatar(long userId, ImageRequestDTO avatarDTO) {
         log.info("Executing uploadAvatar for userId: {}", userId);
-        User user = this.getUserById(userId);
+        User user = this.getUserByIdOrThrow(userId);
 
         log.info("Checking user exists avatar for userId: {}", userId);
         if(checkUserHasAvatar(user)){
@@ -138,7 +138,7 @@ public class UserService {
     @Transactional
     public ImageIdResponseDTO updateAvatar(long userId, ImageRequestDTO avatarDTO) {
         log.info("Executing updateAvatar for userId: {}", userId);
-        User user = this.getUserById(userId);
+        User user = this.getUserByIdOrThrow(userId);
 
         log.info("Checking user exists avatar for userId: {}", userId);
         if(!this.checkUserHasAvatar(user)){
@@ -159,7 +159,7 @@ public class UserService {
     public void deleteAvatarByUserId(long userId){
         log.info("Executing deleteAvatarByUserId for userId: {}", userId);
 
-        User user = this.getUserById(userId);
+        User user = this.getUserByIdOrThrow(userId);
 
         if(!this.checkUserHasAvatar(user)){
             log.error("User: {} not have avatar", userId);
@@ -173,21 +173,21 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ImageResponseDTO getAvatarByUserId(long userId) {
-        log.info("Executing getAvatarByUserId for userId: {}", userId);
+    public ImageUrlResponseDTO getAvatarUrlByUserId(long userId) {
+        log.info("Executing getAvatarUrlByUserId for userId: {}", userId);
 
-        User user = this.getUserById(userId);
+        User user = this.getUserByIdOrThrow(userId);
 
-        log.info("Getting avatar for userId: {}", userId);
-        return imageService.getImageById(user.getIdImage());
+        log.info("Getting avatar url for userId: {}", userId);
+        return new ImageUrlResponseDTO(imageService.getImageUrlByImageId(user.getIdImage()));
     }
 
     @Transactional(readOnly = true)
-    public ImageResponseDTO getAvatarById(String avatarId) {
-        log.info("Executing getAvatarById for avatarId: {}", avatarId);
+    public ImageUrlResponseDTO getAvatarUrlById(String avatarId) {
+        log.info("Executing getAvatarUrlById for avatarId: {}", avatarId);
 
-        log.info("Getting avatar for avatarId: {}", avatarId);
-        return imageService.getImageById(avatarId);
+        log.info("Getting avatar url for avatarId: {}", avatarId);
+        return new ImageUrlResponseDTO(imageService.getImageUrlByImageId(avatarId));
     }
 
     private boolean checkUserHasAvatar(User user) {

@@ -4,9 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.postservice.dto.ImageDTO;
+import ru.andreyszdlv.postservice.dto.controller.post.PostImageUrlResponseDTO;
 import ru.andreyszdlv.postservice.dto.controller.post.AddImagePostRequestDTO;
-import ru.andreyszdlv.postservice.dto.controller.post.PostImageIdsResponseDTO;
 import ru.andreyszdlv.postservice.exception.ImagePostCountException;
 import ru.andreyszdlv.postservice.exception.PostNoSuchImageException;
 import ru.andreyszdlv.postservice.mapper.PostMapper;
@@ -19,23 +18,21 @@ import java.util.List;
 @Slf4j
 public class ImagePostService {
 
-    private final PostMapper postMapper;
-
     private final ImageService imageService;
 
     private final PostValidationService postValidationService;
 
-    @Transactional
-    public PostImageIdsResponseDTO getImagesByPostId(long postId) {
+    @Transactional(readOnly = true)
+    public List<PostImageUrlResponseDTO> getPostImageUrlsByPostId(long postId) {
         Post post = postValidationService.getPostByIdOrThrow(postId);
 
-        return postMapper.postToPostImageIdsResponseDTO(post);
+        return post.getImageIds().stream().map(this::getPostImageUrlByImageId).toList();
     }
 
     @Transactional
-    public PostImageIdsResponseDTO addImagesPostByPostId(long userId,
-                                                         long postId,
-                                                         AddImagePostRequestDTO imagesDTO) {
+    public List<PostImageUrlResponseDTO> addImagesPostByPostId(long userId,
+                                                               long postId,
+                                                               AddImagePostRequestDTO imagesDTO) {
         Post post = postValidationService.getPostByIdOrThrow(postId);
 
         postValidationService.validateUserOwnership(post, userId);
@@ -52,7 +49,7 @@ public class ImagePostService {
 
         post.getImageIds().addAll(newImageIds);
 
-        return postMapper.postToPostImageIdsResponseDTO(post);
+        return post.getImageIds().parallelStream().map(this::getPostImageUrlByImageId).toList();
     }
 
     @Transactional
@@ -69,7 +66,7 @@ public class ImagePostService {
         imageService.deleteImageById(imageId);
     }
 
-    public ImageDTO getImageById(String imageId) {
-        return imageService.getImageById(imageId);
+    public PostImageUrlResponseDTO getPostImageUrlByImageId(String imageId) {
+        return new PostImageUrlResponseDTO(imageService.getImageUrlById(imageId));
     }
 }

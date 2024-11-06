@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.userservice.dto.controller.ImageIdResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
-import ru.andreyszdlv.userservice.dto.controller.ImageResponseDTO;
+import ru.andreyszdlv.userservice.dto.controller.ImageUrlResponseDTO;
 import ru.andreyszdlv.userservice.service.UserService;
 
 @RestController
@@ -75,31 +74,25 @@ public class ImageController {
 
 
     @GetMapping("/my-avatar")
-    public ResponseEntity<byte[]> getAvatarByUserId(@RequestHeader("X-User-Id") long userId){
+    public ResponseEntity<ImageUrlResponseDTO> getAvatarByUserId(@RequestHeader("X-User-Id") long userId){
         log.info("Executing getMyAvatar for userId: {}", userId);
 
         log.info("Getting user avatar for userId: {}", userId);
-        ImageResponseDTO responseDTO = userService.getAvatarByUserId(userId);
+        ImageUrlResponseDTO responseDTO = userService.getAvatarUrlByUserId(userId);
 
         log.info("Successfully getMyAvatar for userId: {}", userId);
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.parseMediaType(responseDTO.contentType()))
-                .body(responseDTO.content());
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping("/avatar/{idImage}")
-    public ResponseEntity<byte[]> getAvatarByIdImage(@PathVariable String idImage){
+    public ResponseEntity<ImageUrlResponseDTO> getAvatarByIdImage(@PathVariable String idImage){
         log.info("Executing getAvatarByIdImage for idImage: {}", idImage);
 
         log.info("Getting user avatar for idImage: {}", idImage);
-        ImageResponseDTO responseDTO = userService.getAvatarById(idImage);
+        ImageUrlResponseDTO responseDTO = userService.getAvatarUrlById(idImage);
 
         log.info("Successfully getAvatarByIdImage for idImage: {}", idImage);
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.parseMediaType(responseDTO.contentType()))
-                .body(responseDTO.content());
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/my-avatar")

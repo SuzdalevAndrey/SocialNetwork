@@ -30,7 +30,7 @@ public class InternalUserService {
 
         log.info("Getting email by userId: {}", userId);
         String email = userService
-                .getUserById(userId)
+                .getUserByIdOrThrow(userId)
                 .getEmail();
 
         return email;
@@ -42,7 +42,7 @@ public class InternalUserService {
 
         log.info("Getting name by userId: {}", userId);
         String name = userService
-                .getUserById(userId)
+                .getUserByIdOrThrow(userId)
                 .getName();
 
         return name;

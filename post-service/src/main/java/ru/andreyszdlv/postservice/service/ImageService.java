@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.andreyszdlv.postservice.dto.ImageDTO;
 import ru.andreyszdlv.postservice.exception.DeleteImageException;
 import ru.andreyszdlv.postservice.exception.EmptyImageException;
 import ru.andreyszdlv.postservice.exception.FileDeleteException;
@@ -12,9 +11,6 @@ import ru.andreyszdlv.postservice.exception.FileUploadException;
 import ru.andreyszdlv.postservice.exception.ImageUploadException;
 import ru.andreyszdlv.postservice.exception.NoSuchImageException;
 import ru.andreyszdlv.postservice.util.ImageUtils;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @Service
 @RequiredArgsConstructor
@@ -33,35 +29,12 @@ public class ImageService {
         return this.saveNewImage(image);
     }
 
-    public String updateImage(MultipartFile image, String deleteImageId) {
-        log.info("Executing uploadImage");
-
-        log.info("Validating image");
-        validateImage(image);
-
-        log.info("Saving new image");
-        String imageId = this.saveNewImage(image);
-
-        log.info("Deleting oldImage by id: {}", deleteImageId);
-        this.deleteImageById(deleteImageId);
-
-        return imageId;
-    }
-
-    public ImageDTO getImageById(String imageId) {
-        log.info("Executing getImageById");
+    public String getImageUrlById(String imageId) {
+        log.info("Executing getImageUrlById for imageId: {}", imageId);
 
         try {
-            log.info("Creating contentType for imageId: {}", imageId);
-            String contentType = Files.probeContentType(Paths.get(imageId));
-
-            log.info("Creating responseDTO for imageId: {}", imageId);
-            ImageDTO image = ImageDTO.builder()
-                    .contentType(contentType)
-                    .content(s3Service.getFileById(imageId))
-                    .build();
-
-            return image;
+            log.info("Creating image url for imageId: {}", imageId);
+            return s3Service.getFileUrlById(imageId);
         } catch (Exception e) {
             log.error("Error: no such image", e);
             throw new NoSuchImageException("errors.404.image_not_found");

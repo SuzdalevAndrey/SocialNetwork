@@ -7,16 +7,15 @@ import ru.andreyszdlv.userservice.exception.FileDeleteException;
 import ru.andreyszdlv.userservice.exception.NoSuchFileException;
 import ru.andreyszdlv.userservice.exception.FileUploadException;
 import ru.andreyszdlv.userservice.props.S3Properties;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.utils.IoUtils;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
-import java.io.IOException;
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +26,9 @@ public class S3Service {
 
     private final S3Client s3Client;
 
-    public void saveFile(byte[] bytes, String fileId)
-            throws FileUploadException {
+    private final S3Presigner s3Presigner;
+
+    public void saveFile(byte[] bytes, String fileId) throws FileUploadException {
         String bucketName = s3Properties.getBucketUserAvatar();
         log.info("Executing saveFile for bucketName: {} and imageId: {}",
                 bucketName,
@@ -54,33 +54,22 @@ public class S3Service {
         }
     }
 
-    public byte[] getFileById(String fileId)
-            throws NoSuchFileException {
+    public String getFileUrlById(String fileId) throws NoSuchFileException {
         String bucketName = s3Properties.getBucketUserAvatar();
-        log.info("Executing getFileById for bucketName: {} and fileId: {}",
+        log.info("Executing getFileUrlById for bucketName: {} and fileId: {}",
                 bucketName,
                 fileId);
 
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileId)
+        GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(s3Properties.getExpirationUrlInMinutes()))
+                .getObjectRequest(req -> req.bucket(bucketName).key(fileId))
                 .build();
-        try {
-            log.info("Getting file from s3 for bucketName: {} and fileId: {}",
-                    bucketName,
-                    fileId);
-            ResponseInputStream<GetObjectResponse> response = s3Client.getObject(getObjectRequest);
 
-            log.info("Converting stream in byte[]");
-            return IoUtils.toByteArray(response);
-        } catch (IOException e) {
-            log.error("Error getting file from S3: {}", e.getMessage());
-            throw new NoSuchFileException();
-        }
+        log.info("Creating file url for bucketName: {} and fileId: {}", bucketName, fileId);
+        return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
     }
 
-    public void deleteFileById(String fileId) throws
-            FileDeleteException {
+    public void deleteFileById(String fileId) throws FileDeleteException {
         String bucketName = s3Properties.getBucketUserAvatar();
         log.info("Executing deleteFileById for bucketName: {} and fileId: {}",
                 bucketName,
