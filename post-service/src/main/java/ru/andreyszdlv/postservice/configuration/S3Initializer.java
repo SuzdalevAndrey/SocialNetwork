@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.andreyszdlv.postservice.exception.CreateBucketException;
 import ru.andreyszdlv.postservice.props.S3Properties;
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -31,15 +30,10 @@ public class S3Initializer {
 
         log.info("Check bucket exists for {}, found: {}", bucketName, found);
         if (!found) {
-            try {
-                log.info("Bucket not exists, creating bucket for name: {}", bucketName);
-                s3Client.createBucket(
-                        b -> b.bucket(bucketName)
-                );
-            } catch (Exception e) {
-                log.error("Create bucket failed", e);
-                throw new CreateBucketException("errors.500.image_upload_failed");
-            }
+            log.info("Bucket not exists, creating bucket for name: {}", bucketName);
+            s3Client.createBucket(
+                    b -> b.bucket(bucketName)
+            );
         }
     }
 }

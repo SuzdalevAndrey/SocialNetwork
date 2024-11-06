@@ -7,7 +7,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.andreyszdlv.postservice.exception.CreateBucketException;
 import ru.andreyszdlv.postservice.exception.DeleteImageException;
 import ru.andreyszdlv.postservice.service.ProblemDetailService;
 
@@ -21,7 +20,6 @@ public class ServerExceptionControllerAdvice {
     private final ProblemDetailService problemDetailService;
 
     @ExceptionHandler({
-            CreateBucketException.class,
             DeleteImageException.class
     })
     public ResponseEntity<ProblemDetail> handleInternalServerException(RuntimeException ex,

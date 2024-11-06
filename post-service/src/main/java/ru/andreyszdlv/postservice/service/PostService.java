@@ -57,12 +57,14 @@ public class PostService {
         post.setUserId(userId);
 
         log.info("Uploading images for post: {}", post.getId());
-        List<String> imagesId = postRequestDTO.images()
-                .parallelStream()
-                .map(imageService::uploadImage)
-                .toList();
-
-        post.setImageIds(imagesId);
+        if (postRequestDTO.images() != null) {
+            log.info("Images no empty, size = {}", postRequestDTO.images().size());
+            List<String> imagesId = postRequestDTO.images()
+                    .parallelStream()
+                    .map(imageService::uploadImage)
+                    .toList();
+            post.setImageIds(imagesId);
+        }
 
         Post responsePost = postRepository.save(post);
 
@@ -86,21 +88,24 @@ public class PostService {
 
         post.setContent(postRequestDTO.content());
 
+        List<String> oldImageIds = post.getImageIds();
+
+        if (postRequestDTO.images() != null) {
+            List<String> newImageIds = postRequestDTO
+                    .images()
+                    .parallelStream()
+                    .map(imageService::uploadImage)
+                    .toList();
+
+            post.setImageIds(newImageIds);
+        }
+
+        oldImageIds.forEach(imageService::deleteImageById);
+
         log.info("Successful update post with postId: {}, content: {}",
                 postId,
                 postRequestDTO.content()
         );
-
-        List<String> newImageIds = postRequestDTO
-                .images()
-                .parallelStream()
-                .map(imageService::uploadImage)
-                .toList();
-
-        post.getImageIds().forEach(imageService::deleteImageById);
-
-        post.setImageIds(newImageIds);
-
         return postMapper.postToPostResponseDTO(post);
     }
 

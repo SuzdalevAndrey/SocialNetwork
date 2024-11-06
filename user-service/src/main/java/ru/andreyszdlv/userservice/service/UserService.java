@@ -127,7 +127,7 @@ public class UserService {
         }
 
         log.info("Uploading avatar for userId: {}", userId);
-        String avatarId = imageService.uploadImage(avatarDTO);
+        String avatarId = imageService.uploadImage(avatarDTO.image());
 
         log.info("Setting id avatar for user: {}", userId);
         user.setIdImage(avatarId);
@@ -146,13 +146,17 @@ public class UserService {
             throw new UserNotHaveAvatarException("errors.409.user_not_have_avatar");
         }
 
-        log.info("Updating avatar for userId: {}", userId);
-        String avatarId = imageService.updateImage(avatarDTO, user.getIdImage());
+        log.info("Uploading avatar for userId: {}", userId);
+        String newAvatarId = imageService.uploadImage(avatarDTO.image());
+
+        String oldAvatarId = user.getIdImage();
 
         log.info("Setting id avatar for user: {}", userId);
-        user.setIdImage(avatarId);
+        user.setIdImage(newAvatarId);
 
-        return new ImageIdResponseDTO(avatarId);
+        imageService.deleteImageById(oldAvatarId);
+
+        return new ImageIdResponseDTO(newAvatarId);
     }
 
     @Transactional

@@ -18,33 +18,14 @@ public class ImageService {
 
     private final S3Service s3Service;
 
-    public String uploadImage(ImageRequestDTO imageDTO) {
+    public String uploadImage(MultipartFile image) {
         log.info("Executing uploadImage");
-
-        MultipartFile image = imageDTO.file();
 
         log.info("Validating image");
         validateImage(image);
 
         log.info("Saving new image");
         return this.saveNewImage(image);
-    }
-
-    public String updateImage(ImageRequestDTO imageDTO, String deleteImageId) {
-        log.info("Executing uploadImage");
-
-        MultipartFile image = imageDTO.file();
-
-        log.info("Validating image");
-        validateImage(image);
-
-        log.info("Saving new image");
-        String imageId = this.saveNewImage(image);
-
-        log.info("Deleting oldImage by id: {}", deleteImageId);
-        this.deleteImageById(deleteImageId);
-
-        return imageId;
     }
 
     public String getImageUrlByImageId(String imageId) {
