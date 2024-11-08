@@ -9,20 +9,14 @@ import ru.andreyszdlv.authservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.LoginUserKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
 import ru.andreyszdlv.authservice.enums.ERole;
+import ru.andreyszdlv.authservice.props.KafkaProducerProperties;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducerService {
 
-    @Value("${spring.kafka.producer.topic.name.login-user}")
-    private String nameTopicLoginUser;
-
-    @Value("${spring.kafka.producer.topic.name.register-user}")
-    private String nameTopicRegisterUser;
-
-    @Value("${spring.kafka.producer.topic.name.save-user}")
-    private String nameTopicSaveUser;
+    private final KafkaProducerProperties kafkaProducerProperties;
 
     private final KafkaTemplate<String, LoginUserKafkaDTO> kafkaTemplateLogin;
 
@@ -33,14 +27,14 @@ public class KafkaProducerService {
     public void sendRegisterEvent(String email, String code){
         log.info("Executing sendRegisterEvent in kafka with email: {} and verification code", email);
         kafkaTemplateRegister.send(
-                nameTopicRegisterUser,
+                kafkaProducerProperties.getTopicNameRegisterUser(),
                 new RegisterUserKafkaDTO(email, code));
     }
 
     public void sendLoginEvent(String name, String email){
         log.info("Executing sendLoginEvent in kafka with name: {}, email: {}", name, email);
         kafkaTemplateLogin.send(
-                nameTopicLoginUser,
+                kafkaProducerProperties.getTopicNameLoginUser(),
                 new LoginUserKafkaDTO(name, email)
         );
     }
@@ -54,7 +48,7 @@ public class KafkaProducerService {
                 email
         );
         kafkaTemplateSaveUser.send(
-                nameTopicSaveUser,
+                kafkaProducerProperties.getTopicNameSaveUser(),
                 UserDetailsKafkaDTO
                         .builder()
                         .name(name)

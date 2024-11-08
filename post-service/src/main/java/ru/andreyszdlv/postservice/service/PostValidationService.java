@@ -29,6 +29,6 @@ public class PostValidationService {
             log.error("User with userId: {} is not the creator of the post", userId);
             throw new AnotherUserCreatePostException("errors.409.another_user_post");
         }
-        log.info("Check successful, this user create post");
+        log.info("Check successful, this user: {} create post", userId);
     }
 }

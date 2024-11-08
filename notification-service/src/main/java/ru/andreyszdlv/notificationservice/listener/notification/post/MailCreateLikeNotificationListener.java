@@ -41,7 +41,7 @@ public class MailCreateLikeNotificationListener {
         mailSender.send(
                 createLikeDTO.email(),
                 header,
-                String.format(body, createLikeDTO.nameLikeAuthor())
+                body
         );
     }
 }

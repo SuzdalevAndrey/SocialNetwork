@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.andreyszdlv.authservice.api.userservice.UserServiceFeignClient;
-import ru.andreyszdlv.authservice.dto.feignclient.UserDetailsResponseDTO;
+import ru.andreyszdlv.authservice.client.UserServiceClient;
+import ru.andreyszdlv.authservice.dto.client.UserDetailsResponseDTO;
 import ru.andreyszdlv.authservice.model.User;
 
 
@@ -16,7 +16,7 @@ import ru.andreyszdlv.authservice.model.User;
 @Slf4j
 public class UserService {
 
-    private final UserServiceFeignClient userServiceFeignClient;
+    private final UserServiceClient userServiceClient;
 
     public UserDetailsService getDetailsService() {
         log.info("Executing getDetailsService in UserService");
@@ -26,7 +26,7 @@ public class UserService {
             public UserDetails loadUserByUsername(String username)
                     throws UsernameNotFoundException {
                 log.info("Load user by email: {}", username);
-                UserDetailsResponseDTO user = userServiceFeignClient
+                UserDetailsResponseDTO user = userServiceClient
                         .getUserDetailsByUserEmail(username)
                         .getBody();
 

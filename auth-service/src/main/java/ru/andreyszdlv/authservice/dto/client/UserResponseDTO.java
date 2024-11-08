@@ -1,4 +1,4 @@
-package ru.andreyszdlv.authservice.dto.feignclient;
+package ru.andreyszdlv.authservice.dto.client;
 
 import ru.andreyszdlv.authservice.enums.ERole;
 

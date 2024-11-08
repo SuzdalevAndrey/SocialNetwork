@@ -48,7 +48,7 @@ public class Post {
     private List<Comment> comments;
 
     @ElementCollection
-    @CollectionTable(name = "t_post_images", joinColumns = @JoinColumn(name = "post_id"))
-    @Column(name = "image_id")
+    @CollectionTable(name = "t_post_images", joinColumns = @JoinColumn(name = "c_post_id"))
+    @Column(name = "c_image_id")
     private List<String> imageIds;
 }

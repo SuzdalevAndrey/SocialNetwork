@@ -1,5 +1,6 @@
 package ru.andreyszdlv.notificationservice.configuration;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -12,23 +13,21 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.andreyszdlv.notificationservice.dto.auth.FailureSendRegisterMailDTO;
+import ru.andreyszdlv.notificationservice.props.KafkaProducerProperties;
 
 import java.util.HashMap;
 
 @Configuration
+@RequiredArgsConstructor
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
-    private String kafkaBootstrapServers;
-
-    @Value("${spring.kafka.producer.topic.name.failure-send-register-mail}")
-    private String nameTopicFailureSendRegisterMail;
+    private final KafkaProducerProperties kafkaProducerProperties;
 
     @Bean
     public ProducerFactory<String, FailureSendRegisterMailDTO> producerFactory(){
         HashMap<String, Object> props = new HashMap<>(3);
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -45,7 +44,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicRegisterCompensation(){
         return TopicBuilder
-                .name(nameTopicFailureSendRegisterMail)
+                .name(kafkaProducerProperties.getTopicNameFailureSendRegisterMail())
                 .partitions(1)
                 .replicas(1)
                 .build();

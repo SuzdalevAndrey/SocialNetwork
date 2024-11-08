@@ -37,18 +37,6 @@ public class InternalUserService {
     }
 
     @Transactional(readOnly = true)
-    public String getNameByUserId(long userId) {
-        log.info("Executing getNameByUserId for userId: {}", userId);
-
-        log.info("Getting name by userId: {}", userId);
-        String name = userService
-                .getUserByIdOrThrow(userId)
-                .getName();
-
-        return name;
-    }
-
-    @Transactional(readOnly = true)
     public UserDetailsResponseDTO getUserDetailsByEmail(String email) {
         log.info("Executing getUserDetailsByEmail for email: {}", email);
 

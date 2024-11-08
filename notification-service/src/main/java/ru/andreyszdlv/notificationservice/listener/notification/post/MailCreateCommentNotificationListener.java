@@ -40,7 +40,7 @@ public class MailCreateCommentNotificationListener {
                 createCommentDTO.email());
         mailSender.send(
                 createCommentDTO.email(),
-                String.format(header, createCommentDTO.nameCommentAuthor()),
+                header,
                 String.format(body, createCommentDTO.content())
         );
     }

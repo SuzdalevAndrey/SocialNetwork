@@ -19,8 +19,8 @@ public class CreateLikeKafkaListener {
     private final ApplicationEventPublisher publisher;
 
     @KafkaListener(
-            topics = "${spring.kafka.consumer.topic.name.create-like}",
-            groupId = "${spring.kafka.consumer.group-id}"
+            topics = "#{@kafkaConsumerProperties.topicNameCreateLike}",
+            groupId = "#{@kafkaConsumerProperties.groupId}"
     )
     public void listen(String createLikeMessage) throws JsonProcessingException {
         log.info("Executing listen message in kafka");
@@ -29,8 +29,7 @@ public class CreateLikeKafkaListener {
                 createLikeMessage,
                 CreateLikeDTO.class);
 
+        log.info("Publish event about create like event");
         publisher.publishEvent(createLikeDTO);
-
-        log.info("Create like user with name: {}", createLikeDTO.nameLikeAuthor());
     }
 }

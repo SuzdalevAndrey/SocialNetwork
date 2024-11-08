@@ -1,5 +1,6 @@
 package ru.andreyszdlv.postservice.configuration;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -14,27 +15,22 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.andreyszdlv.postservice.dto.kafka.CreateCommentKafkaDTO;
 import ru.andreyszdlv.postservice.dto.kafka.CreateLikeKafkaDTO;
+import ru.andreyszdlv.postservice.props.KafkaProducerProperties;
 
 import java.util.HashMap;
 
 @Configuration
 @EnableKafka
+@RequiredArgsConstructor
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.producer.bootstrap-servers}")
-    private String kafkaBootstrapServers;
-
-    @Value("${spring.kafka.producer.topic.name.create-like}")
-    private String nameTopicCreateLike;
-
-    @Value("${spring.kafka.producer.topic.name.create-comment}")
-    private String nameTopicCreateComment;
+    private final KafkaProducerProperties kafkaProducerProperties;
 
     @Bean
     public ProducerFactory<String, CreateLikeKafkaDTO> createLikeProducerFactory(){
         HashMap<String, Object> props = new HashMap<>(3);
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -52,7 +48,7 @@ public class KafkaProducerConfig {
     public ProducerFactory<String, CreateCommentKafkaDTO> createCommentProducerFactory(){
         HashMap<String, Object> props = new HashMap<>(3);
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -69,7 +65,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicCreateLike(){
         return TopicBuilder
-                .name(nameTopicCreateLike)
+                .name(kafkaProducerProperties.getTopicNameCreateLike())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -78,7 +74,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicCreateComment(){
         return TopicBuilder
-                .name(nameTopicCreateComment)
+                .name(kafkaProducerProperties.getTopicNameCreateComment())
                 .partitions(1)
                 .replicas(1)
                 .build();

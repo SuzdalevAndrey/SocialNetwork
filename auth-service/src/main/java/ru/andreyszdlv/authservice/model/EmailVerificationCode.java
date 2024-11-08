@@ -1,5 +1,6 @@
 package ru.andreyszdlv.authservice.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,9 +19,12 @@ public class EmailVerificationCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "c_email", nullable = false)
     private String email;
 
+    @Column(name = "c_verification_code", nullable = false)
     private String verificationCode;
 
+    @Column(name = "c_expiration_time", nullable = false)
     private LocalDateTime expirationTime;
 }

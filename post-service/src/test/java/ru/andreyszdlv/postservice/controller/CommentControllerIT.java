@@ -3,7 +3,6 @@ package ru.andreyszdlv.postservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.configuration.KafkaProducerConfig;
 import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
 import ru.andreyszdlv.postservice.dto.controller.comment.CreateCommentRequestDTO;
@@ -75,7 +74,7 @@ class CommentControllerIT {
     KafkaProducerConfig kafkaProducerConfig;
 
     @MockBean
-    UserServiceFeignClient userServiceFeignClient;
+    UserServiceClient userServiceClient;
 
     String BASE_URL = "/api/posts";
 
@@ -105,8 +104,8 @@ class CommentControllerIT {
                 .header("x-User-Role", "USER")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO));
-        when(userServiceFeignClient.getNameByUserId(userId)).thenReturn(ResponseEntity.of(Optional.of("name")));
-        when(userServiceFeignClient.getUserEmailByUserId(authorPostId)).thenReturn(ResponseEntity.of(Optional.of("email@email.com")));
+        when(userServiceClient.getNameByUserId(userId)).thenReturn(ResponseEntity.of(Optional.of("name")));
+        when(userServiceClient.getUserEmailByUserId(authorPostId)).thenReturn(ResponseEntity.of(Optional.of("email@email.com")));
 
         String response = mockMvc.perform(request)
                 .andExpectAll(

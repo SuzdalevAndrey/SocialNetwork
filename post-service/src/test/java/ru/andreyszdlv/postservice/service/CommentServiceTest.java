@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
-import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
 import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
@@ -40,7 +40,7 @@ class CommentServiceTest {
     PostRepo postRepository;
 
     @Mock
-    UserServiceFeignClient userServiceFeignClient;
+    UserServiceClient userServiceClient;
 
     @Mock
     KafkaProducerService kafkaProducerService;
@@ -109,8 +109,8 @@ class CommentServiceTest {
         );
 
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-        when(userServiceFeignClient.getUserEmailByUserId(post.getUserId())).thenReturn(ResponseEntity.ok(email));
-        when(userServiceFeignClient.getNameByUserId(userId)).thenReturn(ResponseEntity.ok(nameAuthorComment));
+        when(userServiceClient.getUserEmailByUserId(post.getUserId())).thenReturn(ResponseEntity.ok(email));
+        when(userServiceClient.getNameByUserId(userId)).thenReturn(ResponseEntity.ok(nameAuthorComment));
         when(meterRegistry.counter("comments_per_post", List.of(Tag.of("post_id",String.valueOf(postId))))).thenReturn(counter);
         when(commentMapper.commentToCommentReponseDTO(comment)).thenReturn(expectedResponse);
 

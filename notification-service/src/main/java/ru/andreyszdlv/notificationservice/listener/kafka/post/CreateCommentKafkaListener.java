@@ -19,8 +19,8 @@ public class CreateCommentKafkaListener {
     private final ApplicationEventPublisher publisher;
 
     @KafkaListener(
-            topics = "${spring.kafka.consumer.topic.name.create-comment}",
-            groupId = "${spring.kafka.consumer.group-id}"
+            topics = "#{@kafkaConsumerProperties.topicNameCreateComment}",
+            groupId = "#{@kafkaConsumerProperties.groupId}"
     )
     public void listen(String createCommentMessage) throws JsonProcessingException {
         log.info("Executing listen message in kafka");
@@ -29,8 +29,7 @@ public class CreateCommentKafkaListener {
                 createCommentMessage,
                 CreateCommentDTO.class);
 
+        log.info("Publish event about create comment event");
         publisher.publishEvent(createCommentDTO);
-
-        log.info("Create comment user with name: {}", createCommentDTO.nameCommentAuthor());
     }
 }

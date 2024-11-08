@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
-import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
@@ -37,7 +37,7 @@ class LikeServiceTest {
     PostRepo postRepository;
 
     @Mock
-    UserServiceFeignClient userServiceFeignClient;
+    UserServiceClient userServiceClient;
 
     @Mock
     KafkaProducerService kafkaProducerService;
@@ -69,9 +69,9 @@ class LikeServiceTest {
         when(postRepository.existsById(postId)).thenReturn(true);
         when(likeRepository.existsByPostIdAndUserId(postId, userId)).thenReturn(false);
         when(postRepository.findById(postId)).thenReturn(Optional.ofNullable(post));
-        when(userServiceFeignClient.getUserEmailByUserId(authorPostId))
+        when(userServiceClient.getUserEmailByUserId(authorPostId))
                 .thenReturn(ResponseEntity.ok(email));
-        when(userServiceFeignClient.getNameByUserId(userId))
+        when(userServiceClient.getNameByUserId(userId))
                 .thenReturn(ResponseEntity.ok(nameAuthorLike));
         when(meterRegistry.counter(
                 "likes_per_post",

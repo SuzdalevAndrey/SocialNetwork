@@ -7,46 +7,40 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.andreyszdlv.postservice.dto.kafka.CreateCommentKafkaDTO;
 import ru.andreyszdlv.postservice.dto.kafka.CreateLikeKafkaDTO;
+import ru.andreyszdlv.postservice.props.KafkaProducerProperties;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducerService {
-    @Value("${spring.kafka.producer.topic.name.create-like}")
-    private String nameTopicCreateLike;
 
-    @Value("${spring.kafka.producer.topic.name.create-comment}")
-    private String nameTopicCreateComment;
+    private final KafkaProducerProperties kafkaProducerProperties;
 
     private final KafkaTemplate<String, CreateLikeKafkaDTO> kafkaTemplateCreateLike;
 
     private final KafkaTemplate<String, CreateCommentKafkaDTO> kafkaTemplateCreateComment;
 
-    public void sendCreateLikeEvent(String email,
-                                    String nameLikeAuthor){
-        log.info("Executing sendCreateLikeEvent in kafka with email: {}, name like author: {}",
-                email,
-                nameLikeAuthor);
+    public void sendCreateLikeEvent(String email){
+        log.info("Executing sendCreateLikeEvent in kafka with email: {}",
+                email
+        );
         kafkaTemplateCreateLike.send(
-                nameTopicCreateLike,
+                kafkaProducerProperties.getTopicNameCreateLike(),
                 new CreateLikeKafkaDTO(
-                        email,
-                        nameLikeAuthor
+                        email
                 )
         );
     }
 
     public void sendCreateCommentEvent(String email,
-                                       String nameCommentAuthor,
                                        String content){
-        log.info("Executing sendCreateCommentEvent in kafka with email: {}, name comment author: {}",
-                email,
-                nameCommentAuthor);
+        log.info("Executing sendCreateCommentEvent in kafka with email: {}",
+                email
+        );
         kafkaTemplateCreateComment.send(
-                nameTopicCreateComment,
+                kafkaProducerProperties.getTopicNameCreateComment(),
                 new CreateCommentKafkaDTO(
                         email,
-                        nameCommentAuthor,
                         content
                 )
         );

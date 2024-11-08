@@ -43,6 +43,7 @@ public class S3Service {
                             .build(),
                     RequestBody.fromBytes(bytes)
             );
+
             log.info("File saved to s3");
         } catch (Exception e) {
             log.error("Error saving file: {}", e.getMessage());
@@ -60,7 +61,7 @@ public class S3Service {
                 .builder()
                 .signatureDuration(Duration.ofMinutes(s3Properties.getExpirationUrlInMinutes()))
                 .getObjectRequest(
-                        req->req.bucket(bucketName).key(fileId)
+                        req -> req.bucket(bucketName).key(fileId)
                 )
                 .build();
 

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
@@ -25,7 +25,7 @@ public class LikeService {
 
     private final PostRepo postRepository;
 
-    private final UserServiceFeignClient userServiceFeignClient;
+    private final UserServiceClient userServiceClient;
 
     private final KafkaProducerService kafkaProducerService;
 
@@ -61,18 +61,13 @@ public class LikeService {
                 .getUserId();
 
         log.info("Getting email author post by userId: {}", userIdAuthorPost);
-        String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
+        String email = userServiceClient.getUserEmailByUserId(userIdAuthorPost).getBody();
 
-        log.info("Getting name author like by userId: {}", userId);
-        String nameAuthorLike = userServiceFeignClient.getNameByUserId(userId).getBody();
-
-        log.info("Send data email: {}, nameAuthorLike: {} in kafka for create like event",
-                email,
-                nameAuthorLike
+        log.info("Send data email: {} in kafka for create like event",
+                email
         );
         kafkaProducerService.sendCreateLikeEvent(
-                email,
-                nameAuthorLike
+                email
         );
 
         meterRegistry

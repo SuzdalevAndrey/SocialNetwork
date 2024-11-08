@@ -20,7 +20,6 @@ import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
 import java.util.HashMap;
 
 @Configuration
-@EnableKafka
 @RequiredArgsConstructor
 public class KafkaProducerConfig {
 

@@ -6,14 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
 import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.mapper.CommentMapper;
 import ru.andreyszdlv.postservice.model.Comment;
-import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.CommentRepo;
 import ru.andreyszdlv.postservice.repository.PostRepo;
 
@@ -29,7 +28,7 @@ public class CommentService {
 
     private final PostRepo postRepository;
 
-    private final UserServiceFeignClient userServiceFeignClient;
+    private final UserServiceClient userServiceClient;
 
     private final KafkaProducerService kafkaProducerService;
 
@@ -71,19 +70,14 @@ public class CommentService {
         log.info("Successful get userId: {} author post by postId", userIdAuthorPost);
 
         log.info("Getting email author post by author id: {}", userIdAuthorPost);
-        String email = userServiceFeignClient.getUserEmailByUserId(userIdAuthorPost).getBody();
+        String email = userServiceClient.getUserEmailByUserId(userIdAuthorPost).getBody();
 
-        log.info("Getting name author comment by userId: {}", userId);
-        String nameAuthorComment = userServiceFeignClient.getNameByUserId(userId).getBody();
-
-        log.info("Send data email: {}, nameAuthor: {}, content: {} in kafka for create comment event",
+        log.info("Send data email: {}, content: {} in kafka for create comment event",
                 email,
-                nameAuthorComment,
                 content
         );
         kafkaProducerService.sendCreateCommentEvent(
                 email,
-                nameAuthorComment,
                 content
         );
 

@@ -1,10 +1,10 @@
 package ru.andreyszdlv.authservice.configuration;
 
 
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
@@ -15,32 +15,24 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.andreyszdlv.authservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.LoginUserKafkaDTO;
+import ru.andreyszdlv.authservice.props.KafkaProducerProperties;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
 @Configuration
+@RequiredArgsConstructor
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
-    private String kafkaBootstrapServers;
-
-    @Value("${spring.kafka.producer.topic.name.login-user}")
-    private String nameTopicLoginUser;
-
-    @Value("${spring.kafka.producer.topic.name.register-user}")
-    private String nameTopicRegisterUser;
-
-    @Value("${spring.kafka.producer.topic.name.save-user}")
-    private String nameTopicSaveUser;
+    private final KafkaProducerProperties kafkaProducerProperties;
 
     @Bean
     public ProducerFactory<String, LoginUserKafkaDTO> LoginUserProducerFactory() {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -59,7 +51,7 @@ public class KafkaProducerConfig {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -78,7 +70,7 @@ public class KafkaProducerConfig {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -95,7 +87,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicLogin() {
         return TopicBuilder
-                .name(nameTopicLoginUser)
+                .name(kafkaProducerProperties.getTopicNameLoginUser())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -104,7 +96,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicRegister() {
         return TopicBuilder
-                .name(nameTopicRegisterUser)
+                .name(kafkaProducerProperties.getTopicNameRegisterUser())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -113,7 +105,7 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic newTopicSaveUser() {
         return TopicBuilder
-                .name(nameTopicSaveUser)
+                .name(kafkaProducerProperties.getTopicNameSaveUser())
                 .partitions(1)
                 .replicas(1)
                 .build();

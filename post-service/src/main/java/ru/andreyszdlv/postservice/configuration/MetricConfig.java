@@ -30,7 +30,7 @@ public class MetricConfig {
 
             Counter.builder("likes_per_post")
                     .description("Количество лайков на один пост")
-                    .tag("post_id","1")
+                    .tag("post_id","-1")
                     .register(registry);
         };
     }

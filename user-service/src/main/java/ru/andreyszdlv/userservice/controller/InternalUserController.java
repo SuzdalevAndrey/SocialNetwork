@@ -31,17 +31,6 @@ public class InternalUserController {
         return ResponseEntity.ok(email);
     }
 
-    @GetMapping("/name/{userId}")
-    public ResponseEntity<String> getNameByUserId(@PathVariable long userId) {
-        log.info("Executing getNameByUserEmail for userId: {}", userId);
-
-        log.info("Getting name by userId: {}", userId);
-        String name = internalUserService.getNameByUserId(userId);
-
-        log.info("Successfully get name: {} by userId: {}", name, userId);
-        return ResponseEntity.ok(name);
-    }
-
     @GetMapping("/user-details/{email}")
     public ResponseEntity<UserDetailsResponseDTO> getUserDetailsByUserEmail(@PathVariable String email) {
         log.info("Executing getUserDetailsByUserEmail by email: {}", email);

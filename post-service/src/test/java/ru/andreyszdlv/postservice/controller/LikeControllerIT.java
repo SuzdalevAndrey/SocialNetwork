@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.andreyszdlv.postservice.api.userservice.UserServiceFeignClient;
+import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.configuration.KafkaProducerConfig;
 import ru.andreyszdlv.postservice.model.Like;
 import ru.andreyszdlv.postservice.model.Post;
@@ -59,7 +59,7 @@ class LikeControllerIT {
     KafkaProducerConfig kafkaProducerConfig;
 
     @MockBean
-    UserServiceFeignClient userServiceFeignClient;
+    UserServiceClient userServiceClient;
 
     @MockBean
     KafkaProducerService kafkaProducerService;
@@ -80,9 +80,9 @@ class LikeControllerIT {
                 .post(BASE_URL + "/{postId}/like", postId)
                 .header("X-User-Id", userId)
                 .header("x-User-Role", "USER");
-        when(userServiceFeignClient.getUserEmailByUserId(authorPostId))
+        when(userServiceClient.getUserEmailByUserId(authorPostId))
                 .thenReturn(ResponseEntity.of(Optional.of("email@email.com")));
-        when(userServiceFeignClient.getNameByUserId(userId))
+        when(userServiceClient.getNameByUserId(userId))
                 .thenReturn(ResponseEntity.of(Optional.of("name")));
 
         mockMvc.perform(request)
