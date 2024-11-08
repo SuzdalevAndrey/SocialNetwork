@@ -23,10 +23,12 @@ public class UserDataService {
         long userId = jwtSecurityService.extractUserId(token);
         log.info("Extract userId: {}", userId);
 
+        String expectedToken = accessAndRefreshJwtService.getAccessTokenByUserId(userId);
+
         log.info("Validate token");
         if(jwtSecurityService.validateToken(token)
-                && accessAndRefreshJwtService.getAccessTokenByUserId(userId) != null
-                && accessAndRefreshJwtService.getAccessTokenByUserId(userId).equals(token)
+                && expectedToken!= null
+                && expectedToken.equals(token)
         ){
             log.info("Token is valid");
 

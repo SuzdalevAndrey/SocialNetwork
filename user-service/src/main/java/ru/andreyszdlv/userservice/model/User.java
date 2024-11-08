@@ -29,6 +29,6 @@ public class User{
     @Column(name = "c_role", nullable = false)
     private ERole role;
 
-    @Column(name = "c_image_id", nullable = false)
+    @Column(name = "c_image_id")
     private String idImage;
 }

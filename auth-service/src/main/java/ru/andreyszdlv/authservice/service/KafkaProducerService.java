@@ -11,6 +11,8 @@ import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
 import ru.andreyszdlv.authservice.enums.ERole;
 import ru.andreyszdlv.authservice.props.KafkaProducerProperties;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -51,6 +53,7 @@ public class KafkaProducerService {
                 kafkaProducerProperties.getTopicNameSaveUser(),
                 UserDetailsKafkaDTO
                         .builder()
+                        .messageId(UUID.randomUUID())
                         .name(name)
                         .email(email)
                         .password(password)

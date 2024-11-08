@@ -72,6 +72,6 @@ public class RegistrationService {
             return;
         }
         log.error("Code sent user with email: {} not valid", request.email());
-        throw new VerificationCodeNotSuitableException("errors.409.verification_token_is_not_valid");
+        throw new VerificationCodeNotSuitableException("errors.409.verification_code_is_not_valid");
     }
 }

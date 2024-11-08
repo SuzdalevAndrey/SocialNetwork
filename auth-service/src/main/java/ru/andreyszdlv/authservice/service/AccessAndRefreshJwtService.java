@@ -1,5 +1,6 @@
 package ru.andreyszdlv.authservice.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -7,31 +8,35 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AccessAndRefreshJwtService {
 
-    @CachePut(value = "auth-service::getAccessToken", key = "#userId")
-    public String saveAccessTokenByUserId(long userId, String accessToken){
-        return accessToken;
+    private final JwtSecurityService jwtSecurityService;
+
+    @CachePut(value = "${spring.redis.accessTokenNameCache}", key = "#userId")
+    public String generateAccessToken(long userId, String role){
+        return jwtSecurityService.generateToken(userId, role);
     }
 
-    @CachePut(value = "auth-service::getRefreshToken", key = "#userId")
-    public String saveRefreshTokenByUserId(long userId, String refreshToken){
-        return refreshToken;
+    @CachePut(value = "${spring.redis.refreshTokenNameCache}", key = "#userId")
+    public String generateRefreshToken(long userId, String role){
+        return jwtSecurityService.generateRefreshToken(userId, role);
     }
 
-    @Cacheable(value = "auth-service::getAccessToken", key = "#userId")
+    @Cacheable(value = "${spring.redis.accessTokenNameCache}", key = "#userId")
     public String getAccessTokenByUserId(long userId){
         return null;
     }
 
-    @Cacheable(value = "auth-service::getRefreshToken", key = "#userId")
+    @Cacheable(value = "${spring.redis.refreshTokenNameCache}", key = "#userId")
     public String getRefreshTokenByUserId(long userId){
         return null;
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "auth-service::getAccessToken", key = "#userId"),
-            @CacheEvict(value = "auth-service::getRefreshToken", key = "#userId")
+            @CacheEvict(value = "${spring.redis.accessTokenNameCache}", key = "#userId"),
+            @CacheEvict(value = "${spring.redis.refreshTokenNameCache}", key = "#userId")
     })
     public void deleteByUserId(long userId){}
+
 }

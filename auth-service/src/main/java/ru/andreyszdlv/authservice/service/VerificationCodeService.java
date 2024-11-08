@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
+import ru.andreyszdlv.authservice.exception.VerificationCodeHasExpired;
 import ru.andreyszdlv.authservice.model.EmailVerificationCode;
 import ru.andreyszdlv.authservice.repository.EmailVerificationCodeRepo;
 
@@ -53,7 +54,7 @@ public class VerificationCodeService {
         return emailVerificationCodeRepository
                 .findByEmail(email)
                 .orElseThrow(
-                        ()->new RegisterUserNotFoundException("errors.404.email_not_found")
+                        ()->new VerificationCodeHasExpired("errors.409.verification_code_has_expired")
                 )
                 .getVerificationCode()
                 .equals(code);

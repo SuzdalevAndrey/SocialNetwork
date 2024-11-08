@@ -22,13 +22,13 @@ public class AuthService {
 
     private final UserServiceClient userServiceClient;
 
-    private final JwtSecurityService jwtSecurityService;
-
     private final KafkaProducerService kafkaProducerService;
 
     private final AuthenticationManager authenticationManager;
 
     private final AccessAndRefreshJwtService accessAndRefreshJwtService;
+
+    private final JwtSecurityService jwtSecurityService;
 
     @Transactional
     public LoginResponseDTO loginUser(LoginRequestDTO request) {
@@ -47,19 +47,12 @@ public class AuthService {
                 .getBody();
 
         log.info("Token generation for user: {}", user.id());
-        String token = jwtSecurityService.generateToken(
-                user.id(),
-                user.role().name()
-        );
+        String token = accessAndRefreshJwtService
+                .generateAccessToken(user.id(), user.role().name());
 
         log.info("RefreshToken generation for user: {}", user.id());
-        String refreshToken = jwtSecurityService.generateRefreshToken(
-                user.id(),
-                user.role().name()
-        );
-
-        accessAndRefreshJwtService.saveAccessTokenByUserId(user.id(), token);
-        accessAndRefreshJwtService.saveRefreshTokenByUserId(user.id(), refreshToken);
+        String refreshToken = accessAndRefreshJwtService
+                .generateRefreshToken(user.id(), user.role().name());
 
         log.info("Login completed successfully with id: {}", user.id());
         kafkaProducerService.sendLoginEvent(user.name(), user.email());
@@ -79,20 +72,18 @@ public class AuthService {
         String role = jwtSecurityService.extractRole(token);
         log.info("Extract role: {}", role);
 
+        String expectedRefreshToken = accessAndRefreshJwtService.getRefreshTokenByUserId(userId);
+
         log.info("Validate token");
         if(jwtSecurityService.validateToken(token)
-                && accessAndRefreshJwtService.getRefreshTokenByUserId(userId) != null
-                && accessAndRefreshJwtService.getRefreshTokenByUserId(userId).equals(token)
+                && expectedRefreshToken != null
+                && expectedRefreshToken.equals(token)
         ){
             log.info("Successfully validated token");
 
-            log.info("Generate refresh and access token");
-            String accessToken = jwtSecurityService.generateToken(userId, role);
-            String refreshToken = jwtSecurityService.generateRefreshToken(userId, role);
-
-            log.info("Save tokens to cache");
-            accessAndRefreshJwtService.saveAccessTokenByUserId(userId, accessToken);
-            accessAndRefreshJwtService.saveRefreshTokenByUserId(userId, refreshToken);
+            log.info("Generate and save refresh and access token");
+            String accessToken = accessAndRefreshJwtService.generateAccessToken(userId, role);
+            String refreshToken = accessAndRefreshJwtService.generateRefreshToken(userId, role);
 
             log.info("Refresh token completed successfully");
             return new RefreshTokenResponseDTO(

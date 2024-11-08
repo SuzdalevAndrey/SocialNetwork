@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import ru.andreyszdlv.notificationservice.dto.auth.FailureSendRegisterMailDTO;
 import ru.andreyszdlv.notificationservice.props.KafkaProducerProperties;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,7 +23,11 @@ public class KafkaProducerService {
         log.info("Executing sendFailureRegisterMailEvent in kafka with email: {}", email);
         kafkaTemplateMailFailure.send(
                 kafkaProducerProperties.getTopicNameFailureSendRegisterMail(),
-                new FailureSendRegisterMailDTO(email)
+                FailureSendRegisterMailDTO
+                        .builder()
+                        .messageId(UUID.randomUUID())
+                        .email(email)
+                        .build()
         );
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.authservice.enums.ERole;
+import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.model.PendingUser;
 import ru.andreyszdlv.authservice.repository.PendingUserRepo;
 
@@ -54,7 +55,7 @@ public class PendingUserService {
         PendingUser pendingUser = pendingUserRepository
                 .findByEmail(email)
                 .orElseThrow(
-                        ()->new NoSuchElementException("errors.404.email_not_found")
+                        ()->new RegisterUserNotFoundException("errors.404.email_not_found")
                 );
 
         log.info("Delete user from pending user table by email: {}", email);

@@ -10,6 +10,8 @@ import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -50,6 +52,7 @@ public class KafkaProducerService {
                 producerProperties.getTopicNameFailureSaveUser(),
                 UserDetailsKafkaDTO
                         .builder()
+                        .messageId(UUID.randomUUID())
                         .name(name)
                         .email(email)
                         .password(password)

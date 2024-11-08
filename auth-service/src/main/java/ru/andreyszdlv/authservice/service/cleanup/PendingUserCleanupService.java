@@ -26,6 +26,7 @@ public class PendingUserCleanupService {
                 .now()
                 .minus(24, ChronoUnit.HOURS);
 
+        log.info("Deleting old users older than " + cutOffTime);
         pendingUserRepository.deleteBycreatedAtBefore(cutOffTime);
     }
 }

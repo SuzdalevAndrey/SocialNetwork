@@ -12,6 +12,7 @@ import ru.andreyszdlv.authservice.exception.UserNeedConfirmException;
 import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
+import ru.andreyszdlv.authservice.exception.VerificationCodeHasExpired;
 import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
 import ru.andreyszdlv.authservice.service.ProblemDetailService;
 
@@ -49,7 +50,8 @@ public class IncorrectDataControllerAdvice {
             ValidateTokenException.class,
             UserAlreadyRegisteredException.class,
             VerificationCodeNotSuitableException.class,
-            UserNeedConfirmException.class
+            UserNeedConfirmException.class,
+            VerificationCodeHasExpired.class
     })
     public ResponseEntity<ProblemDetail> handleConflictException(
             RuntimeException ex,

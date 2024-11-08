@@ -3,9 +3,11 @@ package ru.andreyszdlv.authservice.dto.kafka;
 import lombok.Builder;
 import ru.andreyszdlv.authservice.enums.ERole;
 
+import java.util.UUID;
+
 @Builder
 public record UserDetailsKafkaDTO(
-        Long id,
+        UUID messageId,
 
         String name,
 

@@ -24,6 +24,7 @@ public class VerificationCodeCleanupService {
         LocalDateTime cutOffTime = LocalDateTime
                 .now();
 
+        log.info("Deleting expired verification codes older than " + cutOffTime);
         emailVerificationCodeRepository.deleteByexpirationTimeBefore(cutOffTime);
     }
 }
