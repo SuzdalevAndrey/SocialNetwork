@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
 import ru.andreyszdlv.userservice.exception.DeleteImageException;
 import ru.andreyszdlv.userservice.exception.EmptyImageException;
+import ru.andreyszdlv.userservice.exception.FileIsNotImageException;
 import ru.andreyszdlv.userservice.exception.ImageUploadException;
 import ru.andreyszdlv.userservice.exception.NoSuchImageException;
 import ru.andreyszdlv.userservice.util.ImageUtils;
@@ -77,6 +78,13 @@ public class ImageService {
             log.error("Error: image is empty");
             throw new EmptyImageException("errors.400.image_is_empty");
         }
+
+        log.info("Checking file is an image");
+        if(!ImageUtils.isImageFile(avatar)){
+            log.error("File is not an image");
+            throw new FileIsNotImageException("errors.400.file_is_not_image");
+        }
+        log.info("File is an image");
     }
 
     private byte[] getImageBytes(MultipartFile avatar) {

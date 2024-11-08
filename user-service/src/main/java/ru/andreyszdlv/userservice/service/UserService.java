@@ -11,12 +11,14 @@ import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageUrlResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
+import ru.andreyszdlv.userservice.exception.FileIsNotImageException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.exception.UserAlreadyHaveAvatarException;
 import ru.andreyszdlv.userservice.exception.UserNotHaveAvatarException;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
+import ru.andreyszdlv.userservice.util.ImageUtils;
 
 @Slf4j
 @Service
@@ -118,6 +120,7 @@ public class UserService {
     @Transactional
     public ImageIdResponseDTO uploadAvatar(long userId, ImageRequestDTO avatarDTO) {
         log.info("Executing uploadAvatar for userId: {}", userId);
+
         User user = this.getUserByIdOrThrow(userId);
 
         log.info("Checking user exists avatar for userId: {}", userId);
@@ -138,10 +141,11 @@ public class UserService {
     @Transactional
     public ImageIdResponseDTO updateAvatar(long userId, ImageRequestDTO avatarDTO) {
         log.info("Executing updateAvatar for userId: {}", userId);
+
         User user = this.getUserByIdOrThrow(userId);
 
         log.info("Checking user exists avatar for userId: {}", userId);
-        if(!this.checkUserHasAvatar(user)){
+        if (!this.checkUserHasAvatar(user)) {
             log.error("User: {} not have avatar", userId);
             throw new UserNotHaveAvatarException("errors.409.user_not_have_avatar");
         }

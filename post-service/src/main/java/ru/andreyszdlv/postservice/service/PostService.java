@@ -53,6 +53,8 @@ public class PostService {
         post.setNumberViews(0L);
         post.setUserId(userId);
 
+        Post responsePost = postRepository.save(post);
+
         log.info("Uploading images for post: {}", post.getId());
         if (postRequestDTO.images() != null) {
             log.info("Images no empty, size = {}", postRequestDTO.images().size());
@@ -62,8 +64,6 @@ public class PostService {
                     .toList();
             post.setImageIds(imagesId);
         }
-
-        Post responsePost = postRepository.save(post);
 
         log.info("Successful create post with content: {}", postRequestDTO.content());
 
@@ -95,9 +95,11 @@ public class PostService {
                     .toList();
 
             post.setImageIds(newImageIds);
+        } else {
+            post.setImageIds(List.of());
         }
 
-        oldImageIds.forEach(imageService::deleteImageById);
+        oldImageIds.parallelStream().forEach(imageService::deleteImageById);
 
         log.info("Successful update post with postId: {}, content: {}",
                 postId,

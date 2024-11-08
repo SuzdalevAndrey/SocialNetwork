@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.validation.BindException;
 import ru.andreyszdlv.userservice.exception.EmptyImageException;
+import ru.andreyszdlv.userservice.exception.FileIsNotImageException;
 import ru.andreyszdlv.userservice.exception.ImageUploadException;
 import ru.andreyszdlv.userservice.service.ProblemDetailService;
 
@@ -47,7 +48,8 @@ public class BadRequestControllerAdvice {
 
     @ExceptionHandler({
             EmptyImageException.class,
-            ImageUploadException.class
+            ImageUploadException.class,
+            FileIsNotImageException.class
     })
     public ResponseEntity<ProblemDetail> handleBadRequestException(final RuntimeException ex,
                                                                    Locale locale) {

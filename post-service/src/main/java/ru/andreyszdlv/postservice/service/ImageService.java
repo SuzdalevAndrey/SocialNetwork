@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.andreyszdlv.postservice.exception.DeleteImageException;
 import ru.andreyszdlv.postservice.exception.EmptyImageException;
 import ru.andreyszdlv.postservice.exception.FileDeleteException;
+import ru.andreyszdlv.postservice.exception.FileIsNotImageException;
 import ru.andreyszdlv.postservice.exception.FileUploadException;
 import ru.andreyszdlv.postservice.exception.ImageUploadException;
 import ru.andreyszdlv.postservice.exception.NoSuchImageException;
@@ -59,6 +60,13 @@ public class ImageService {
             log.error("Error: image is empty");
             throw new EmptyImageException("errors.400.image_is_empty");
         }
+
+        log.info("Checking file is an image");
+        if(!ImageUtils.isImageFile(avatar)){
+            log.error("File is not an image");
+            throw new FileIsNotImageException("errors.400.file_is_not_image");
+        }
+        log.info("File is an image");
     }
 
     private String saveNewImage(MultipartFile avatar){
