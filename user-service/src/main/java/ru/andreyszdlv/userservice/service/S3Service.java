@@ -10,7 +10,6 @@ import ru.andreyszdlv.userservice.props.S3Properties;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
@@ -54,7 +53,7 @@ public class S3Service {
         }
     }
 
-    public String getFileUrlById(String fileId) throws NoSuchFileException {
+    public String getFileUrlById(String fileId) {
         String bucketName = s3Properties.getBucketUserAvatar();
         log.info("Executing getFileUrlById for bucketName: {} and fileId: {}",
                 bucketName,

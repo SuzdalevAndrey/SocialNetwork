@@ -31,9 +31,6 @@ import static org.mockito.Mockito.when;
 
 class InternalUserServiceTest {
     @Mock
-    UserRepo userRepository;
-
-    @Mock
     KafkaProducerService kafkaProducerService;
 
     @Mock
@@ -122,7 +119,7 @@ class InternalUserServiceTest {
 
         internalUserService.saveUser(name, email, password, role);
 
-        verify(userRepository, times(1)).save(any(User.class));
+        verify(userService, times(1)).save(any(User.class));
     }
 
     @Test
@@ -132,10 +129,10 @@ class InternalUserServiceTest {
         String password = "password";
         ERole role = ERole.USER;
 
-        doThrow(new RuntimeException("Database Error")).when(userRepository).save(any(User.class));
+        doThrow(new RuntimeException("Database Error")).when(userService).save(any(User.class));
         internalUserService.saveUser(name, email, password, role);
 
-        verify(userRepository, times(1)).save(any(User.class));
+        verify(userService, times(1)).save(any(User.class));
         verify(
                 kafkaProducerService,
                 times(1)
@@ -146,7 +143,7 @@ class InternalUserServiceTest {
     public void existsUserByEmail_ReturnTrue_WhenUserExists(){
         String email = "test@gmail.com";
 
-        when(userRepository.existsByEmail(email)).thenReturn(true);
+        when(userService.existsByEmail(email)).thenReturn(true);
 
         assertTrue(internalUserService.existsUserByEmail(email));
     }
@@ -155,7 +152,7 @@ class InternalUserServiceTest {
     public void existsUserByEmail_ReturnFalse_WhenUserNotFound(){
         String email = "test@gmail.com";
 
-        when(userRepository.existsByEmail(email)).thenReturn(false);
+        when(userService.existsByEmail(email)).thenReturn(false);
 
         assertFalse(internalUserService.existsUserByEmail(email));
     }

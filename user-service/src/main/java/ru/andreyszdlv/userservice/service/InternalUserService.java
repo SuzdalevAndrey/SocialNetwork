@@ -9,14 +9,11 @@ import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
-import ru.andreyszdlv.userservice.repository.UserRepo;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class InternalUserService {
-
-    private final UserRepo userRepository;
 
     private final KafkaProducerService kafkaProducerService;
 
@@ -59,7 +56,7 @@ public class InternalUserService {
 
         log.info("Saving user with email: {}", email);
         try {
-            userRepository.save(user);
+            userService.save(user);
         } catch (Exception ex) {
             log.error("Send data name, email: {}, password, role in kafka for failure save user event",
                     email
@@ -74,9 +71,9 @@ public class InternalUserService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean existsUserByEmail(String email) {
+    public boolean existsUserByEmail(String email) {
         log.info("Executing existsUserByEmail for email: {}", email);
-        return userRepository.existsByEmail(email);
+        return userService.existsByEmail(email);
     }
 
     @Transactional(readOnly = true)

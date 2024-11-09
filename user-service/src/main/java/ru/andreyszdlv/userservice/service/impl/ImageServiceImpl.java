@@ -65,7 +65,7 @@ public class ImageServiceImpl implements ImageService {
         try {
             log.info("Saving image for imageId: {}", imageId);
             s3Service.saveFile(avatarBytes, imageId);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             log.error("Error saving image: {}", e.getMessage());
             throw new ImageUploadException("errors.400.image_upload_failed");
         }

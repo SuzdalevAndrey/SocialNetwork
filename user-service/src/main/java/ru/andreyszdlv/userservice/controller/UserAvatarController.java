@@ -20,15 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.andreyszdlv.userservice.dto.controller.ImageIdResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageUrlResponseDTO;
-import ru.andreyszdlv.userservice.service.UserService;
+import ru.andreyszdlv.userservice.service.UserAvatarService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
 @Slf4j
-public class ImageController {
+public class UserAvatarController {
 
-    private final UserService userService;
+    private final UserAvatarService userAvatarService;
 
     @PostMapping("/my-avatar")
     public ResponseEntity<ImageIdResponseDTO> uploadAvatar(@RequestHeader("X-User-Id") long userId,
@@ -49,7 +49,7 @@ public class ImageController {
         log.info("Validation successful, uploading avatar for userId: {}", userId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userService.uploadAvatar(userId, imageDTO));
+                .body(userAvatarService.uploadAvatar(userId, imageDTO));
     }
 
     @PatchMapping("/my-avatar")
@@ -69,7 +69,7 @@ public class ImageController {
         }
 
         log.info("Validation successful, updating avatar for userId: {}", userId);
-        return ResponseEntity.ok(userService.updateAvatar(userId, imageDTO));
+        return ResponseEntity.ok(userAvatarService.updateAvatar(userId, imageDTO));
     }
 
 
@@ -78,7 +78,7 @@ public class ImageController {
         log.info("Executing getMyAvatar for userId: {}", userId);
 
         log.info("Getting user avatar for userId: {}", userId);
-        ImageUrlResponseDTO responseDTO = userService.getAvatarUrlByUserId(userId);
+        ImageUrlResponseDTO responseDTO = userAvatarService.getAvatarUrlByUserId(userId);
 
         log.info("Successfully getMyAvatar for userId: {}", userId);
         return ResponseEntity.ok(responseDTO);
@@ -89,7 +89,7 @@ public class ImageController {
         log.info("Executing getAvatarByIdImage for idImage: {}", idImage);
 
         log.info("Getting user avatar for idImage: {}", idImage);
-        ImageUrlResponseDTO responseDTO = userService.getAvatarUrlById(idImage);
+        ImageUrlResponseDTO responseDTO = userAvatarService.getAvatarUrlById(idImage);
 
         log.info("Successfully getAvatarByIdImage for idImage: {}", idImage);
         return ResponseEntity.ok(responseDTO);
@@ -99,7 +99,7 @@ public class ImageController {
     public ResponseEntity<Void> deleteAvatarByUserId(@RequestHeader("X-User-Id") long userId){
         log.info("Executing deleteAvatarByUserId for userId: {}", userId);
 
-        userService.deleteAvatarByUserId(userId);
+        userAvatarService.deleteAvatarByUserId(userId);
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

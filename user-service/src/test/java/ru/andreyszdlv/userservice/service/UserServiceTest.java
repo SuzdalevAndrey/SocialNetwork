@@ -17,6 +17,7 @@ import ru.andreyszdlv.userservice.repository.UserRepo;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,19 +26,7 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     @Mock
-    PasswordEncoder passwordEncoder;
-
-    @Mock
     UserRepo userRepository;
-
-    @Mock
-    KafkaProducerService kafkaProducerService;
-
-    @Mock
-    MeterRegistry meterRegistry;
-
-    @Mock
-    Counter counter;
 
     @InjectMocks
     UserService userService;
@@ -48,91 +37,85 @@ class UserServiceTest {
     }
 
     @Test
-    void updateEmailUser_Success_WhenUserExists() {
+    void getUserByIdOrThrow_ReturnUser_WhenUserExists() {
         long userId = 1L;
-        String oldEmail = "oldEmail@email.com";
-        String newEmail = "newEmail@email.com";
-        User user = new User();
-        user.setEmail(oldEmail);
-
+        User user = mock(User.class);
         when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-        userService.updateEmailUser(userId, newEmail);
 
+        User response = userService.getUserByIdOrThrow(userId);
+
+        assertNotNull(response);
+        assertEquals(user, response);
         verify(userRepository, times(1)).findById(userId);
-        verify(kafkaProducerService, times(1)).sendEditEmailEvent(oldEmail, newEmail);
     }
 
     @Test
-    void updateEmailUser_Failed_WhenUserNoExists() {
+    void getUserByIdOrThrow_ThrowException_WhenUserNotExists() {
         long userId = 1L;
-        String oldEmail = "oldEmail@email.com";
-        String newEmail = "newEmail@email.com";
+        when(userRepository.findById(userId)).thenThrow(NoSuchUserException.class);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
         assertThrows(
                 NoSuchUserException.class,
-                ()->userService.updateEmailUser(userId, newEmail)
+                () -> userService.getUserByIdOrThrow(userId)
         );
 
         verify(userRepository, times(1)).findById(userId);
-        verify(kafkaProducerService, never()).sendEditEmailEvent(oldEmail, newEmail);
     }
 
     @Test
-    void updatePasswordUser_Success_WhenUserExists() {
-        long userId = 1L;
-        String oldPassword = "000000";
-        String newPassword = "0000000";
-        String email = "email@email.com";
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(oldPassword);
+    void getUserByEmaildOrThrow_ReturnUser_WhenUserExists(){
+        String email = "test@mail.ru";
+        User user = mock(User.class);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
 
-        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-        when(passwordEncoder.matches(user.getPassword(), oldPassword)).thenReturn(true);
-        when(meterRegistry.counter("user_change_password")).thenReturn(counter);
-        userService.updatePasswordUser(userId, oldPassword, newPassword);
+        User response = userService.getUserByEmaildOrThrow(email);
 
-        verify(userRepository, times(1)).findById(userId);
-        verify(kafkaProducerService, times(1)).sendEditPasswordEvent(email);
+        assertNotNull(response);
+        assertEquals(user, response);
+        verify(userRepository, times(1)).findByEmail(email);
     }
 
     @Test
-    void updatePasswordUser_Failed_WhenUserNoExists() {
-        long userId = 1L;
-        String oldPassword = "000000";
-        String newPassword = "0000000";
-        String email = "email@email.com";
+    void getUserByEmaildOrThrow_ThrowException_WhenUserNotExists(){
+        String email = "test@mail.ru";
+        when(userRepository.findByEmail(email)).thenThrow(NoSuchUserException.class);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
         assertThrows(
                 NoSuchUserException.class,
-                ()->userService.updatePasswordUser(userId, oldPassword, newPassword)
+                ()->userService.getUserByEmaildOrThrow(email)
         );
 
-        verify(userRepository, times(1)).findById(userId);
-        verify(kafkaProducerService, never()).sendEditPasswordEvent(email);
+        verify(userRepository, times(1)).findByEmail(email);
     }
 
     @Test
-    void updatePasswordUser_Failed_WhenPasswordsDifferent() {
-        long userId = 1L;
-        String oldPassword = "oldPassword";
-        String newPassword = "newPassword";
-        String email = "email@email.com";
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(oldPassword));
+    void save_Success(){
+        User user = mock(User.class);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-        when(passwordEncoder.matches(user.getPassword(), "differentOldPassword")).thenReturn(true);
-        assertThrows(
-                DifferentPasswordsException.class,
-                ()->userService.updatePasswordUser(userId, "differentOldPassword", newPassword)
-        );
+        userService.save(user);
 
-        verify(userRepository, times(1)).findById(userId);
-        verify(kafkaProducerService, never()).sendEditPasswordEvent(email);
+        verify(userRepository, times(1)).save(user);
     }
 
+    @Test
+    void existsByEmail_ReturnsTrue_WhenUserExists(){
+        String email = "test@mail.ru";
+        when(userRepository.existsByEmail(email)).thenReturn(true);
+
+        boolean response = userService.existsByEmail(email);
+
+        assertTrue(response);
+        verify(userRepository, times(1)).existsByEmail(email);
+    }
+
+    @Test
+    void existsByEmail_ReturnsFalse_WhenUserNotExists(){
+        String email = "test@mail.ru";
+        when(userRepository.existsByEmail(email)).thenReturn(false);
+
+        boolean response = userService.existsByEmail(email);
+
+        assertFalse(response);
+        verify(userRepository, times(1)).existsByEmail(email);
+    }
 }
