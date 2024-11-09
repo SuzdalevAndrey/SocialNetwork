@@ -11,14 +11,12 @@ import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageUrlResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
-import ru.andreyszdlv.userservice.exception.FileIsNotImageException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.exception.UserAlreadyHaveAvatarException;
 import ru.andreyszdlv.userservice.exception.UserNotHaveAvatarException;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
-import ru.andreyszdlv.userservice.util.ImageUtils;
 
 @Slf4j
 @Service
@@ -105,7 +103,7 @@ public class UserService {
     }
 
     @Transactional
-    public User getUserByEmail(String email){
+    public User getUserByEmaildOrThrow(String email){
         log.info("Executing getUserByEmail");
 
         log.info("Getting user by email: {}", email);

@@ -1,13 +1,14 @@
-package ru.andreyszdlv.authservice.service;
+package ru.andreyszdlv.userservice.service.impl;
 
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import ru.andreyszdlv.userservice.service.KafkaMessageIdService;
 
 import java.util.UUID;
 
 @Service
-public class KafkaMessageIdCacheService {
+public class KafkaMessageIdCacheServiceImpl implements KafkaMessageIdService {
 
     @CachePut(value = "${spring.redis.kafkaMessageIdsNameCache}", key = "#messageId.toString()")
     public boolean saveMessageId(UUID messageId){

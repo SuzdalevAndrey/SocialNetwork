@@ -85,6 +85,6 @@ public class ImagePostService {
 
     public PostImageUrlResponseDTO getPostImageUrlByImageId(String imageId) {
         log.info("Executing getPostImageUrlByImageId for imageId: {}", imageId);
-        return new PostImageUrlResponseDTO(imageService.getImageUrlById(imageId));
+        return new PostImageUrlResponseDTO(imageService.getImageUrlByImageId(imageId));
     }
 }

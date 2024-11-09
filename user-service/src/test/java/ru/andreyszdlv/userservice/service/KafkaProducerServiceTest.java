@@ -12,6 +12,7 @@ import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
+import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,23 +42,22 @@ class KafkaProducerServiceTest {
     @Mock
     KafkaTemplate<String, UserDetailsKafkaDTO> kafkaTemplateFailureSave;
 
+    @Mock
+    KafkaProducerProperties kafkaProducerProperties;
+
     @InjectMocks
     KafkaProducerService kafkaProducerService;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-
-        ReflectionTestUtils.setField(kafkaProducerService, "nameTopicEditEmail", "test-edit-email");
-        ReflectionTestUtils.setField(kafkaProducerService, "nameTopicEditPassword", "test-edit-password");
-        ReflectionTestUtils.setField(kafkaProducerService, "nameTopicFailureSaveUser", "test-failure-save-user");
     }
 
     @Test
     public void sendEditEmailEvent_Success_WhenValidData() {
         String oldEmail = "oldEmail";
         String newEmail = "newEmail";
-        EditEmailKafkaDTO expectedMessage = new EditEmailKafkaDTO(oldEmail, newEmail);
+        when(kafkaProducerProperties.getTopicNameEditEmail()).thenReturn("test-edit-email");
 
         kafkaProducerService.sendEditEmailEvent(oldEmail, newEmail);
 
@@ -65,23 +65,28 @@ class KafkaProducerServiceTest {
     }
 
     @Test
-    public void sendEditPasswordEvent_Success_WhenValidData(){
+    public void sendEditPasswordEvent_Success_WhenValidData() {
         String email = "test@example.com";
-        EditPasswordKafkaDTO expectedMessage = new EditPasswordKafkaDTO(email);
+        when(kafkaProducerProperties.getTopicNameEditPassword()).thenReturn("test-edit-password");
 
         kafkaProducerService.sendEditPasswordEvent(email);
 
-        verify(kafkaTemplateEditPassword, times(1)).send(eq("test-edit-password"), any());
+        verify(kafkaTemplateEditPassword, times(1)).send(
+                eq("test-edit-password"),
+                any()
+        );
     }
 
     @Test
-    public void sendFailureSaveUserEvent_Success_WhenValidData(){
+    public void sendFailureSaveUserEvent_Success_WhenValidData() {
         String name = "name";
         String email = "test@example.com";
         String password = "password";
         ERole role = ERole.USER;
+        when(kafkaProducerProperties.getTopicNameFailureSaveUser())
+                .thenReturn("test-failure-save-user");
 
-        kafkaProducerService.sendFailureSaveUserEvent(name,email,password,role);
+        kafkaProducerService.sendFailureSaveUserEvent(name, email, password, role);
 
         verify(kafkaTemplateFailureSave, times(1)).send(
                 eq("test-failure-save-user"),

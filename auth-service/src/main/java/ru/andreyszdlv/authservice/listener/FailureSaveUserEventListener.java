@@ -7,8 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.andreyszdlv.authservice.dto.kafka.UserDetailsKafkaDTO;
-import ru.andreyszdlv.authservice.props.KafkaConsumerProperties;
-import ru.andreyszdlv.authservice.service.KafkaMessageIdCacheService;
+import ru.andreyszdlv.authservice.service.KafkaMessageIdService;
 import ru.andreyszdlv.authservice.service.compensation.ConfirmEmailCompensationService;
 
 @Component
@@ -20,7 +19,7 @@ public class FailureSaveUserEventListener {
 
     private final ObjectMapper mapper;
 
-    private final KafkaMessageIdCacheService kafkaMessageIdCacheService;
+    private final KafkaMessageIdService KafkaMessageIdService;
 
     @KafkaListener(
             topics = "#{@kafkaConsumerProperties.topicNameFailureSaveUser}",
@@ -34,10 +33,10 @@ public class FailureSaveUserEventListener {
                 .readValue(messageUser, UserDetailsKafkaDTO.class);
 
         log.info("Checking exist messageId in cache");
-        if(!kafkaMessageIdCacheService.isMessageIdExists(user.messageId())){
+        if(!KafkaMessageIdService.isMessageIdExists(user.messageId())){
 
             log.info("Adding messageId in cache");
-            kafkaMessageIdCacheService.saveMessageId(user.messageId());
+            KafkaMessageIdService.saveMessageId(user.messageId());
 
             log.info("Execution compensation action for email: {}", user.email());
             compensationService.handle(user.name(), user.email(), user.password(), user.role());

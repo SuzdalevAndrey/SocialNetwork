@@ -11,8 +11,6 @@ import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
 
-import java.util.UUID;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -25,8 +23,6 @@ public class InternalUserService {
     private final UserMapper userMapper;
 
     private final UserService userService;
-
-    private final KafkaMessageIdCacheService kafkaMessageIdCacheService;
 
     @Transactional(readOnly = true)
     public String getUserEmailByUserId(long userId) {
@@ -45,7 +41,7 @@ public class InternalUserService {
         log.info("Executing getUserDetailsByEmail for email: {}", email);
 
         log.info("Getting user by email: {}", email);
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserByEmaildOrThrow(email);
 
         return userMapper.userToUserDetailsResponseDTO(user);
     }
@@ -88,7 +84,7 @@ public class InternalUserService {
         log.info("Executing getUserByUserEmail for email: {}", email);
 
         log.info("Getting user by email: {}", email);
-        User user = userService.getUserByEmail(email);
+        User user = userService.getUserByEmaildOrThrow(email);
 
         return userMapper.userToInternalUserResponseDTO(user);
     }

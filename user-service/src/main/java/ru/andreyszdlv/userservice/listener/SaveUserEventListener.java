@@ -7,10 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
-import ru.andreyszdlv.userservice.props.KafkaConsumerProperties;
 import ru.andreyszdlv.userservice.service.InternalUserService;
-import ru.andreyszdlv.userservice.service.KafkaMessageIdCacheService;
-import ru.andreyszdlv.userservice.service.UserService;
+import ru.andreyszdlv.userservice.service.KafkaMessageIdService;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +19,7 @@ public class SaveUserEventListener {
 
     private final InternalUserService internalUserService;
 
-    private final KafkaMessageIdCacheService kafkaMessageIdCacheService;
+    private final KafkaMessageIdService KafkaMessageIdService;
 
     @KafkaListener(
             topics = "#{@kafkaConsumerProperties.topicNameSaveUser}",
@@ -35,10 +33,10 @@ public class SaveUserEventListener {
         UserDetailsKafkaDTO user = mapper.readValue(messageUser, UserDetailsKafkaDTO.class);
 
         log.info("Checking exist messageId in cache");
-        if(!kafkaMessageIdCacheService.isMessageIdExists(user.messageId())) {
+        if(!KafkaMessageIdService.isMessageIdExists(user.messageId())) {
 
             log.info("Adding messageId in cache");
-            kafkaMessageIdCacheService.saveMessageId(user.messageId());
+            KafkaMessageIdService.saveMessageId(user.messageId());
 
             log.info("Saving user with email: {}", user.email());
             internalUserService.saveUser(

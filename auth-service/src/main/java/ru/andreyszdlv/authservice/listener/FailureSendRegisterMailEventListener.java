@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.andreyszdlv.authservice.dto.kafka.FailureSendRegisterMailKafkaDTO;
-import ru.andreyszdlv.authservice.service.KafkaMessageIdCacheService;
+import ru.andreyszdlv.authservice.service.KafkaMessageIdService;
 import ru.andreyszdlv.authservice.service.compensation.RegisterCompensationService;
 
 @Component
@@ -19,7 +19,7 @@ public class FailureSendRegisterMailEventListener {
 
     private final RegisterCompensationService registerCompensationService;
 
-    private final KafkaMessageIdCacheService kafkaMessageIdCacheService;
+    private final KafkaMessageIdService KafkaMessageIdService;
 
     @KafkaListener(
             topics = "#{@kafkaConsumerProperties.topicNameFailureSendRegisterMail}",
@@ -33,10 +33,10 @@ public class FailureSendRegisterMailEventListener {
                 .readValue(message, FailureSendRegisterMailKafkaDTO.class);
 
         log.info("Checking exist messageId in cache");
-        if(!kafkaMessageIdCacheService.isMessageIdExists(dto.messageId())){
+        if(!KafkaMessageIdService.isMessageIdExists(dto.messageId())){
 
             log.info("Adding messageId in cache");
-            kafkaMessageIdCacheService.saveMessageId(dto.messageId());
+            KafkaMessageIdService.saveMessageId(dto.messageId());
 
             log.info("Execution compensation action for email: {}", dto.email());
             registerCompensationService.handle(dto.email());

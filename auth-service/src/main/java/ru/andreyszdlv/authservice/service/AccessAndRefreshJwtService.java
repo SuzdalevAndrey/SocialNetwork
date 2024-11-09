@@ -1,42 +1,18 @@
 package ru.andreyszdlv.authservice.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Service;
 
-@Service
-@RequiredArgsConstructor
-public class AccessAndRefreshJwtService {
+public interface AccessAndRefreshJwtService {
+    String generateAccessToken(long userId, String role);
 
-    private final JwtSecurityService jwtSecurityService;
+    String generateRefreshToken(long userId, String role);
 
-    @CachePut(value = "${spring.redis.accessTokenNameCache}", key = "#userId")
-    public String generateAccessToken(long userId, String role){
-        return jwtSecurityService.generateToken(userId, role);
-    }
+    String getAccessTokenByUserId(long userId);
 
-    @CachePut(value = "${spring.redis.refreshTokenNameCache}", key = "#userId")
-    public String generateRefreshToken(long userId, String role){
-        return jwtSecurityService.generateRefreshToken(userId, role);
-    }
+    String getRefreshTokenByUserId(long userId);
 
-    @Cacheable(value = "${spring.redis.accessTokenNameCache}", key = "#userId")
-    public String getAccessTokenByUserId(long userId){
-        return null;
-    }
-
-    @Cacheable(value = "${spring.redis.refreshTokenNameCache}", key = "#userId")
-    public String getRefreshTokenByUserId(long userId){
-        return null;
-    }
-
-    @Caching(evict = {
-            @CacheEvict(value = "${spring.redis.accessTokenNameCache}", key = "#userId"),
-            @CacheEvict(value = "${spring.redis.refreshTokenNameCache}", key = "#userId")
-    })
-    public void deleteByUserId(long userId){}
-
+    void deleteByUserId(long userId);
 }

@@ -10,8 +10,6 @@ import java.util.UUID;
 @Slf4j
 public final class ImageUtils {
 
-    //todo написать логи
-
     private ImageUtils(){}
 
     public static String generateImageId(MultipartFile file) {
@@ -23,26 +21,38 @@ public final class ImageUtils {
     }
 
     public static boolean isImageFile(MultipartFile file) {
+        log.info("Executing isImageFile");
+
+        log.info("Simple checking file is image");
         if (!isImage(file) || !hasImageExtension(file)) {
+            log.error("File is not image");
             return false;
         }
 
         try {
+            log.info("Detailed verification that file is image");
             return ImageIO.read(file.getInputStream()) != null;
         } catch (IOException e) {
+            log.error("File is not image");
             return false;
         }
     }
 
     private static boolean hasImageExtension(MultipartFile file) {
+        log.info("Executing hasImageExtension");
+
         String fileName = file.getOriginalFilename();
 
+        log.info("Checking if image extension is {}", fileName);
         return fileName != null && fileName.matches(".*\\.(jpg|jpeg|png|gif|bmp)$");
     }
 
     private static boolean isImage(MultipartFile file) {
+        log.info("Executing isImage");
+
         String contentType = file.getContentType();
 
+        log.info("Checking if image type is {}", contentType);
         return contentType != null && contentType.startsWith("image/");
     }
 

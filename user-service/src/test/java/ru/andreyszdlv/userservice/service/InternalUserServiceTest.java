@@ -39,6 +39,9 @@ class InternalUserServiceTest {
     @Mock
     UserMapper userMapper;
 
+    @Mock
+    UserService userService;
+
     @InjectMocks
     InternalUserService internalUserService;
 
@@ -54,7 +57,7 @@ class InternalUserServiceTest {
         User user = mock(User.class);
 
         when(user.getEmail()).thenReturn(mockEmail);
-        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+        when(userService.getUserByIdOrThrow(userId)).thenReturn(user);
         String email = internalUserService.getUserEmailByUserId(userId);
 
         assertNotNull(email);
@@ -65,37 +68,11 @@ class InternalUserServiceTest {
     public void getUserEmailByUserId_ThrowsException_WhenUserNotFound(){
         long userId = 1L;
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userService.getUserByIdOrThrow(userId)).thenThrow(NoSuchUserException.class);
 
         assertThrows(
                 NoSuchUserException.class,
                 () -> internalUserService.getUserEmailByUserId(userId)
-        );
-    }
-
-    @Test
-    public void getNameByUserId_ReturnedName_WhenUserExists(){
-        long userId = 1L;
-        String mockName = "test";
-        User user = mock(User.class);
-
-        when(user.getName()).thenReturn(mockName);
-        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-        String name = internalUserService.getNameByUserId(userId);
-
-        assertNotNull(name);
-        assertEquals(mockName, name);
-    }
-
-    @Test
-    public void getNameByUserId_ThrowsException_WhenUserNotFound(){
-        long userId = 1L;
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(
-                NoSuchUserException.class,
-                ()->internalUserService.getNameByUserId(userId)
         );
     }
 
@@ -112,7 +89,7 @@ class InternalUserServiceTest {
                 .email(email)
                 .build();
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
+        when(userService.getUserByEmaildOrThrow(email)).thenReturn(user);
         when(userMapper.userToUserDetailsResponseDTO(user)).thenReturn(userDetails);
         UserDetailsResponseDTO result = internalUserService.getUserDetailsByEmail(email);
 
@@ -126,13 +103,13 @@ class InternalUserServiceTest {
     public void getUserDetailsByEmail_ThrowsException_WhenUserNotFound(){
         String email = "test@gmail.com";
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userService.getUserByEmaildOrThrow(email)).thenThrow(NoSuchUserException.class);
 
         assertThrows(
                 NoSuchUserException.class,
                 ()->internalUserService.getUserDetailsByEmail(email)
         );
-        verify(userRepository, times(1)).findByEmail(email);
+        verify(userService, times(1)).getUserByEmaildOrThrow(email);
         verify(userMapper, never()).userToUserDetailsResponseDTO(any());
     }
 
@@ -187,15 +164,15 @@ class InternalUserServiceTest {
     public void getUserByUserEmail_ReturnUser_WhenUserExists(){
         String email = "test@gmail.com";
         String name = "name";
-        UserResponseDTO mockUserDTO = UserResponseDTO
+        InternalUserResponseDTO mockUserDTO = InternalUserResponseDTO
                 .builder()
                 .name(name)
                 .email(email)
                 .build();
         User user = mock(User.class);
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(user));
-        when(userMapper.userToUserResponseDTO(user)).thenReturn(mockUserDTO);
+        when(userService.getUserByEmaildOrThrow(email)).thenReturn(user);
+        when(userMapper.userToInternalUserResponseDTO(user)).thenReturn(mockUserDTO);
         InternalUserResponseDTO result = internalUserService.getUserByUserEmail(email);
 
         assertNotNull(result);
@@ -207,7 +184,7 @@ class InternalUserServiceTest {
     public void getUserByUserEmail_ThrowsException_WhenUserNotFound(){
         String email = "test@gmail.com";
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userService.getUserByEmaildOrThrow(email)).thenThrow(NoSuchUserException.class);
 
         assertThrows(
                 NoSuchUserException.class,
