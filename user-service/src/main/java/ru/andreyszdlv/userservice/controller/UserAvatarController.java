@@ -69,7 +69,9 @@ public class UserAvatarController {
         }
 
         log.info("Validation successful, updating avatar for userId: {}", userId);
-        return ResponseEntity.ok(userAvatarService.updateAvatar(userId, imageDTO));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(userAvatarService.updateAvatar(userId, imageDTO));
     }
 
 
@@ -99,6 +101,7 @@ public class UserAvatarController {
     public ResponseEntity<Void> deleteAvatarByUserId(@RequestHeader("X-User-Id") long userId){
         log.info("Executing deleteAvatarByUserId for userId: {}", userId);
 
+        log.info("Deleting avatar for userId: {}", userId);
         userAvatarService.deleteAvatarByUserId(userId);
 
         return ResponseEntity

@@ -3,8 +3,6 @@ package ru.andreyszdlv.userservice.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -12,37 +10,47 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.andreyszdlv.userservice.configuration.KafkaConsumerConfig;
-import ru.andreyszdlv.userservice.configuration.KafkaProducerConfig;
-import ru.andreyszdlv.userservice.listener.SaveUserEventListener;
+import org.testcontainers.utility.DockerImageName;
+import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.model.Friend;
 import ru.andreyszdlv.userservice.model.TempFriend;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.FriendRepo;
 import ru.andreyszdlv.userservice.repository.TempFriendRepo;
 import ru.andreyszdlv.userservice.repository.UserRepo;
-import ru.andreyszdlv.userservice.service.KafkaProducerService;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Testcontainers
-@SpringBootTest
 @AutoConfigureMockMvc
-class FriendControllerIT {
+@Testcontainers
+class FriendControllerIT extends BaseIT {
 
     @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest");
+    static PostgreSQLContainer<?> postgreSQLContainer =
+            new PostgreSQLContainer<>("postgres:latest");
+
+    @Container
+    static GenericContainer<?> redisContainer =
+            new GenericContainer<>(DockerImageName.parse("redis:latest"))
+                    .withExposedPorts(6379)
+                    .waitingFor(Wait.forListeningPort());
+
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry){
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+
+        registry.add("spring.redis.host", redisContainer::getHost);
+        registry.add("spring.redis.port", redisContainer::getFirstMappedPort);
     }
 
     @Autowired
@@ -57,28 +65,20 @@ class FriendControllerIT {
     @Autowired
     FriendRepo friendRepository;
 
-    @MockBean
-    KafkaProducerService kafkaProducerService;
-
-    @MockBean
-    SaveUserEventListener saveUserEventListener;
-
-    @MockBean
-    KafkaConsumerConfig kafkaConsumerConfig;
-
-    @MockBean
-    KafkaProducerConfig kafkaProducerConfig;
-
     @Test
     @Transactional
     void getFriends_ReturnedListFriends_WhenFriendsExists() throws Exception{
         User user1 = new User();
         user1.setName("name1");
         user1.setEmail("email1");
+        user1.setPassword("password1");
+        user1.setRole(ERole.USER);
         userRepository.save(user1);
         User user2 = new User();
         user2.setName("name2");
         user2.setEmail("email2");
+        user2.setPassword("password2");
+        user2.setRole(ERole.USER);
         userRepository.save(user2);
         friendRepository.save(new Friend(0L, user1.getId(), user2.getId()));
         friendRepository.save(new Friend(0L, user2.getId(), user1.getId()));
@@ -96,7 +96,7 @@ class FriendControllerIT {
                               [
                                   {
                                      "name": "name2",
-                                     "email":"email2"
+                                     "idImage": null
                                   }
                               ]
                               """

@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface UserServiceClient {
 
     @Timed("get_user_email_by_user_id_time")
-    @GetMapping("/email/{userId}")
+    @GetMapping("/{userId}/email")
     ResponseEntity<String> getUserEmailByUserId(@PathVariable long userId);
 }

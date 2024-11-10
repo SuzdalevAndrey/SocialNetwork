@@ -5,26 +5,25 @@ import jakarta.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.andreyszdlv.userservice.configuration.KafkaConsumerConfig;
-import ru.andreyszdlv.userservice.configuration.KafkaProducerConfig;
+import org.testcontainers.utility.DockerImageName;
 import ru.andreyszdlv.userservice.dto.controller.UpdateEmailRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.UpdatePasswordRequestDTO;
-import ru.andreyszdlv.userservice.listener.SaveUserEventListener;
+import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
+import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.andreyszdlv.userservice.service.KafkaProducerService;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,19 +33,29 @@ import static org.mockito.Mockito.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Testcontainers
-@SpringBootTest
 @AutoConfigureMockMvc
-class UserProfileControllerIT {
+@Testcontainers
+class UserProfileControllerIT extends BaseIT {
 
     @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest");
+    static PostgreSQLContainer<?> postgreSQLContainer =
+            new PostgreSQLContainer<>("postgres:latest");
+
+    @Container
+    static GenericContainer<?> redisContainer =
+            new GenericContainer<>(DockerImageName.parse("redis:latest"))
+                    .withExposedPorts(6379)
+                    .waitingFor(Wait.forListeningPort());
+
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry){
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+
+        registry.add("spring.redis.host", redisContainer::getHost);
+        registry.add("spring.redis.port", redisContainer::getFirstMappedPort);
     }
 
     @Autowired
@@ -61,17 +70,51 @@ class UserProfileControllerIT {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @MockBean
-    KafkaProducerService kafkaProducerService;
+    @Test
+    @Transactional
+    public void getUserById_Returns200_WhenUserExists() throws Exception{
+        User user = new User();
+        String name = "name";
+        String email = "email@mail.ru";
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword("password");
+        user.setRole(ERole.USER);
+        long userId = userRepository.save(user).getId();
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/profile")
+                .header("X-User-Id", userId)
+                .header("X-User-Role", "USER");
+        UserResponseDTO userResponseDTO = UserResponseDTO
+                .builder()
+                .name(name)
+                .email(email)
+                .idImage(null)
+                .build();
 
-    @MockBean
-    SaveUserEventListener saveUserEventListener;
+        mockMvc.perform(request)
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(objectMapper.writeValueAsString(userResponseDTO))
+                );
+    }
 
-    @MockBean
-    KafkaConsumerConfig kafkaConsumerConfig;
+    @Test
+    public void getUserById_Returns404_WhenUserNoExists() throws Exception{
+        long userId = 1L;
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/profile")
+                .header("X-User-Id", userId)
+                .header("X-User-Role", "USER");
 
-    @MockBean
-    KafkaProducerConfig kafkaProducerConfig;
+        mockMvc.perform(request)
+                .andExpectAll(
+                        status().isNotFound(),
+                        content().contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON),
+                        jsonPath("$").exists()
+                );
+    }
 
     @Test
     @Transactional
@@ -79,7 +122,10 @@ class UserProfileControllerIT {
         String newEmail = "newemail@example.com";
         String oldEmail = "oldemail@example.com";
         User user = new User();
+        user.setName("name");
         user.setEmail(oldEmail);
+        user.setPassword("password");
+        user.setRole(ERole.USER);
         UpdateEmailRequestDTO requestDTO = new UpdateEmailRequestDTO(newEmail);
         long userId = userRepository.save(user).getId();
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -145,8 +191,10 @@ class UserProfileControllerIT {
         String newPassword = "0000000";
         String email = "email@mail.ru";
         User user = new User();
+        user.setName("name");
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(oldPassword));
+        user.setRole(ERole.USER);
         UpdatePasswordRequestDTO requestDTO = new UpdatePasswordRequestDTO(oldPassword, newPassword);
         long userId = userRepository.save(user).getId();
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -215,8 +263,10 @@ class UserProfileControllerIT {
         String newPassword = "00000000";
         String email = "email@mail.ru";
         User user = new User();
+        user.setName("name");
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode("000000"));
+        user.setRole(ERole.USER);
         UpdatePasswordRequestDTO requestDTO = new UpdatePasswordRequestDTO(oldPassword, newPassword);
         long userId = userRepository.save(user).getId();
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders

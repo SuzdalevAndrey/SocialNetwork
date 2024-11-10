@@ -27,6 +27,19 @@ class ImageServiceImplTest {
     }
 
     @Test
+    void uploadImage_ReturnImageId_WhenImageIsValid(){
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "avatar.jpg",
+                "image/jpeg",
+                "test image content".getBytes()
+        );
+
+        String imageId = imageService.uploadImage(image);
+        assertNotNull(imageId);
+    }
+
+    @Test
     void uploadImage_ThrowException_WhenImageIsEmpty() {
         MockMultipartFile emptyImage = new MockMultipartFile("image", "test.jpg", "image/jpeg", new byte[0]);
 

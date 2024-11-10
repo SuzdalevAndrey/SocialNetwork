@@ -32,6 +32,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponseDTO loginUser(LoginRequestDTO request) {
+        //todo исправить два обращения к user-service, сделать разумное использование
         log.info("Executing loginUser in AuthService for email: {}", request.email());
 
         log.info("Checking login user with email: {}", request.email());
@@ -42,9 +43,7 @@ public class AuthService {
                 ));
 
         log.info("Verification user existence with email: {}", request.email());
-        UserResponseDTO user = userServiceClient
-                .getUserByEmail(request.email())
-                .getBody();
+        UserResponseDTO user = userServiceClient.getUserByEmail(request.email()).getBody();
 
         log.info("Token generation for user: {}", user.id());
         String token = accessAndRefreshJwtService

@@ -20,7 +20,7 @@ public class InternalUserController {
 
     private final InternalUserService internalUserService;
 
-    @GetMapping("/email/{userId}")
+    @GetMapping("/{userId}/email")
     public ResponseEntity<String> getUserEmailByUserId(@PathVariable long userId) {
         log.info("Executing getUserEmailByUserId for userId: {}", userId);
 
@@ -31,7 +31,7 @@ public class InternalUserController {
         return ResponseEntity.ok(email);
     }
 
-    @GetMapping("/user-details/{email}")
+    @GetMapping("/{email}/user-details")
     public ResponseEntity<UserDetailsResponseDTO> getUserDetailsByUserEmail(@PathVariable String email) {
         log.info("Executing getUserDetailsByUserEmail by email: {}", email);
 
@@ -42,7 +42,7 @@ public class InternalUserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/exists/{email}")
+    @GetMapping("/{email}/exists")
     public ResponseEntity<Boolean> existsUserByEmail(@PathVariable String email) {
         log.info("Executing existsUserByEmail by email: {}", email);
 

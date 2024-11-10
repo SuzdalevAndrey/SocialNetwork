@@ -12,7 +12,7 @@ import ru.andreyszdlv.authservice.dto.client.UserResponseDTO;
 public interface UserServiceClient {
 
     @Timed("exists_user_by_email_time")
-    @GetMapping("/exists/{email}")
+    @GetMapping("/{email}/exists")
     ResponseEntity<Boolean> existsUserByEmail(@PathVariable String email);
 
     @Timed("get_user_by_email_time")
@@ -20,6 +20,6 @@ public interface UserServiceClient {
     ResponseEntity<UserResponseDTO> getUserByEmail(@PathVariable String email);
 
     @Timed("get_user_details_by_user_email_time")
-    @GetMapping("/user-details/{email}")
+    @GetMapping("/{email}/user-details")
     ResponseEntity<UserDetailsResponseDTO> getUserDetailsByUserEmail(@PathVariable String email);
 }
