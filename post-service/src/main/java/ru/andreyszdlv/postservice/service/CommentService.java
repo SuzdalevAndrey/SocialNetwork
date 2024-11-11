@@ -94,7 +94,8 @@ public class CommentService {
         log.info("Executing deleteComment for commentId: {}", commentId);
 
         log.info("Getting a comment by id: {}", commentId);
-        Comment comment = commentRepository.findById(commentId)
+        Comment comment = commentRepository
+                .findById(commentId)
                 .orElseThrow(
                         ()->new NoSuchCommentException("errors.404.comment_not_found")
                 );

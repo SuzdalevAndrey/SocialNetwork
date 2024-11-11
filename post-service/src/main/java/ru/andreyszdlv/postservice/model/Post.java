@@ -18,6 +18,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -50,5 +51,5 @@ public class Post {
     @ElementCollection
     @CollectionTable(name = "t_post_images", joinColumns = @JoinColumn(name = "c_post_id"))
     @Column(name = "c_image_id")
-    private List<String> imageIds;
+    private List<String> imageIds = new ArrayList<>();
 }

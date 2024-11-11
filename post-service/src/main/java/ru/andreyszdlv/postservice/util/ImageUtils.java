@@ -23,19 +23,8 @@ public final class ImageUtils {
     public static boolean isImageFile(MultipartFile file) {
         log.info("Executing isImageFile");
 
-        log.info("Simple checking file is image");
-        if (!isImage(file) || !hasImageExtension(file)) {
-            log.error("File is not image");
-            return false;
-        }
-
-        try {
-            log.info("Detailed verification that file is image");
-            return ImageIO.read(file.getInputStream()) != null;
-        } catch (IOException e) {
-            log.error("File is not image");
-            return false;
-        }
+        log.info("Checking file is image");
+        return isImage(file) && hasImageExtension(file);
     }
 
     private static boolean hasImageExtension(MultipartFile file) {

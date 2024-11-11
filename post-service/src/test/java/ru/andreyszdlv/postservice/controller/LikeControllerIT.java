@@ -13,9 +13,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.configuration.KafkaProducerConfig;
 import ru.andreyszdlv.postservice.model.Like;
@@ -31,20 +34,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
-class LikeControllerIT {
+class LikeControllerIT extends BaseIT{
 
     @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest");
+
+    @Container
+    static GenericContainer<?> redisContainer =
+            new GenericContainer<>(DockerImageName.parse("redis:latest"))
+                    .withExposedPorts(6379)
+                    .waitingFor(Wait.forListeningPort());
+
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry){
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+
+        registry.add("spring.redis.host", redisContainer::getHost);
+        registry.add("spring.redis.port", redisContainer::getFirstMappedPort);
     }
+
 
     @Autowired
     MockMvc mockMvc;
@@ -54,15 +67,6 @@ class LikeControllerIT {
 
     @Autowired
     LikeRepo likeRepository;
-
-    @MockBean
-    KafkaProducerConfig kafkaProducerConfig;
-
-    @MockBean
-    UserServiceClient userServiceClient;
-
-    @MockBean
-    KafkaProducerService kafkaProducerService;
 
     String BASE_URL = "/api/posts";
 
@@ -82,8 +86,6 @@ class LikeControllerIT {
                 .header("x-User-Role", "USER");
         when(userServiceClient.getUserEmailByUserId(authorPostId))
                 .thenReturn(ResponseEntity.of(Optional.of("email@email.com")));
-        when(userServiceClient.getNameByUserId(userId))
-                .thenReturn(ResponseEntity.of(Optional.of("name")));
 
         mockMvc.perform(request)
                 .andExpect(status().isCreated());

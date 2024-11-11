@@ -93,12 +93,10 @@ public class PostService {
                     .parallelStream()
                     .map(imageService::uploadImage)
                     .toList();
-
             post.setImageIds(newImageIds);
-        } else {
-            post.setImageIds(List.of());
         }
 
+        log.info("Deleting oldImageIds for post with postId: {}", postId);
         oldImageIds.parallelStream().forEach(imageService::deleteImageById);
 
         log.info("Successful update post with postId: {}, content: {}",
@@ -121,7 +119,7 @@ public class PostService {
         postRepository.deleteById(postId);
 
         log.info("Deleting images for post with postId: {}", postId);
-        post.getImageIds().forEach(imageService::deleteImageById);
+        post.getImageIds().parallelStream().forEach(imageService::deleteImageById);
     }
 
     @Transactional

@@ -48,6 +48,9 @@ class LikeServiceTest {
     @Mock
     Counter counter;
 
+    @Mock
+    PostValidationService postValidationService;
+
     @InjectMocks
     LikeService likeService;
 
@@ -62,17 +65,14 @@ class LikeServiceTest {
         long authorPostId = 2L;
         long postId = 10L;
         String email = "email@email.com";
-        String nameAuthorLike = "name";
         Post post = new Post();
         post.setId(postId);
         post.setUserId(authorPostId);
         when(postRepository.existsById(postId)).thenReturn(true);
         when(likeRepository.existsByPostIdAndUserId(postId, userId)).thenReturn(false);
-        when(postRepository.findById(postId)).thenReturn(Optional.ofNullable(post));
+        when(postValidationService.getPostByIdOrThrow(postId)).thenReturn(post);
         when(userServiceClient.getUserEmailByUserId(authorPostId))
                 .thenReturn(ResponseEntity.ok(email));
-        when(userServiceClient.getNameByUserId(userId))
-                .thenReturn(ResponseEntity.ok(nameAuthorLike));
         when(meterRegistry.counter(
                 "likes_per_post",
                 List.of(Tag.of("post_id", String.valueOf(postId))))
@@ -81,10 +81,7 @@ class LikeServiceTest {
         likeService.createLike(userId, postId);
 
         verify(likeRepository, times(1)).save(any(Like.class));
-        verify(kafkaProducerService, times(1)).sendCreateLikeEvent(
-                email,
-                nameAuthorLike
-        );
+        verify(kafkaProducerService, times(1)).sendCreateLikeEvent(email);
     }
 
     @Test
@@ -157,5 +154,4 @@ class LikeServiceTest {
 
         verify(likeRepository, times(1)).deleteByPostIdAndUserId(postId, userId);
     }
-
 }

@@ -10,6 +10,7 @@ import ru.andreyszdlv.postservice.exception.ImagePostCountException;
 import ru.andreyszdlv.postservice.exception.PostNoSuchImageException;
 import ru.andreyszdlv.postservice.model.Post;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -57,7 +58,9 @@ public class ImagePostService {
                 .toList();
 
         log.info("Adding new image ids to existing image ids");
-        post.getImageIds().addAll(newImageIds);
+        List<String> imageIds = new ArrayList<>(post.getImageIds());
+        imageIds.addAll(newImageIds);
+        post.setImageIds(imageIds);
 
         log.info("Getting url for post image ids");
         return post.getImageIds().parallelStream().map(this::getPostImageUrlByImageId).toList();
@@ -71,13 +74,15 @@ public class ImagePostService {
         postValidationService.validateUserOwnership(post, userId);
 
         log.info("Checking post exist image: {}", imageId);
-        if(!post.getImageIds().contains(imageId)){
+        if (!post.getImageIds().contains(imageId)) {
             log.error("Post no exist image: {}", imageId);
             throw new PostNoSuchImageException("errors.404.post_image_not_found");
         }
 
         log.info("Post exists image, deleting imageId from list images post");
-        post.getImageIds().remove(imageId);
+        List<String> imageIds = new ArrayList<>(post.getImageIds());
+        imageIds.remove(imageId);
+        post.setImageIds(imageIds);
 
         log.info("Deleting image");
         imageService.deleteImageById(imageId);

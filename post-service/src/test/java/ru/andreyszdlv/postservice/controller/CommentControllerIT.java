@@ -15,9 +15,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.configuration.KafkaProducerConfig;
 import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
@@ -40,19 +43,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
-class CommentControllerIT {
+class CommentControllerIT extends BaseIT{
 
     @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest");
+
+    @Container
+    static GenericContainer<?> redisContainer =
+            new GenericContainer<>(DockerImageName.parse("redis:latest"))
+                    .withExposedPorts(6379)
+                    .waitingFor(Wait.forListeningPort());
+
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry){
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+
+        registry.add("spring.redis.host", redisContainer::getHost);
+        registry.add("spring.redis.port", redisContainer::getFirstMappedPort);
     }
 
     @Autowired
@@ -64,17 +76,7 @@ class CommentControllerIT {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Autowired
     static PostRepo postRepository;
-
-    @MockBean
-    KafkaProducerService kafkaProducerService;
-
-    @MockBean
-    KafkaProducerConfig kafkaProducerConfig;
-
-    @MockBean
-    UserServiceClient userServiceClient;
 
     String BASE_URL = "/api/posts";
 
@@ -104,7 +106,6 @@ class CommentControllerIT {
                 .header("x-User-Role", "USER")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO));
-        when(userServiceClient.getNameByUserId(userId)).thenReturn(ResponseEntity.of(Optional.of("name")));
         when(userServiceClient.getUserEmailByUserId(authorPostId)).thenReturn(ResponseEntity.of(Optional.of("email@email.com")));
 
         String response = mockMvc.perform(request)

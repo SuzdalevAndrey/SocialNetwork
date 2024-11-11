@@ -11,7 +11,7 @@ import ru.andreyszdlv.userservice.service.KafkaProducerService;
 import ru.andreyszdlv.userservice.service.S3Service;
 
 @SpringBootTest
-public abstract class BaseIT {
+abstract class BaseIT {
     @MockBean
     KafkaProducerService kafkaProducerService;
 

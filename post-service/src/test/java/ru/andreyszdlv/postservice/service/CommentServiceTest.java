@@ -54,6 +54,9 @@ class CommentServiceTest {
     @Mock
     CommentMapper commentMapper;
 
+    @Mock
+    PostValidationService postValidationService;
+
     @InjectMocks
     CommentService commentService;
 
@@ -63,11 +66,45 @@ class CommentServiceTest {
     }
 
     @Test
+    void createComment_Success_WhenPostExists() {
+        long userId = 1L;
+        long postId = 10L;
+        String content = "Content";
+        String email = "email@email.com";
+        Post post = new Post();
+        post.setUserId(2L);
+        when(postRepository.existsById(postId)).thenReturn(true);
+        when(postValidationService.getPostByIdOrThrow(postId)).thenReturn(post);
+        Comment comment = new Comment();
+        comment.setId(1L);
+        comment.setUserId(userId);
+        comment.setPostId(postId);
+        comment.setContent(content);
+        comment.setDateCreate(LocalDateTime.now());
+        CommentResponseDTO expectedResponse = new CommentResponseDTO(
+                comment.getId(),
+                comment.getContent(),
+                comment.getDateCreate(),
+                comment.getUserId(),
+                comment.getPostId()
+        );
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+        when(userServiceClient.getUserEmailByUserId(post.getUserId())).thenReturn(ResponseEntity.ok(email));
+        when(meterRegistry.counter("comments_per_post", List.of(Tag.of("post_id",String.valueOf(postId))))).thenReturn(counter);
+        when(commentMapper.commentToCommentReponseDTO(comment)).thenReturn(expectedResponse);
+
+        CommentResponseDTO result = commentService.createComment(userId, postId, content);
+
+        verify(commentRepository, times(1)).save(any(Comment.class));
+        verify(kafkaProducerService, times(1)).sendCreateCommentEvent(eq(email), eq(content));
+        assertEquals(expectedResponse, result);
+    }
+
+    @Test
     void createComment_ThrowsException_WhenPostNotExist() {
         long userId = 1L;
         long postId = 10L;
         String content = "Content";
-
         when(postRepository.existsById(postId)).thenReturn(false);
 
         assertThrows(
@@ -76,56 +113,28 @@ class CommentServiceTest {
         );
 
         verify(commentRepository, never()).save(any());
-        verify(kafkaProducerService, never()).sendCreateCommentEvent(anyString(), anyString(), anyString());
+        verify(kafkaProducerService, never()).sendCreateCommentEvent(anyString(), anyString());
     }
 
     @Test
-    void createComment_Success_WhenPostExists() {
+    void deleteComment_Success_WhenCommentExistsAndCommentCreateUser(){
         long userId = 1L;
-        long postId = 10L;
-        String content = "Content";
-        String email = "email@email.com";
-        String nameAuthorComment = "name";
-
-        Post post = new Post();
-        post.setUserId(2L);
-
-        when(postRepository.existsById(postId)).thenReturn(true);
-        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-
+        long commentId = 10L;
         Comment comment = new Comment();
-        comment.setId(1L);
+        comment.setId(commentId);
         comment.setUserId(userId);
-        comment.setPostId(postId);
-        comment.setContent(content);
-        comment.setDateCreate(LocalDateTime.now());
+        when(commentRepository.findById(commentId)).thenReturn(Optional.ofNullable(comment));
 
-        CommentResponseDTO expectedResponse = new CommentResponseDTO(
-                comment.getId(),
-                comment.getContent(),
-                comment.getDateCreate(),
-                comment.getUserId(),
-                comment.getPostId()
-        );
+        commentService.deleteComment(userId, commentId);
 
-        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-        when(userServiceClient.getUserEmailByUserId(post.getUserId())).thenReturn(ResponseEntity.ok(email));
-        when(userServiceClient.getNameByUserId(userId)).thenReturn(ResponseEntity.ok(nameAuthorComment));
-        when(meterRegistry.counter("comments_per_post", List.of(Tag.of("post_id",String.valueOf(postId))))).thenReturn(counter);
-        when(commentMapper.commentToCommentReponseDTO(comment)).thenReturn(expectedResponse);
-
-        CommentResponseDTO result = commentService.createComment(userId, postId, content);
-
-        verify(commentRepository, times(1)).save(any(Comment.class));
-        verify(kafkaProducerService, times(1)).sendCreateCommentEvent(eq(email), eq(nameAuthorComment), eq(content));
-        assertEquals(expectedResponse, result);
+        verify(commentRepository, times(1)).deleteById(commentId);
     }
+
 
     @Test
     void deleteComment_ThrowsException_WhenCommentNotExist(){
         long userId = 1L;
         long commentId = 10L;
-
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         assertThrows(
@@ -143,7 +152,6 @@ class CommentServiceTest {
         Comment comment = new Comment();
         comment.setId(commentId);
         comment.setUserId(2L);
-
         when(commentRepository.findById(commentId)).thenReturn(Optional.ofNullable(comment));
 
         assertThrows(
@@ -155,18 +163,20 @@ class CommentServiceTest {
     }
 
     @Test
-    void deleteComment_Success_WhenCommentExistsAndCommentCreateUser(){
+    void updateComment_Success_WhenCommentExistsAndCommentCreateUser(){
         long userId = 1L;
         long commentId = 10L;
+        String oldContent = "old content";
+        String newContent = "new content";
         Comment comment = new Comment();
         comment.setId(commentId);
         comment.setUserId(userId);
-
+        comment.setContent(oldContent);
         when(commentRepository.findById(commentId)).thenReturn(Optional.ofNullable(comment));
 
-        commentService.deleteComment(userId, commentId);
+        commentService.updateComment(userId, commentId, newContent);
 
-        verify(commentRepository, times(1)).deleteById(commentId);
+        assertEquals(newContent, comment.getContent());
     }
 
     @Test
@@ -189,12 +199,10 @@ class CommentServiceTest {
         long commentId = 10L;
         String oldContent = "old content";
         String newContent = "new content";
-
         Comment comment = new Comment();
         comment.setId(commentId);
         comment.setUserId(2L);
         comment.setContent(oldContent);
-
         when(commentRepository.findById(commentId)).thenReturn(Optional.ofNullable(comment));
 
         assertThrows(
@@ -203,24 +211,5 @@ class CommentServiceTest {
         );
 
         assertNotEquals(newContent, comment.getContent());
-    }
-
-    @Test
-    void updateComment_Success_WhenCommentExistsAndCommentCreateUser(){
-        long userId = 1L;
-        long commentId = 10L;
-        String oldContent = "old content";
-        String newContent = "new content";
-
-        Comment comment = new Comment();
-        comment.setId(commentId);
-        comment.setUserId(userId);
-        comment.setContent(oldContent);
-
-        when(commentRepository.findById(commentId)).thenReturn(Optional.ofNullable(comment));
-
-        commentService.updateComment(userId, commentId, newContent);
-
-        assertEquals(newContent, comment.getContent());
     }
 }

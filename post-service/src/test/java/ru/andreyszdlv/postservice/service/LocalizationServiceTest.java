@@ -9,7 +9,6 @@ import org.springframework.context.MessageSource;
 
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 class LocalizationServiceTest {
