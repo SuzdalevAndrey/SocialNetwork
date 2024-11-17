@@ -7,20 +7,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.authservice.client.UserServiceClient;
 import ru.andreyszdlv.authservice.dto.controller.LoginRequestDTO;
 import ru.andreyszdlv.authservice.dto.controller.LoginResponseDTO;
 import ru.andreyszdlv.authservice.dto.controller.RefreshTokenRequestDTO;
 import ru.andreyszdlv.authservice.dto.controller.RefreshTokenResponseDTO;
-import ru.andreyszdlv.authservice.dto.client.UserResponseDTO;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
+import ru.andreyszdlv.authservice.model.User;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
-    private final UserServiceClient userServiceClient;
 
     private final KafkaProducerService kafkaProducerService;
 
@@ -41,20 +38,18 @@ public class AuthService {
                         request.email(),
                         request.password()
                 ));
+        User user = (User) authentication.getPrincipal();
 
-        log.info("Verification user existence with email: {}", request.email());
-        UserResponseDTO user = userServiceClient.getUserByEmail(request.email()).getBody();
-
-        log.info("Token generation for user: {}", user.id());
+        log.info("Token generation for user: {}", user.getId());
         String token = accessAndRefreshJwtService
-                .generateAccessToken(user.id(), user.role().name());
+                .generateAccessToken(user.getId(), user.getRole().name());
 
-        log.info("RefreshToken generation for user: {}", user.id());
+        log.info("RefreshToken generation for user: {}", user.getId());
         String refreshToken = accessAndRefreshJwtService
-                .generateRefreshToken(user.id(), user.role().name());
+                .generateRefreshToken(user.getId(), user.getRole().name());
 
-        log.info("Login completed successfully with id: {}", user.id());
-        kafkaProducerService.sendLoginEvent(user.name(), user.email());
+        log.info("Login completed successfully with id: {}", user.getId());
+        kafkaProducerService.sendLoginEvent(user.getName(), user.getEmail());
 
         return new LoginResponseDTO(token, refreshToken);
     }

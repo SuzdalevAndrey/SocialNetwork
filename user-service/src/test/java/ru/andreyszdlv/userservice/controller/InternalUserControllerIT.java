@@ -17,7 +17,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.model.User;
@@ -169,50 +168,6 @@ class InternalUserControllerIT extends BaseIT {
                 .andExpectAll(
                         status().isOk(),
                         content().string("false")
-                );
-    }
-
-    @Test
-    @Transactional
-    public void getUserByEmail_Return200_WhenUserExists() throws Exception{
-        String email = "email@mail.ru";
-        String name = "name";
-        User user = new User();
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword("Password");
-        user.setRole(ERole.USER);
-        long userId = userRepository.save(user).getId();
-        InternalUserResponseDTO responseDTO = InternalUserResponseDTO
-                .builder()
-                .id(userId)
-                .name(name)
-                .email(email)
-                .role(ERole.USER)
-                .build();
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get("/internal/user/{email}", email);
-
-        mockMvc.perform(request)
-                .andExpectAll(
-                        status().isOk(),
-                        content().json(
-                                objectMapper.writeValueAsString(responseDTO)
-                        )
-                );
-    }
-
-    @Test
-    public void getUserByEmail_Return404_WhenUserNoExists() throws Exception{
-        String email = "email@mail.ru";
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get("/internal/user/{email}", email);
-
-        mockMvc.perform(request)
-                .andExpectAll(
-                        status().isNotFound(),
-                        content().contentType(MediaType.APPLICATION_PROBLEM_JSON),
-                        jsonPath("$").exists()
                 );
     }
 }

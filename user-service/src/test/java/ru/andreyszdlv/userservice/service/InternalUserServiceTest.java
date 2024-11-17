@@ -5,16 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
-import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
-import ru.andreyszdlv.userservice.repository.UserRepo;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -155,37 +150,5 @@ class InternalUserServiceTest {
         when(userService.existsByEmail(email)).thenReturn(false);
 
         assertFalse(internalUserService.existsUserByEmail(email));
-    }
-
-    @Test
-    public void getUserByUserEmail_ReturnUser_WhenUserExists(){
-        String email = "test@gmail.com";
-        String name = "name";
-        InternalUserResponseDTO mockUserDTO = InternalUserResponseDTO
-                .builder()
-                .name(name)
-                .email(email)
-                .build();
-        User user = mock(User.class);
-
-        when(userService.getUserByEmaildOrThrow(email)).thenReturn(user);
-        when(userMapper.userToInternalUserResponseDTO(user)).thenReturn(mockUserDTO);
-        InternalUserResponseDTO result = internalUserService.getUserByUserEmail(email);
-
-        assertNotNull(result);
-        assertEquals(email, result.email());
-        assertEquals(name, result.name());
-    }
-
-    @Test
-    public void getUserByUserEmail_ThrowsException_WhenUserNotFound(){
-        String email = "test@gmail.com";
-
-        when(userService.getUserByEmaildOrThrow(email)).thenThrow(NoSuchUserException.class);
-
-        assertThrows(
-                NoSuchUserException.class,
-                ()->internalUserService.getUserByUserEmail(email)
-        );
     }
 }

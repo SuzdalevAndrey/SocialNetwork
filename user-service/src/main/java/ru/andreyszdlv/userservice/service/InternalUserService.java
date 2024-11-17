@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.andreyszdlv.userservice.dto.controller.InternalUserResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
@@ -74,15 +73,5 @@ public class InternalUserService {
     public boolean existsUserByEmail(String email) {
         log.info("Executing existsUserByEmail for email: {}", email);
         return userService.existsByEmail(email);
-    }
-
-    @Transactional(readOnly = true)
-    public InternalUserResponseDTO getUserByUserEmail(String email) {
-        log.info("Executing getUserByUserEmail for email: {}", email);
-
-        log.info("Getting user by email: {}", email);
-        User user = userService.getUserByEmaildOrThrow(email);
-
-        return userMapper.userToInternalUserResponseDTO(user);
     }
 }

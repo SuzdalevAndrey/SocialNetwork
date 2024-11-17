@@ -24,6 +24,7 @@ import ru.andreyszdlv.authservice.service.UserService;
 @AllArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
+
     private final UserService userService;
 
     private final RoleUserFilter roleUserFilter;
@@ -42,7 +43,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+            throws Exception {
         return configuration.getAuthenticationManager();
     }
 
