@@ -29,7 +29,6 @@ public class AuthService {
 
     @Transactional
     public LoginResponseDTO loginUser(LoginRequestDTO request) {
-        //todo исправить два обращения к user-service, сделать разумное использование
         log.info("Executing loginUser in AuthService for email: {}", request.email());
 
         log.info("Checking login user with email: {}", request.email());
