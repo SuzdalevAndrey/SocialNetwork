@@ -10,9 +10,9 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.andreyszdlv.postservice.exception.EmptyImageException;
-import ru.andreyszdlv.postservice.exception.FileIsNotImageException;
-import ru.andreyszdlv.postservice.exception.ImageUploadException;
+import ru.andreyszdlv.springbootstarters3loadimage.exception.EmptyImageException;
+import ru.andreyszdlv.springbootstarters3loadimage.exception.FileIsNotImageException;
+import ru.andreyszdlv.springbootstarters3loadimage.exception.ImageUploadException;
 import ru.andreyszdlv.postservice.service.ProblemDetailService;
 
 import java.util.Locale;

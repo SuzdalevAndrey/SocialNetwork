@@ -12,6 +12,7 @@ import ru.andreyszdlv.postservice.exception.ImagePostCountException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.exception.PostNoSuchImageException;
 import ru.andreyszdlv.postservice.model.Post;
+import ru.andreyszdlv.springbootstarters3loadimage.service.ImageService;
 
 import java.util.List;
 

@@ -14,7 +14,7 @@ import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.ImagePostCountException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
-import ru.andreyszdlv.postservice.exception.NoSuchImageException;
+import ru.andreyszdlv.springbootstarters3loadimage.exception.NoSuchImageException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
 import ru.andreyszdlv.postservice.exception.PostNoSuchImageException;
 import ru.andreyszdlv.postservice.service.ProblemDetailService;

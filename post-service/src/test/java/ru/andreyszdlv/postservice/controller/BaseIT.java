@@ -4,10 +4,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.configuration.KafkaProducerConfig;
-import ru.andreyszdlv.postservice.configuration.S3Config;
-import ru.andreyszdlv.postservice.configuration.S3Initializer;
+import ru.andreyszdlv.springbootstarters3loadimage.config.S3Initializer;
 import ru.andreyszdlv.postservice.service.KafkaProducerService;
-import ru.andreyszdlv.postservice.service.S3Service;
+import ru.andreyszdlv.springbootstarters3loadimage.service.S3Service;
 
 @SpringBootTest
 abstract class BaseIT {
@@ -26,7 +25,4 @@ abstract class BaseIT {
 
     @MockBean
     S3Initializer s3Initializer;
-
-    @MockBean
-    S3Config s3Config;
 }

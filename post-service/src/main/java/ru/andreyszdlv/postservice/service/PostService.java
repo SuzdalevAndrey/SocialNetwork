@@ -12,6 +12,7 @@ import ru.andreyszdlv.postservice.dto.controller.post.UpdatePostRequestDTO;
 import ru.andreyszdlv.postservice.mapper.PostMapper;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.PostRepo;
+import ru.andreyszdlv.springbootstarters3loadimage.service.ImageService;
 
 import java.time.LocalDateTime;
 import java.util.List;

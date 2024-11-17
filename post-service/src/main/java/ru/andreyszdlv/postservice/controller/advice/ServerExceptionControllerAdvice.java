@@ -7,7 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.andreyszdlv.postservice.exception.DeleteImageException;
+import ru.andreyszdlv.springbootstarters3loadimage.exception.DeleteImageException;
 import ru.andreyszdlv.postservice.service.ProblemDetailService;
 
 import java.util.Locale;
