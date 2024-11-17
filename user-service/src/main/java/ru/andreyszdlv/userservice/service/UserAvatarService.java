@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.andreyszdlv.springbootstarters3loadimage.service.ImageService;
 import ru.andreyszdlv.userservice.dto.controller.ImageIdResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageUrlResponseDTO;

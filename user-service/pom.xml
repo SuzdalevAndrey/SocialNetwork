@@ -163,11 +163,11 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
-			<version>${s3.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>software.amazon.awssdk</groupId>-->
+<!--			<artifactId>s3</artifactId>-->
+<!--			<version>${s3.version}</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -177,6 +177,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>ru.andreyszdlv</groupId>
+			<artifactId>spring-boot-starter-s3-load-image</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>

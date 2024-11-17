@@ -2,13 +2,13 @@ package ru.andreyszdlv.userservice.controller;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.andreyszdlv.springbootstarters3loadimage.props.S3Properties;
 import ru.andreyszdlv.userservice.configuration.KafkaConsumerConfig;
 import ru.andreyszdlv.userservice.configuration.KafkaProducerConfig;
-import ru.andreyszdlv.userservice.configuration.S3Config;
-import ru.andreyszdlv.userservice.configuration.S3Initializer;
+import ru.andreyszdlv.springbootstarters3loadimage.config.S3Initializer;
 import ru.andreyszdlv.userservice.listener.SaveUserEventListener;
 import ru.andreyszdlv.userservice.service.KafkaProducerService;
-import ru.andreyszdlv.userservice.service.S3Service;
+import ru.andreyszdlv.springbootstarters3loadimage.service.S3Service;
 
 @SpringBootTest
 abstract class BaseIT {
@@ -29,7 +29,4 @@ abstract class BaseIT {
 
     @MockBean
     S3Service s3Service;
-
-    @MockBean
-    S3Config s3Config;
 }

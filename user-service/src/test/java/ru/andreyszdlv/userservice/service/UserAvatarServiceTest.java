@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.multipart.MultipartFile;
+import ru.andreyszdlv.springbootstarters3loadimage.service.ImageService;
 import ru.andreyszdlv.userservice.dto.controller.ImageIdResponseDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.ImageUrlResponseDTO;
