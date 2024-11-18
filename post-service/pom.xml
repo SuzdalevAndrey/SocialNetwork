@@ -26,6 +26,12 @@
         <tag/>
         <url/>
     </scm>
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
     <properties>
         <java.version>17</java.version>
         <org.mapstruct.version>1.6.2</org.mapstruct.version>
@@ -175,9 +181,9 @@
         </dependency>
 
         <dependency>
-            <groupId>ru.andreyszdlv</groupId>
+            <groupId>com.github.SuzdalevAndrey</groupId>
             <artifactId>spring-boot-starter-s3-load-image</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>v1.0.1</version>
         </dependency>
     </dependencies>
     <build>
