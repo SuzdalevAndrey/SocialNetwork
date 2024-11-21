@@ -8,6 +8,7 @@ services:
       - "2181:2181"
 
   kafka:
+    container_name: kafka
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
@@ -16,18 +17,18 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   redis:
     image: redis:latest
-    ports:
-      - "6379:6379"
+    container_name: redis
 
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -37,6 +38,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - "3000:3000"
     environment:
@@ -55,3 +57,91 @@ services:
     ports:
       - '9091:9091'
       - '9000:9000'
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+
+  eureka-server:
+    container_name: eureka-server
+    build:
+      context: ./eureka-server
+    env_file:
+      - .env
+    depends_on:
+      minio:
+        condition: service_started
+      kafka:
+        condition: service_started
+      grafana:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      redis:
+        condition: service_started
+      zookeeper:
+        condition: service_started
+
+  config-service:
+    container_name: config-service
+    build: config-service
+    env_file:
+      - .env
+
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user-service
+    env_file:
+      - .env
+    depends_on:
+      config-service:
+        condition: service_started
+
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./auth-service
+    env_file:
+      - .env
+    depends_on:
+      config-service:
+        condition: service_started
+
+  notification-service:
+    container_name: notification-service
+    build:
+      context: ./notification-service
+    env_file:
+      - .env
+    depends_on:
+      config-service:
+        condition: service_started
+
+  post-service:
+    container_name: post-service
+    build:
+      context: post-service
+    env_file:
+      - .env
+    depends_on:
+      config-service:
+        condition: service_started
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: api-gateway
+    env_file:
+      - .env
+    ports:
+      - '8082:8082'
+    depends_on:
+      config-service:
+        condition: service_started
