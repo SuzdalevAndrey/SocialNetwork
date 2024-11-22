@@ -14,6 +14,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.andreyszdlv.notificationservice.dto.auth.FailureSendRegisterMailDTO;
 import ru.andreyszdlv.notificationservice.props.KafkaProducerProperties;
+import ru.andreyszdlv.notificationservice.props.KafkaProperties;
 
 import java.util.HashMap;
 
@@ -21,13 +22,15 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class KafkaProducerConfig {
 
+    private final KafkaProperties kafkaProperties;
+
     private final KafkaProducerProperties kafkaProducerProperties;
 
     @Bean
     public ProducerFactory<String, FailureSendRegisterMailDTO> producerFactory(){
         HashMap<String, Object> props = new HashMap<>(3);
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 

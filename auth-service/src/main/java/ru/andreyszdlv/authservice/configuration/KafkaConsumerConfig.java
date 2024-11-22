@@ -11,6 +11,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import ru.andreyszdlv.authservice.props.KafkaConsumerProperties;
+import ru.andreyszdlv.authservice.props.KafkaProperties;
 
 import java.util.HashMap;
 
@@ -19,13 +20,15 @@ import java.util.HashMap;
 @EnableKafka
 public class KafkaConsumerConfig {
 
+    private final KafkaProperties kafkaProperties;
+
     private final KafkaConsumerProperties kafkaConsumerProperties;
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         HashMap<String, Object> props = new HashMap<>();
 
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConsumerProperties.getBootstrapServers());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConsumerProperties.getGroupId());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

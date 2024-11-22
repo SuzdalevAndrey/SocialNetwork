@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "spring.kafka.consumer")
 public class KafkaConsumerProperties {
 
-    private String bootstrapServers;
-
     private String topicNameRegisterUser;
 
     private String topicNameLoginUser;

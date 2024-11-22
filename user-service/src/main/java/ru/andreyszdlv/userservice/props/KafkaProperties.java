@@ -6,14 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConfigurationProperties(prefix = "spring.kafka")
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "spring.kafka.producer")
-public class KafkaProducerProperties {
-
-    private String topicNameEditEmail;
-
-    private String topicNameEditPassword;
-
-    private String topicNameFailureSaveUser;
+public class KafkaProperties {
+    private String bootstrapServers;
 }

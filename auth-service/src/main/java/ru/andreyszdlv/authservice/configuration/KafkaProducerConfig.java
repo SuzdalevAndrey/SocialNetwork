@@ -1,6 +1,5 @@
 package ru.andreyszdlv.authservice.configuration;
 
-
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -16,6 +15,7 @@ import ru.andreyszdlv.authservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.LoginUserKafkaDTO;
 import ru.andreyszdlv.authservice.props.KafkaProducerProperties;
+import ru.andreyszdlv.authservice.props.KafkaProperties;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +25,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class KafkaProducerConfig {
 
+    private final KafkaProperties kafkaProperties;
+
     private final KafkaProducerProperties kafkaProducerProperties;
 
     @Bean
@@ -32,7 +34,7 @@ public class KafkaProducerConfig {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -51,7 +53,7 @@ public class KafkaProducerConfig {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -70,7 +72,7 @@ public class KafkaProducerConfig {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerProperties.getBootstrapServers());
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
