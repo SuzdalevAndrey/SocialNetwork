@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-deploy
+  labels:
+    app: user-service-app
+spec:
+  selector:
+    matchLabels:
+      app: user-service-app
+  template:
+    metadata:
+      labels:
+        app: user-service-app
+    spec:
+      containers:
+        - name: user-service-containers
+          image: andreyszdlv/user-service
+          ports:
+            - containerPort: 8070
+          envFrom:
+            - configMapRef:
+                name: app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8070
+      targetPort: 8070
+      name: http
+  selector:
+    app: user-service-app

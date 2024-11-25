@@ -121,7 +121,7 @@ services:
         condition: service_started
 
   post-service:
-    container_name: post-service
+    container_name: post-service.yaml
     build:
       context: post-service
     env_file:

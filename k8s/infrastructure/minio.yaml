@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-deploy
+  labels:
+    app: minio-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio-app
+  template:
+    metadata:
+      labels:
+        app: minio-app
+    spec:
+      containers:
+        - name: minio-container
+          image: minio/minio:latest
+          ports:
+            - containerPort: 9091
+            - containerPort: 9000
+          env:
+            - name: MINIO_ROOT_USER
+              value: "minioadmin"
+            - name: MINIO_ROOT_PASSWORD
+              value: "minioadmin"
+          args:
+            - "server"
+            - "/data"
+            - "--console-address"
+            - ":9091"
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: minio-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  labels:
+    app: minio-app
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 9091
+      targetPort: 9091
+      nodePort: 30001
+    - name: api
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: minio-app

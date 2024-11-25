@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-service-deploy
+  labels:
+    app: config-service-app
+spec:
+  selector:
+    matchLabels:
+      app: config-service-app
+  template:
+    metadata:
+      labels:
+        app: config-service-app
+    spec:
+      containers:
+        - name: config-service-containers
+          image: andreyszdlv/config-server
+          ports:
+            - containerPort: 8888
+          envFrom:
+            - configMapRef:
+                name: app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-service
+spec:
+  ports:
+    - port: 8888
+      targetPort: 8888
+      name: http
+  selector:
+    app: config-service-app
