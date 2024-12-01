@@ -1,0 +1,20 @@
+app:
+  name: prometheus-app
+  port: 9090
+
+deploy:
+  name: prometheus-deploy
+  container:
+    name: prometheus-container
+    image: prom/prometheus:latest
+    configMap:
+      name: app-config
+
+configMap:
+  name: prometheus-config
+
+pvc:
+  name: prometheus-pvc
+
+svc:
+  name: prometheus

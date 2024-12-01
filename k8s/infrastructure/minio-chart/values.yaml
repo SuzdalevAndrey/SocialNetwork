@@ -1,0 +1,19 @@
+app:
+  name: minio-app
+  portUI: 9091
+  portData: 9000
+
+pvc:
+  name: minio-pvc
+
+deploy:
+  name: minio-deploy
+  container:
+    name: minio-container
+    image: minio/minio:latest
+    env:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+svc:
+  name: minio

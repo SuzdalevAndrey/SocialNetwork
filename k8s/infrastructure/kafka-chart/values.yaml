@@ -1,0 +1,19 @@
+app:
+  name: kafka-app
+  port: 9092
+
+deploy:
+  name: kafka-deploy
+  container:
+    name: kafka-container
+    image: bitnami/kafka:latest
+    env:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      ALLOW_PLAINTEXT_LISTENER: yes
+
+
+svc:
+  name: kafka

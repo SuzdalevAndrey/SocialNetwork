@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.deploy.name}}
+  labels:
+    app: {{.Values.app.name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Values.app.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.app.name}}
+    spec:
+      containers:
+        - name: {{.Values.deploy.container.name}}
+          image: {{.Values.deploy.container.image}}
+          ports:
+            - containerPort: {{.Values.app.port}}
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+          volumeMounts:
+            - name: prometheus-config-volume
+              mountPath: /etc/prometheus
+              readOnly: true
+            - name: prometheus-data
+              mountPath: /data
+      volumes:
+        - name: prometheus-config-volume
+          configMap:
+            name: {{.Values.configMap.name}}
+        - name: prometheus-data
+          persistentVolumeClaim:
+            claimName: {{.Values.pvc.name}}

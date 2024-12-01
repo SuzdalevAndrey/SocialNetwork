@@ -1,0 +1,14 @@
+app:
+  name: zookeeper-app
+  port: 2181
+
+deploy:
+  name: zookeeper-deploy
+  container:
+    name: zookeeper-container
+    image: bitnami/zookeeper:latest
+    env:
+      ALLOW_ANONYMOUS_LOGIN: yes
+
+svc:
+  name: zookeeper

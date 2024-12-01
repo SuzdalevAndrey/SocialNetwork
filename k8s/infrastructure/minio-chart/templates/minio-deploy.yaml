@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.deploy.name}}
+  labels:
+    app: {{.Values.app.name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Values.app.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.app.name}}
+    spec:
+      containers:
+        - name: {{.Values.deploy.container.name}}
+          image: {{.Values.deploy.container.image}}
+          ports:
+            - containerPort: {{.Values.app.portUI}}
+            - containerPort: {{.Values.app.portData}}
+          env:
+            - name: MINIO_ROOT_USER
+              value: {{.Values.deploy.container.env.MINIO_ROOT_USER}}
+            - name: MINIO_ROOT_PASSWORD
+              value: {{.Values.deploy.container.env.MINIO_ROOT_PASSWORD}}
+          args:
+            - "server"
+            - "/data"
+            - "--console-address"
+            - ":{{.Values.app.portUI}}"
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: {{.Values.pvc.name}}

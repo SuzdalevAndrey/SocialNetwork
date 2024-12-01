@@ -1,0 +1,12 @@
+app:
+  name: redis-app
+  port: 6379
+
+deploy:
+  name: redis-deploy
+  container:
+    name: redis-container
+    image: redis:latest
+
+svc:
+  name: redis

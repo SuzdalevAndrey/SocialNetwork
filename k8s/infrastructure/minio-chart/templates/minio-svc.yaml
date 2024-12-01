@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.svc.name}}
+  labels:
+    app: {{.Values.app.name}}
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: {{.Values.app.portUI}}
+      targetPort: {{.Values.app.portUI}}
+      nodePort: 30001
+    - name: api
+      port: {{.Values.app.portData}}
+      targetPort: {{.Values.app.portData}}
+  selector:
+    app: {{.Values.app.name}}

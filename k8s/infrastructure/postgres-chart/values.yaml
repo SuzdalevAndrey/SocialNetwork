@@ -1,0 +1,17 @@
+app:
+  name: postgres-app
+  port: 5432
+
+deploy:
+  name: postgres-deploy
+  container:
+    name: postgres-container
+    image: postgres:latest
+    configMap:
+      name: app-config
+
+configMap:
+  name: init-db-config
+
+svc:
+  name: postgres
