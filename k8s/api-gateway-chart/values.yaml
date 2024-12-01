@@ -1,0 +1,18 @@
+app:
+  name: api-gateway-app
+  port: 8082
+
+deploy:
+  name: api-gateway-deploy
+  container:
+    name: api-gateway-container
+    image: andreyszdlv/api-gateway
+  configMap:
+    name: app-config
+
+svc:
+  name: api-gateway
+
+ingress:
+  name: api-gateway-ingress
+  host: social-network.nn.ru

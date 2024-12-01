@@ -1,0 +1,14 @@
+app:
+  name: post-service-app
+  port: 8071
+
+deploy:
+  name: post-service-deploy
+  container:
+    name: post-service-container
+    image: andreyszdlv/post-service
+  configMap:
+    name: app-config
+
+svc:
+  name: post-service

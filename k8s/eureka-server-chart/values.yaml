@@ -1,0 +1,14 @@
+app:
+  name: eureka-server-app
+  port: 8761
+
+deploy:
+  name: eureka-server-deploy
+  container:
+    name: eureka-server-container
+    image: andreyszdlv/eureka-server
+  configMap:
+    name: app-config
+
+svc:
+  name: eureka-server

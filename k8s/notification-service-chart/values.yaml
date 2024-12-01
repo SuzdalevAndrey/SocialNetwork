@@ -1,0 +1,14 @@
+app:
+  name: notification-service-app
+  port: 8072
+
+deploy:
+  name: notification-service-deploy
+  container:
+    name: notification-service-container
+    image: andreyszdlv/notification-service
+  configMap:
+    name: app-config
+
+svc:
+  name: notification-service

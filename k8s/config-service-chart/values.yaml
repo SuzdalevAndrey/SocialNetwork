@@ -1,0 +1,14 @@
+app:
+  name: config-service-app
+  port: 8888
+
+deploy:
+  name: config-service-deploy
+  container:
+    name: config-service-container
+    image: andreyszdlv/config-server
+  configMap:
+    name: app-config
+
+svc:
+  name: config-service

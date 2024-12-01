@@ -1,0 +1,14 @@
+app:
+  name: auth-service-app
+  port: 8073
+
+deploy:
+  name: auth-service-deploy
+  container:
+    name: auth-service-container
+    image: andreyszdlv/auth-service
+  configMap:
+    name: app-config
+
+svc:
+  name: auth-service

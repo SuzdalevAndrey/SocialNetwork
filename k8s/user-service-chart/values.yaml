@@ -1,0 +1,14 @@
+app:
+  name: user-service-app
+  port: 8070
+
+deploy:
+  name: user-service-deploy
+  container:
+    name: user-service-container
+    image: andreyszdlv/user-service
+  configMap:
+    name: app-config
+
+svc:
+  name: user-service
