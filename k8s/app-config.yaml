@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  #config-service
+  CONFIG_SERVICE_PORT: "8888"
+  CONFIG_SERVICE_USERNAME: "config"
+  CONFIG_SERVICE_PASSWORD: "password"
+
+  #eureka-server
+  EUREKA_PORT: "8761"
+
+  #user-service
+  USER_SERVICE_PORT: "8070"
+
+  #post-service
+  POST_SERVICE_PORT: "8071"
+
+  #post-service
+  NOTIFICATION_SERVICE_PORT: "8072"
+
+  #auth-service
+  AUTH_SERVICE_PORT: "8073"
+
+  #api-gateway
+  API_GATEWAY_PORT: "8082"
+
+  #postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+
+  #jwt
+  JWT_SECRET: "6yU3AaLTrj/YSKQtYF6yU3/YSKAaLTIv9aRtGxOcU39h7T/aRtGxO+syA="
+
+  #kafka
+  KAFKA_PORT: "9092"
+
+  #redis
+  REDIS_PORT: "6379"
+
+  #mail
+  MAIL_HOST: "smtp.gmail.com"
+  MAIL_PORT: "587"
+  MAIL_USERNAME:
+  MAIL_PASSWORD:
+
+  #s3
+  S3_PROVIDER: "minio"
+  S3_PORT: "9000"
+  S3_ACCESS_KEY: "minioadmin"
+  S3_SECRET_KEY: "minioadmin"
