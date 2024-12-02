@@ -2,6 +2,9 @@ app:
   name: postgres-app
   port: 5432
 
+pvc:
+  name: postgres-pvc
+
 deploy:
   name: postgres-deploy
   container:

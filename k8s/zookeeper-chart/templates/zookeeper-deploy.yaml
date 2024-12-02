@@ -21,4 +21,4 @@ spec:
             - containerPort: {{.Values.app.port}}
           env:
             - name: ALLOW_ANONYMOUS_LOGIN
-              value: {{.Values.deploy.container.env.ALLOW_ANONYMOUS_LOGIN}}
+              value: "{{.Values.deploy.container.env.ALLOW_ANONYMOUS_LOGIN}}"
