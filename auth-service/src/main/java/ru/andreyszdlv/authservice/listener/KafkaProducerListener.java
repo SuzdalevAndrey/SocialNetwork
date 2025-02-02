@@ -1,22 +1,19 @@
-package ru.andreyszdlv.authservice.service;
+package ru.andreyszdlv.authservice.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
 import ru.andreyszdlv.authservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.LoginUserKafkaDTO;
 import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
-import ru.andreyszdlv.authservice.enums.ERole;
 import ru.andreyszdlv.authservice.props.KafkaProducerProperties;
 
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
 @Slf4j
-public class KafkaProducerService {
+public class KafkaProducerListener {
 
     private final KafkaProducerProperties kafkaProducerProperties;
 
@@ -26,38 +23,38 @@ public class KafkaProducerService {
 
     private final KafkaTemplate<String, UserDetailsKafkaDTO> kafkaTemplateSaveUser;
 
-    public void sendRegisterEvent(String email, String code){
-        log.info("Executing sendRegisterEvent in kafka with email: {} and verification code", email);
+    @EventListener
+    public void sendRegisterEvent(RegisterUserKafkaDTO registerUser) {
+        log.info("Executing sendRegisterEvent in kafka with email: {} and verification code", registerUser.email());
         kafkaTemplateRegister.send(
                 kafkaProducerProperties.getTopicNameRegisterUser(),
-                new RegisterUserKafkaDTO(email, code));
+                registerUser);
     }
 
-    public void sendLoginEvent(String name, String email){
-        log.info("Executing sendLoginEvent in kafka with name: {}, email: {}", name, email);
+    @EventListener
+    public void sendLoginEvent(LoginUserKafkaDTO loginUser){
+        log.info("Executing sendLoginEvent in kafka with name: {}, email: {}", loginUser.name(), loginUser.email());
         kafkaTemplateLogin.send(
                 kafkaProducerProperties.getTopicNameLoginUser(),
-                new LoginUserKafkaDTO(name, email)
+                loginUser
         );
     }
 
-    public void sendSaveUserEvent(String name,
-                                  String email,
-                                  String password,
-                                  ERole role){
+    @EventListener
+    public void sendSaveUserEvent(UserDetailsKafkaDTO userDetails){
         log.info("Executing sendSaveUserEvent in kafka with userName: {}, userEmail: {}",
-                name,
-                email
+                userDetails.name(),
+                userDetails.email()
         );
         kafkaTemplateSaveUser.send(
                 kafkaProducerProperties.getTopicNameSaveUser(),
                 UserDetailsKafkaDTO
                         .builder()
                         .messageId(UUID.randomUUID())
-                        .name(name)
-                        .email(email)
-                        .password(password)
-                        .role(role)
+                        .name(userDetails.name())
+                        .email(userDetails.email())
+                        .password(userDetails.password())
+                        .role(userDetails.role())
                         .build()
         );
     }

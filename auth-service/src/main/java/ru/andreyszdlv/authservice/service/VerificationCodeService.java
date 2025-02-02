@@ -2,8 +2,10 @@ package ru.andreyszdlv.authservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
 import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.exception.VerificationCodeHasExpiredException;
 import ru.andreyszdlv.authservice.model.EmailVerificationCode;
@@ -20,7 +22,7 @@ public class VerificationCodeService {
 
     private final PendingUserService pendingUserService;
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public String generateAndSaveVerificationCode(String email){
@@ -74,6 +76,6 @@ public class VerificationCodeService {
         String verificationCode = this.generateAndSaveVerificationCode(userEmail);
 
         log.info("Sending message to kafka contains userEmail: {}", userEmail);
-        kafkaProducerService.sendRegisterEvent(userEmail, verificationCode);
+        applicationEventPublisher.publishEvent(new RegisterUserKafkaDTO(userEmail, verificationCode));
     }
 }

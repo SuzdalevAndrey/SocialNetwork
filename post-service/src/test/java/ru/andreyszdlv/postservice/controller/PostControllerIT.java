@@ -492,7 +492,7 @@ class PostControllerIT extends BaseIT{
         Post post2 = new Post();
         post2.setUserId(userId);
         post2.setContent(content2);
-        post2.setDateCreate(LocalDateTime.now());
+        post2.setDateCreate(timeCreatePost2);
         post2.setNumberViews(0L);
         long postId2 = postRepository.save(post2).getId();
         List<PostResponseDTO> expectedPosts = List.of(

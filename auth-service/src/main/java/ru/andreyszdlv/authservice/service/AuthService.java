@@ -2,6 +2,7 @@ package ru.andreyszdlv.authservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,6 +12,7 @@ import ru.andreyszdlv.authservice.dto.controller.LoginRequestDTO;
 import ru.andreyszdlv.authservice.dto.controller.LoginResponseDTO;
 import ru.andreyszdlv.authservice.dto.controller.RefreshTokenRequestDTO;
 import ru.andreyszdlv.authservice.dto.controller.RefreshTokenResponseDTO;
+import ru.andreyszdlv.authservice.dto.kafka.LoginUserKafkaDTO;
 import ru.andreyszdlv.authservice.exception.ValidateTokenException;
 import ru.andreyszdlv.authservice.model.User;
 
@@ -19,7 +21,7 @@ import ru.andreyszdlv.authservice.model.User;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final AuthenticationManager authenticationManager;
 
@@ -48,7 +50,7 @@ public class AuthService {
                 .generateRefreshToken(user.getId(), user.getRole().name());
 
         log.info("Login completed successfully with id: {}", user.getId());
-        kafkaProducerService.sendLoginEvent(user.getName(), user.getEmail());
+        applicationEventPublisher.publishEvent(new LoginUserKafkaDTO(user.getName(), user.getEmail()));
 
         return new LoginResponseDTO(token, refreshToken);
     }

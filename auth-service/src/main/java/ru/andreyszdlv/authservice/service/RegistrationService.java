@@ -3,11 +3,13 @@ package ru.andreyszdlv.authservice.service;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.authservice.client.UserServiceClient;
 import ru.andreyszdlv.authservice.dto.controller.ConfirmEmailRequestDTO;
 import ru.andreyszdlv.authservice.dto.controller.RegisterRequestDTO;
+import ru.andreyszdlv.authservice.dto.kafka.RegisterUserKafkaDTO;
 import ru.andreyszdlv.authservice.exception.UserAlreadyRegisteredException;
 import ru.andreyszdlv.authservice.exception.UserNeedConfirmException;
 import ru.andreyszdlv.authservice.exception.VerificationCodeNotSuitableException;
@@ -23,7 +25,7 @@ public class RegistrationService {
 
     private final UserServiceClient userServiceClient;
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final MeterRegistry meterRegistry;
 
@@ -52,8 +54,7 @@ public class RegistrationService {
         log.info("Save user to temporary database");
         pendingUserService.savePendingUser(request.name(), request.email(), request.password());
 
-        log.info("Send message to kafka contains userEmail: {} and code", request.email());
-        kafkaProducerService.sendRegisterEvent(request.email(), verificationCode);
+        applicationEventPublisher.publishEvent(new RegisterUserKafkaDTO(request.email(), verificationCode));
 
         meterRegistry.counter("user_registry").increment();
     }

@@ -2,16 +2,17 @@ package ru.andreyszdlv.authservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.andreyszdlv.authservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.authservice.enums.ERole;
 import ru.andreyszdlv.authservice.exception.RegisterUserNotFoundException;
 import ru.andreyszdlv.authservice.model.PendingUser;
 import ru.andreyszdlv.authservice.repository.PendingUserRepo;
 
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class PendingUserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
     public boolean existsUserByEmail(String email) {
@@ -62,12 +63,14 @@ public class PendingUserService {
         pendingUserRepository.deleteByEmail(email);
 
         log.info("Send user in kafka for save in permanent BD");
-        kafkaProducerService.sendSaveUserEvent(
-                pendingUser.getName(),
-                pendingUser.getEmail(),
-                pendingUser.getPassword(),
-                pendingUser.getRole()
+        applicationEventPublisher.publishEvent(
+                UserDetailsKafkaDTO
+                        .builder()
+                        .name(pendingUser.getName())
+                        .email(pendingUser.getEmail())
+                        .role(pendingUser.getRole())
+                        .password(pendingUser.getPassword())
+                        .build()
         );
-
     }
 }
