@@ -1,18 +1,16 @@
-package ru.andreyszdlv.postservice.service;
+package ru.andreyszdlv.postservice.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
 import ru.andreyszdlv.postservice.dto.kafka.CreateCommentKafkaDTO;
 import ru.andreyszdlv.postservice.dto.kafka.CreateLikeKafkaDTO;
 import ru.andreyszdlv.postservice.props.KafkaProducerProperties;
 
-@Service
 @RequiredArgsConstructor
 @Slf4j
-public class KafkaProducerService {
+public class KafkaProducerListener {
 
     private final KafkaProducerProperties kafkaProducerProperties;
 
@@ -20,29 +18,25 @@ public class KafkaProducerService {
 
     private final KafkaTemplate<String, CreateCommentKafkaDTO> kafkaTemplateCreateComment;
 
-    public void sendCreateLikeEvent(String email){
+    @EventListener
+    public void sendCreateLikeEvent(CreateLikeKafkaDTO likeDTO){
         log.info("Executing sendCreateLikeEvent in kafka with email: {}",
-                email
+                likeDTO.email()
         );
         kafkaTemplateCreateLike.send(
                 kafkaProducerProperties.getTopicNameCreateLike(),
-                new CreateLikeKafkaDTO(
-                        email
-                )
+                likeDTO
         );
     }
 
-    public void sendCreateCommentEvent(String email,
-                                       String content){
+    @EventListener
+    public void sendCreateCommentEvent(CreateCommentKafkaDTO commentDTO){
         log.info("Executing sendCreateCommentEvent in kafka with email: {}",
-                email
+                commentDTO.email()
         );
         kafkaTemplateCreateComment.send(
                 kafkaProducerProperties.getTopicNameCreateComment(),
-                new CreateCommentKafkaDTO(
-                        email,
-                        content
-                )
+                commentDTO
         );
     }
 }

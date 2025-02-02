@@ -5,14 +5,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.configuration.KafkaProducerConfig;
 import ru.andreyszdlv.springbootstarters3loadimage.config.S3Initializer;
-import ru.andreyszdlv.postservice.service.KafkaProducerService;
+import ru.andreyszdlv.postservice.listener.KafkaProducerListener;
 import ru.andreyszdlv.springbootstarters3loadimage.service.S3Service;
 
 @SpringBootTest
 abstract class BaseIT {
 
     @MockBean
-    KafkaProducerService kafkaProducerService;
+    KafkaProducerListener kafkaProducerListener;
 
     @MockBean
     KafkaProducerConfig kafkaProducerConfig;

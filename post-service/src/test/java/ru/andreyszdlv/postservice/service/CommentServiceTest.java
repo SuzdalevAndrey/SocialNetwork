@@ -8,12 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
+import ru.andreyszdlv.postservice.dto.kafka.CreateCommentKafkaDTO;
 import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
+import ru.andreyszdlv.postservice.listener.KafkaProducerListener;
 import ru.andreyszdlv.postservice.mapper.CommentMapper;
 import ru.andreyszdlv.postservice.model.Comment;
 import ru.andreyszdlv.postservice.model.Post;
@@ -43,7 +46,7 @@ class CommentServiceTest {
     UserServiceClient userServiceClient;
 
     @Mock
-    KafkaProducerService kafkaProducerService;
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     MeterRegistry meterRegistry;
@@ -71,6 +74,7 @@ class CommentServiceTest {
         long postId = 10L;
         String content = "Content";
         String email = "email@email.com";
+        CreateCommentKafkaDTO createCommentKafkaDTO = new CreateCommentKafkaDTO(email, content);
         Post post = new Post();
         post.setUserId(2L);
         when(postRepository.existsById(postId)).thenReturn(true);
@@ -96,7 +100,7 @@ class CommentServiceTest {
         CommentResponseDTO result = commentService.createComment(userId, postId, content);
 
         verify(commentRepository, times(1)).save(any(Comment.class));
-        verify(kafkaProducerService, times(1)).sendCreateCommentEvent(eq(email), eq(content));
+        verify(applicationEventPublisher, times(1)).publishEvent(createCommentKafkaDTO);
         assertEquals(expectedResponse, result);
     }
 
@@ -113,7 +117,7 @@ class CommentServiceTest {
         );
 
         verify(commentRepository, never()).save(any());
-        verify(kafkaProducerService, never()).sendCreateCommentEvent(anyString(), anyString());
+        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
     @Test

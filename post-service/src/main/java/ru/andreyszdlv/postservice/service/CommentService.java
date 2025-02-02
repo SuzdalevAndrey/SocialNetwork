@@ -4,10 +4,12 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
 import ru.andreyszdlv.postservice.dto.controller.comment.CommentResponseDTO;
+import ru.andreyszdlv.postservice.dto.kafka.CreateCommentKafkaDTO;
 import ru.andreyszdlv.postservice.exception.AnotherUsersCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchCommentException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
@@ -30,7 +32,7 @@ public class CommentService {
 
     private final UserServiceClient userServiceClient;
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final MeterRegistry meterRegistry;
 
@@ -76,10 +78,7 @@ public class CommentService {
                 email,
                 content
         );
-        kafkaProducerService.sendCreateCommentEvent(
-                email,
-                content
-        );
+        applicationEventPublisher.publishEvent(new CreateCommentKafkaDTO(email, content));
 
         meterRegistry.counter(
                 "comments_per_post",

@@ -4,9 +4,11 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
+import ru.andreyszdlv.postservice.dto.kafka.CreateLikeKafkaDTO;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
@@ -27,7 +29,7 @@ public class LikeService {
 
     private final UserServiceClient userServiceClient;
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final PostValidationService postValidationService;
 
@@ -66,9 +68,7 @@ public class LikeService {
         log.info("Send data email: {} in kafka for create like event",
                 email
         );
-        kafkaProducerService.sendCreateLikeEvent(
-                email
-        );
+        applicationEventPublisher.publishEvent(new CreateLikeKafkaDTO(email));
 
         meterRegistry
                 .counter(

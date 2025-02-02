@@ -8,18 +8,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import ru.andreyszdlv.postservice.client.UserServiceClient;
+import ru.andreyszdlv.postservice.dto.kafka.CreateLikeKafkaDTO;
 import ru.andreyszdlv.postservice.exception.AlreadyLikedException;
 import ru.andreyszdlv.postservice.exception.NoLikedPostThisUserException;
 import ru.andreyszdlv.postservice.exception.NoSuchPostException;
+import ru.andreyszdlv.postservice.listener.KafkaProducerListener;
 import ru.andreyszdlv.postservice.model.Like;
 import ru.andreyszdlv.postservice.model.Post;
 import ru.andreyszdlv.postservice.repository.LikeRepo;
 import ru.andreyszdlv.postservice.repository.PostRepo;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +42,7 @@ class LikeServiceTest {
     UserServiceClient userServiceClient;
 
     @Mock
-    KafkaProducerService kafkaProducerService;
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     MeterRegistry meterRegistry;
@@ -65,6 +67,7 @@ class LikeServiceTest {
         long authorPostId = 2L;
         long postId = 10L;
         String email = "email@email.com";
+        CreateLikeKafkaDTO createLikeKafkaDTO = new CreateLikeKafkaDTO(email);
         Post post = new Post();
         post.setId(postId);
         post.setUserId(authorPostId);
@@ -81,7 +84,7 @@ class LikeServiceTest {
         likeService.createLike(userId, postId);
 
         verify(likeRepository, times(1)).save(any(Like.class));
-        verify(kafkaProducerService, times(1)).sendCreateLikeEvent(email);
+        verify(applicationEventPublisher, times(1)).publishEvent(createLikeKafkaDTO);
     }
 
     @Test
