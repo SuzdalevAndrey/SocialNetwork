@@ -5,6 +5,8 @@ import jakarta.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -20,6 +22,8 @@ import org.testcontainers.utility.DockerImageName;
 import ru.andreyszdlv.userservice.dto.controller.UpdateEmailRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.UpdatePasswordRequestDTO;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.model.User;
 import ru.andreyszdlv.userservice.repository.UserRepo;
@@ -28,9 +32,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -57,6 +60,9 @@ class UserProfileControllerIT extends BaseIT {
         registry.add("spring.redis.host", redisContainer::getHost);
         registry.add("spring.redis.port", redisContainer::getFirstMappedPort);
     }
+
+    @MockBean
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -141,7 +147,6 @@ class UserProfileControllerIT extends BaseIT {
                         content().string("Email успешно обновлён")
                 );
         assertEquals(newEmail, userRepository.findById(userId).get().getEmail());
-        verify(kafkaProducerService, times(1)).sendEditEmailEvent(oldEmail, newEmail);
     }
 
     @Test
@@ -210,7 +215,6 @@ class UserProfileControllerIT extends BaseIT {
                         content().string("Пароль успешно изменён")
                 );
         assertTrue(passwordEncoder.matches(newPassword, userRepository.findById(userId).get().getPassword()));
-        verify(kafkaProducerService, times(1)).sendEditPasswordEvent(email);
     }
 
     @Test
@@ -232,7 +236,7 @@ class UserProfileControllerIT extends BaseIT {
                         content().contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON),
                         jsonPath("$").exists()
                 );
-        verify(kafkaProducerService, times(0)).sendEditPasswordEvent(anyString());
+        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
     @Test
@@ -254,7 +258,7 @@ class UserProfileControllerIT extends BaseIT {
                         content().contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON),
                         jsonPath("$").exists()
                 );
-        verify(kafkaProducerService, times(0)).sendEditPasswordEvent(anyString());
+        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
     @Test
@@ -283,6 +287,6 @@ class UserProfileControllerIT extends BaseIT {
                         jsonPath("$").exists()
                 );
         assertFalse(passwordEncoder.matches(newPassword, userRepository.findById(userId).get().getPassword()));
-        verify(kafkaProducerService, times(0)).sendEditPasswordEvent(email);
+        verify(applicationEventPublisher, never()).publishEvent(new EditPasswordKafkaDTO(email));
     }
 }

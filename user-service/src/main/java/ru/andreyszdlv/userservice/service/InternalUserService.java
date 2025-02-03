@@ -2,9 +2,11 @@ package ru.andreyszdlv.userservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
+import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
@@ -14,7 +16,7 @@ import ru.andreyszdlv.userservice.model.User;
 @RequiredArgsConstructor
 public class InternalUserService {
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final UserMapper userMapper;
 
@@ -60,11 +62,14 @@ public class InternalUserService {
             log.error("Send data name, email: {}, password, role in kafka for failure save user event",
                     email
             );
-            kafkaProducerService.sendFailureSaveUserEvent(
-                    name,
-                    email,
-                    password,
-                    role
+            applicationEventPublisher.publishEvent(
+                    UserDetailsKafkaDTO
+                            .builder()
+                            .name(name)
+                            .email(email)
+                            .password(password)
+                            .role(role)
+                            .build()
             );
         }
     }

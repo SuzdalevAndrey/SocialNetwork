@@ -3,10 +3,13 @@ package ru.andreyszdlv.userservice.service;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
@@ -18,7 +21,7 @@ public class UserProfileService {
 
     private final UserService userService;
 
-    private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -52,7 +55,7 @@ public class UserProfileService {
                 oldEmail,
                 newEmail
         );
-        kafkaProducerService.sendEditEmailEvent(oldEmail, newEmail);
+        applicationEventPublisher.publishEvent(new EditEmailKafkaDTO(oldEmail, newEmail));
     }
 
     @Transactional
@@ -68,7 +71,7 @@ public class UserProfileService {
             user.setPassword(passwordEncoder.encode(newPassword));
 
             log.info("Send data email: {} in kafka for update password event", user.getEmail());
-            kafkaProducerService.sendEditPasswordEvent(user.getEmail());
+            applicationEventPublisher.publishEvent(new EditPasswordKafkaDTO(user.getEmail()));
 
             meterRegistry.counter("user_change_password").increment();
         }

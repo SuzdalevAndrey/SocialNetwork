@@ -1,21 +1,19 @@
-package ru.andreyszdlv.userservice.service;
+package ru.andreyszdlv.userservice.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
 import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
 import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
-import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.props.KafkaProducerProperties;
 
 import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
 @Slf4j
-public class KafkaProducerService {
+@RequiredArgsConstructor
+public class KafkaProducerListener {
 
     private final KafkaProducerProperties producerProperties;
 
@@ -25,38 +23,38 @@ public class KafkaProducerService {
 
     private final KafkaTemplate<String, UserDetailsKafkaDTO> kafkaTemplateFailureSaveUser;
 
-    public void sendEditEmailEvent(String oldEmail, String newEmail){
+    @EventListener
+    public void sendEditEmailEvent(EditEmailKafkaDTO editEmailDTO){
         log.info("Executing sendEditEmailEvent in kafka with oldEmail");
         kafkaTemplateEditEmail.send(
                 producerProperties.getTopicNameEditEmail(),
-                new EditEmailKafkaDTO(oldEmail, newEmail)
+                editEmailDTO
         );
     }
 
-    public void sendEditPasswordEvent(String email){
+    @EventListener
+    public void sendEditPasswordEvent(EditPasswordKafkaDTO editPasswordDTO){
         log.info("Executing sendEditPasswordEvent in kafka");
         kafkaTemplateEditPassword.send(
                 producerProperties.getTopicNameEditPassword(),
-                new EditPasswordKafkaDTO(email)
+                editPasswordDTO
         );
     }
 
-    public void sendFailureSaveUserEvent(String name,
-                                         String email,
-                                         String password,
-                                         ERole role){
+    @EventListener
+    public void sendFailureSaveUserEvent(UserDetailsKafkaDTO userDetailsDTO){
         log.info("Executing sendFailureSaveUserEvent in kafka with name, email: {}, password, role",
-                email
+                userDetailsDTO.email()
         );
         kafkaTemplateFailureSaveUser.send(
                 producerProperties.getTopicNameFailureSaveUser(),
                 UserDetailsKafkaDTO
                         .builder()
                         .messageId(UUID.randomUUID())
-                        .name(name)
-                        .email(email)
-                        .password(password)
-                        .role(role)
+                        .name(userDetailsDTO.name())
+                        .email(userDetailsDTO.email())
+                        .password(userDetailsDTO.password())
+                        .role(userDetailsDTO.role())
                         .build()
         );
     }

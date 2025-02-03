@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationEventPublisher;
 import ru.andreyszdlv.userservice.dto.controller.UserDetailsResponseDTO;
+import ru.andreyszdlv.userservice.dto.kafka.UserDetailsKafkaDTO;
 import ru.andreyszdlv.userservice.enums.ERole;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
+import ru.andreyszdlv.userservice.listener.KafkaProducerListener;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 
@@ -26,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 class InternalUserServiceTest {
     @Mock
-    KafkaProducerService kafkaProducerService;
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     UserMapper userMapper;
@@ -128,10 +131,15 @@ class InternalUserServiceTest {
         internalUserService.saveUser(name, email, password, role);
 
         verify(userService, times(1)).save(any(User.class));
-        verify(
-                kafkaProducerService,
-                times(1)
-        ).sendFailureSaveUserEvent(name, email, password, role);
+        verify(applicationEventPublisher, times(1))
+                .publishEvent(UserDetailsKafkaDTO
+                        .builder()
+                        .name(name)
+                        .email(email)
+                        .role(role)
+                        .password(password)
+                        .build()
+                );
     }
 
     @Test

@@ -7,10 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.andreyszdlv.userservice.dto.controller.UserResponseDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditEmailKafkaDTO;
+import ru.andreyszdlv.userservice.dto.kafka.EditPasswordKafkaDTO;
 import ru.andreyszdlv.userservice.exception.DifferentPasswordsException;
 import ru.andreyszdlv.userservice.exception.NoSuchUserException;
+import ru.andreyszdlv.userservice.listener.KafkaProducerListener;
 import ru.andreyszdlv.userservice.mapper.UserMapper;
 import ru.andreyszdlv.userservice.model.User;
 
@@ -28,7 +32,7 @@ class UserProfileServiceTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
-    KafkaProducerService kafkaProducerService;
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     MeterRegistry meterRegistry;
@@ -97,7 +101,8 @@ class UserProfileServiceTest {
         userProfileService.updateEmailUser(userId, newEmail);
 
         verify(userService, times(1)).getUserByIdOrThrow(userId);
-        verify(kafkaProducerService, times(1)).sendEditEmailEvent(oldEmail, newEmail);
+        verify(applicationEventPublisher, times(1))
+                .publishEvent(new EditEmailKafkaDTO(oldEmail, newEmail));
     }
 
     @Test
@@ -113,7 +118,7 @@ class UserProfileServiceTest {
         );
 
         verify(userService, times(1)).getUserByIdOrThrow(userId);
-        verify(kafkaProducerService, never()).sendEditEmailEvent(oldEmail, newEmail);
+        verify(applicationEventPublisher, never()).publishEvent(new EditEmailKafkaDTO(oldEmail, newEmail));
     }
 
     @Test
@@ -132,7 +137,7 @@ class UserProfileServiceTest {
         userProfileService.updatePasswordUser(userId, oldPassword, newPassword);
 
         verify(userService, times(1)).getUserByIdOrThrow(userId);
-        verify(kafkaProducerService, times(1)).sendEditPasswordEvent(email);
+        verify(applicationEventPublisher, times(1)).publishEvent(new EditPasswordKafkaDTO(email));
     }
 
     @Test
@@ -149,7 +154,7 @@ class UserProfileServiceTest {
         );
 
         verify(userService, times(1)).getUserByIdOrThrow(userId);
-        verify(kafkaProducerService, never()).sendEditPasswordEvent(email);
+        verify(applicationEventPublisher, never()).publishEvent(new EditPasswordKafkaDTO(email));
     }
 
     @Test
@@ -175,6 +180,6 @@ class UserProfileServiceTest {
         );
 
         verify(userService, times(1)).getUserByIdOrThrow(userId);
-        verify(kafkaProducerService, never()).sendEditPasswordEvent(email);
+        verify(applicationEventPublisher, never()).publishEvent(new EditPasswordKafkaDTO(email));
     }
 }
